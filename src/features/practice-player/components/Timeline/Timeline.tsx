@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { PracticeMarker, TimelineWaveformDatum } from '../../types/practicePlayer';
 import { WaveformTimeline } from '../WaveformTimeline/WaveformTimeline';
 import styles from './Timeline.module.css';
@@ -21,6 +22,17 @@ export function Timeline({
   waveform,
   onSeek,
 }: TimelineProps) {
+  const isDraggingRef = useRef(false);
+
+  const handleSeekFromTrack = (clientX: number, left: number, width: number) => {
+    if (duration <= 0) {
+      return;
+    }
+
+    const ratio = (clientX - left) / width;
+    onSeek(Math.max(0, Math.min(1, ratio)) * duration);
+  };
+
   return (
     <div className={styles.root}>
       {waveform.length > 0 ? (
@@ -31,9 +43,39 @@ export function Timeline({
           markers={markers}
           loopStart={loopStart}
           loopEnd={loopEnd}
+          onSeek={onSeek}
         />
       ) : (
-        <div className={styles.genericTrack}>
+        <div
+          className={styles.genericTrack}
+          onPointerDown={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            isDraggingRef.current = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            handleSeekFromTrack(event.clientX, rect.left, rect.width);
+          }}
+          onPointerMove={(event) => {
+            if (!isDraggingRef.current) {
+              return;
+            }
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            handleSeekFromTrack(event.clientX, rect.left, rect.width);
+          }}
+          onPointerUp={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            handleSeekFromTrack(event.clientX, rect.left, rect.width);
+            isDraggingRef.current = false;
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }}
+          onPointerCancel={(event) => {
+            isDraggingRef.current = false;
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }}
+          role="button"
+          tabIndex={duration > 0 ? 0 : -1}
+          aria-label="Seek through media timeline"
+        >
           <div className={styles.genericProgress} style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
           {loopStart !== null && loopEnd !== null && duration > 0 ? (
             <div
@@ -53,17 +95,6 @@ export function Timeline({
           ))}
         </div>
       )}
-
-      <input
-        className={styles.range}
-        type="range"
-        min={0}
-        max={duration || 0}
-        step={0.01}
-        value={Math.min(currentTime, duration || 0)}
-        onChange={(event) => onSeek(Number(event.target.value))}
-        disabled={duration <= 0}
-      />
     </div>
   );
 }

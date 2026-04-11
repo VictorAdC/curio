@@ -9,6 +9,7 @@
   border-radius: 24px;
   background: linear-gradient(135deg, #e8f0ff, #f8fbff);
   overflow: hidden;
+  cursor: pointer;
 }
 
 .genericProgress {
@@ -31,8 +32,4 @@
   margin-left: -5px;
   border-radius: 999px;
   background: #123a7d;
-}
-
-.range {
-  width: 100%;
 }
