@@ -9,7 +9,6 @@
 .hero {
   display: grid;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.8fr);
   align-items: end;
 }
 
@@ -35,26 +34,11 @@
   text-transform: uppercase;
 }
 
-.statusCard,
 .playerShell,
 .metaCard {
   border-radius: 30px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
-}
-
-.statusCard {
-  display: grid;
-  gap: 0.5rem;
-  padding: 1.4rem;
-}
-
-.statusLabel {
-  color: #31589a;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .playerShell {

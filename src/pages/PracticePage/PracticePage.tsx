@@ -95,11 +95,6 @@ export function PracticePage() {
             loop-based study sessions with notes.
           </p>
         </div>
-        <div className={styles.statusCard}>
-          <span className={styles.statusLabel}>Current source</span>
-          <strong>{state.source?.title ?? 'No media loaded'}</strong>
-          <span>{state.source?.kind ?? 'Load a local file or YouTube URL to begin.'}</span>
-        </div>
       </header>
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
