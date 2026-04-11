@@ -21,9 +21,11 @@ function SessionHistoryItem({
   onRenameSession: (sessionId: string, name: string) => void;
 }) {
   const [draftName, setDraftName] = useState(session.name);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setDraftName(session.name);
+    setIsEditing(false);
   }, [session.name]);
 
   const commitName = () => {
@@ -31,34 +33,56 @@ function SessionHistoryItem({
 
     if (!trimmedName || trimmedName === session.name) {
       setDraftName(session.name);
+      setIsEditing(false);
       return;
     }
 
     onRenameSession(session.id, trimmedName);
+    setIsEditing(false);
   };
 
   return (
     <article className={`${styles.item} ${isActive ? styles.activeItem : ''}`}>
       <div className={styles.itemHeader}>
         <button className={styles.loadButton} type="button" onClick={() => onLoadSession(session.id)}>
-          {session.sourceTitle}
+          {session.name}
         </button>
-        {isActive ? <span className={styles.activeBadge}>Open</span> : null}
+        <div className={styles.itemHeaderActions}>
+          {isActive ? <span className={styles.activeBadge}>Open</span> : null}
+          <button
+            className={styles.renameButton}
+            type="button"
+            onClick={() => {
+              setDraftName(session.name);
+              setIsEditing(true);
+            }}
+          >
+            Rename
+          </button>
+        </div>
       </div>
-      <input
-        className={styles.nameInput}
-        type="text"
-        value={draftName}
-        onChange={(event) => setDraftName(event.target.value)}
-        onBlur={commitName}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            event.currentTarget.blur();
-          }
-        }}
-        aria-label={`Session name for ${session.sourceTitle}`}
-      />
+      {isEditing ? (
+        <input
+          className={styles.nameInput}
+          type="text"
+          value={draftName}
+          onChange={(event) => setDraftName(event.target.value)}
+          onBlur={commitName}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.currentTarget.blur();
+            }
+            if (event.key === 'Escape') {
+              setDraftName(session.name);
+              setIsEditing(false);
+            }
+          }}
+          aria-label={`Session name for ${session.sourceTitle}`}
+          autoFocus
+        />
+      ) : null}
       <div className={styles.meta}>
+        <span>{session.sourceTitle}</span>
         <span>{session.sourceKind}</span>
         <span>{new Date(session.updatedAt).toLocaleString()}</span>
       </div>
