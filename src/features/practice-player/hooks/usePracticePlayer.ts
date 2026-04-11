@@ -16,7 +16,7 @@ export function usePracticePlayer() {
   const store = usePracticeSessionStore();
 
   useEffect(() => {
-    if (!audioRef.current || !videoRef.current) {
+    if (!audioRef.current) {
       return;
     }
 
@@ -99,6 +99,12 @@ export function usePracticePlayer() {
           } catch {
             store.setWaveform([]);
           }
+        }
+
+        if (!isAudio) {
+          await new Promise<void>((resolve) => {
+            window.requestAnimationFrame(() => resolve());
+          });
         }
 
         await controllerRef.current?.load(source);

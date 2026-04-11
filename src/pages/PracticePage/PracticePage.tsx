@@ -10,6 +10,10 @@ import styles from './PracticePage.module.css';
 
 export function PracticePage() {
   const { state, actions } = usePracticePlayer();
+  const sourceKind = state.source?.kind ?? null;
+  const showMediaDisplay = sourceKind === 'local-video' || sourceKind === 'youtube';
+  const showTimeline = state.source !== null;
+  const timelineWaveform = sourceKind === 'local-audio' ? state.waveform : [];
 
   const loopRange = useMemo(() => {
     const start = state.markers.find((marker) => marker.id === state.loopSelection.startMarkerId);
@@ -62,25 +66,30 @@ export function PracticePage() {
           </div>
         </div>
 
-        <div className={styles.playerArea}>
-          <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
-          <video ref={actions.setVideoElement} className={state.source?.kind === 'local-video' ? styles.video : styles.hiddenMedia} controls={false} />
-          <div className={state.source?.kind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
+        <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
 
-          {!state.source ? (
-            <div className={styles.emptyPlayer}>Load a file or YouTube URL to start a practice session.</div>
-          ) : null}
-        </div>
+        {showMediaDisplay ? (
+          <div className={styles.playerArea}>
+            <video
+              ref={actions.setVideoElement}
+              className={sourceKind === 'local-video' ? styles.video : styles.hiddenMedia}
+              controls={false}
+            />
+            <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
+          </div>
+        ) : null}
 
-        <Timeline
-          currentTime={state.currentTime}
-          duration={state.duration}
-          markers={state.markers}
-          loopStart={loopRange.start}
-          loopEnd={loopRange.end}
-          waveform={state.waveform}
-          onSeek={actions.seek}
-        />
+        {showTimeline ? (
+          <Timeline
+            currentTime={state.currentTime}
+            duration={state.duration}
+            markers={state.markers}
+            loopStart={loopRange.start}
+            loopEnd={loopRange.end}
+            waveform={timelineWaveform}
+            onSeek={actions.seek}
+          />
+        ) : null}
 
         <TransportControls
           isPlaying={state.isPlaying}
