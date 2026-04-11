@@ -11,32 +11,35 @@ export function MediaSourcePicker({ onLocalFileSelected, onYouTubeLoad }: MediaS
 
   return (
     <section className={styles.root}>
-      <label className={styles.uploadCard}>
-        <span className={styles.cardLabel}>Upload audio or video</span>
-        <span className={styles.helper}>Use local practice files directly in the browser.</span>
-        <input
-          className={styles.hiddenInput}
-          type="file"
-          accept="audio/*,video/*"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-
-            if (file) {
-              onLocalFileSelected(file);
-            }
-          }}
-        />
-      </label>
-
-      <div className={styles.youtubeCard}>
-        <span className={styles.cardLabel}>Use a YouTube URL</span>
+      <div className={styles.inputShell}>
         <input
           className={styles.textInput}
           type="url"
-          placeholder="https://www.youtube.com/watch?v=..."
+          placeholder="Paste a YouTube link"
           value={youtubeUrl}
           onChange={(event) => setYoutubeUrl(event.target.value)}
         />
+      </div>
+
+      <div className={styles.secondaryBlock}>
+        <div className={styles.secondaryRow}>
+          <span className={styles.secondaryText}>or</span>
+          <label className={styles.fileLink}>
+            load a local audio or video file
+            <input
+              className={styles.hiddenInput}
+              type="file"
+              accept="audio/*,video/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+
+                if (file) {
+                  onLocalFileSelected(file);
+                }
+              }}
+            />
+          </label>
+        </div>
         <button className={styles.loadButton} type="button" onClick={() => onYouTubeLoad(youtubeUrl)}>
           Load
         </button>

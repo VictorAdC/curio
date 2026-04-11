@@ -1,55 +1,56 @@
 .root {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
-.uploadCard,
-.youtubeCard {
-  display: grid;
   gap: 0.75rem;
-  min-height: 160px;
-  padding: 1.25rem;
-  border: 1px solid rgba(16, 32, 51, 0.12);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-}
-
-.uploadCard {
-  cursor: pointer;
-}
-
-.cardLabel {
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #31589a;
-}
-
-.helper {
-  color: #5f6f85;
+  justify-items: center;
 }
 
 .hiddenInput {
   display: none;
 }
 
+.inputShell {
+  width: min(760px, 100%);
+}
+
 .textInput {
   width: 100%;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(49, 88, 154, 0.2);
-  border-radius: 14px;
-  background: #f8fbff;
+  padding: 1.05rem 1.15rem;
+  border: 1px solid rgba(16, 32, 51, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.secondaryRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.secondaryBlock {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+}
+
+.secondaryText {
+  color: #54657b;
+}
+
+.fileLink {
+  color: #31589a;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .loadButton {
-  justify-self: start;
-  padding: 0.8rem 1.2rem;
+  padding: 0.6rem 1rem;
   border: 0;
-  border-radius: 14px;
+  border-radius: 999px;
   background: linear-gradient(135deg, #2563eb, #0f4cc8);
   color: white;
   font-weight: 700;
+  box-shadow: 0 14px 24px rgba(37, 99, 235, 0.18);
 }
