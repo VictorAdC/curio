@@ -17,6 +17,15 @@ interface PracticeSessionActions {
   removeMarker: (markerId: string) => void;
   assignLoopRole: (markerId: string, role: PracticeMarker['loopRole']) => void;
   clearLoop: () => void;
+  hydrateSession: (payload: {
+    source: PracticeMediaSource;
+    currentTime: number;
+    duration: number;
+    markers: PracticeMarker[];
+    loopSelection: LoopSelection;
+    sessionNote: string;
+    waveform: TimelineWaveformDatum[];
+  }) => void;
   resetForNewSource: () => void;
 }
 
@@ -115,6 +124,19 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       loopSelection: initialLoopSelection,
       markers: state.markers.map((marker) => ({ ...marker, loopRole: 'none' })),
     })),
+  hydrateSession: (payload) =>
+    set({
+      source: payload.source,
+      isPlaying: false,
+      currentTime: payload.currentTime,
+      duration: payload.duration,
+      markers: payload.markers,
+      loopSelection: payload.loopSelection,
+      sessionNote: payload.sessionNote,
+      waveform: payload.waveform,
+      error: null,
+      isReady: false,
+    }),
   resetForNewSource: () =>
     set({
       isPlaying: false,

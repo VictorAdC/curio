@@ -4,6 +4,12 @@ import { PracticePlayerController } from '../controllers/practicePlayerControlle
 import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
 import type { PracticeMarker, PracticeMediaSource } from '../types/practicePlayer';
+import {
+  persistLocalMediaFile,
+  persistPracticeSession,
+  removePersistedLocalMediaFile,
+  restorePracticeSession,
+} from '../utils/sessionPersistence';
 import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
@@ -12,8 +18,55 @@ export function usePracticePlayer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controllerRef = useRef<PracticePlayerController | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const restoredSessionRef = useRef(false);
+  const pendingRestoreSeekRef = useRef<number | null>(null);
+  const persistTimerRef = useRef<number | null>(null);
 
   const store = usePracticeSessionStore();
+
+  const releaseObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
+
+  const clearPersistedLocalMediaForSource = async (source: PracticeMediaSource | null) => {
+    if (!source || source.kind === 'youtube') {
+      return;
+    }
+
+    await removePersistedLocalMediaFile(source.sourceRef.persistedMediaId ?? source.id);
+  };
+
+  const loadSourceIntoPlayer = async (
+    source: PracticeMediaSource,
+    options?: {
+      fileForWaveform?: File;
+      restoredCurrentTime?: number;
+    },
+  ) => {
+    if (source.kind === 'local-video') {
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+    }
+
+    await controllerRef.current?.load(source);
+
+    if (options?.fileForWaveform && source.kind === 'local-audio') {
+      try {
+        const waveform = await buildWaveformFromFile(options.fileForWaveform);
+        store.setWaveform(waveform);
+      } catch {
+        store.setWaveform([]);
+      }
+    }
+
+    if (options?.restoredCurrentTime !== undefined) {
+      pendingRestoreSeekRef.current = options.restoredCurrentTime;
+    }
+  };
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -46,11 +99,73 @@ export function usePracticePlayer() {
 
   useEffect(() => {
     return () => {
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-      }
+      releaseObjectUrl();
     };
   }, []);
+
+  useEffect(() => {
+    if (!controllerRef.current || restoredSessionRef.current) {
+      return;
+    }
+
+    restoredSessionRef.current = true;
+
+    void (async () => {
+      const restoredSession = await restorePracticeSession();
+
+      if (!restoredSession) {
+        return;
+      }
+
+      if (restoredSession.source.sourceRef.objectUrl) {
+        releaseObjectUrl();
+        objectUrlRef.current = restoredSession.source.sourceRef.objectUrl;
+      }
+
+      store.hydrateSession(restoredSession);
+      await loadSourceIntoPlayer(restoredSession.source, {
+        fileForWaveform: restoredSession.source.sourceRef.file,
+        restoredCurrentTime: restoredSession.currentTime,
+      });
+    })();
+  }, [store]);
+
+  useEffect(() => {
+    if (!store.source) {
+      return;
+    }
+
+    if (persistTimerRef.current) {
+      window.clearTimeout(persistTimerRef.current);
+    }
+
+    persistTimerRef.current = window.setTimeout(() => {
+      persistPracticeSession(usePracticeSessionStore.getState());
+    }, 250);
+
+    return () => {
+      if (persistTimerRef.current) {
+        window.clearTimeout(persistTimerRef.current);
+      }
+    };
+  }, [
+    store.currentTime,
+    store.duration,
+    store.loopSelection,
+    store.markers,
+    store.sessionNote,
+    store.source,
+    store.waveform,
+  ]);
+
+  useEffect(() => {
+    if (!store.isReady || pendingRestoreSeekRef.current === null) {
+      return;
+    }
+
+    controllerRef.current?.seek(pendingRestoreSeekRef.current);
+    pendingRestoreSeekRef.current = null;
+  }, [store.isReady]);
 
   const actions = useMemo(
     () => ({
@@ -69,45 +184,43 @@ export function usePracticePlayer() {
           return;
         }
 
-        if (objectUrlRef.current) {
-          URL.revokeObjectURL(objectUrlRef.current);
-        }
+        await clearPersistedLocalMediaForSource(store.source);
+        releaseObjectUrl();
 
         const objectUrl = URL.createObjectURL(file);
         objectUrlRef.current = objectUrl;
 
         store.resetForNewSource();
 
+        const sourceId = nanoid();
+        await persistLocalMediaFile(sourceId, file);
+
         const source: PracticeMediaSource = {
-          id: nanoid(),
+          id: sourceId,
           kind: isAudio ? 'local-audio' : 'local-video',
           title: file.name.replace(/\.[^.]+$/, ''),
           durationSeconds: 0,
           sourceRef: {
             file,
             objectUrl,
+            persistedMediaId: sourceId,
           },
         };
 
-        store.setSource(source);
+        store.hydrateSession({
+          source,
+          currentTime: 0,
+          duration: 0,
+          markers: [],
+          loopSelection: {
+            startMarkerId: null,
+            endMarkerId: null,
+          },
+          sessionNote: '',
+          waveform: [],
+        });
         store.setError(null);
-
-        if (isVideo) {
-          await new Promise<void>((resolve) => {
-            window.requestAnimationFrame(() => resolve());
-          });
-        }
-
-        await controllerRef.current?.load(source);
-
-        if (isAudio) {
-          try {
-            const waveform = await buildWaveformFromFile(file);
-            store.setWaveform(waveform);
-          } catch {
-            store.setWaveform([]);
-          }
-        }
+        await loadSourceIntoPlayer(source, { fileForWaveform: file });
       },
       async loadYouTubeUrl(url: string) {
         const videoId = parseYouTubeVideoId(url);
@@ -117,6 +230,8 @@ export function usePracticePlayer() {
           return;
         }
 
+        await clearPersistedLocalMediaForSource(store.source);
+        releaseObjectUrl();
         store.resetForNewSource();
 
         const source: PracticeMediaSource = {
@@ -130,9 +245,20 @@ export function usePracticePlayer() {
           },
         };
 
-        store.setSource(source);
+        store.hydrateSession({
+          source,
+          currentTime: 0,
+          duration: 0,
+          markers: [],
+          loopSelection: {
+            startMarkerId: null,
+            endMarkerId: null,
+          },
+          sessionNote: '',
+          waveform: [],
+        });
         store.setError(null);
-        await controllerRef.current?.load(source);
+        await loadSourceIntoPlayer(source);
       },
       togglePlayback() {
         if (store.isPlaying) {

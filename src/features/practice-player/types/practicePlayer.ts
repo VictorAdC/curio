@@ -10,6 +10,7 @@ export interface PracticeMediaSource {
     objectUrl?: string;
     youtubeUrl?: string;
     youtubeVideoId?: string;
+    persistedMediaId?: string;
   };
 }
 
