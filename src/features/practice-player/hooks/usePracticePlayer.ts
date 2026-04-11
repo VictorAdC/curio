@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { PracticePlayerController } from '../controllers/practicePlayerController';
 import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
-import type { PracticeMediaSource } from '../types/practicePlayer';
+import type { PracticeMarker, PracticeMediaSource } from '../types/practicePlayer';
 import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
@@ -156,12 +156,68 @@ export function usePracticePlayer() {
           loopRole: 'none',
         });
       },
+      clearLoop() {
+        store.clearLoop();
+      },
+      assignLoopRole(markerId: string, role: PracticeMarker['loopRole']) {
+        store.assignLoopRole(markerId, role);
+      },
+      removeMarker(markerId: string) {
+        store.removeMarker(markerId);
+      },
+      updateMarker(markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note'>>) {
+        store.updateMarker(markerId, updates);
+      },
+      setSessionNote(value: string) {
+        store.setSessionNote(value);
+      },
     }),
     [store],
   );
 
+  const loopRange = useMemo(() => {
+    const start = store.markers.find((marker) => marker.id === store.loopSelection.startMarkerId);
+    const end = store.markers.find((marker) => marker.id === store.loopSelection.endMarkerId);
+
+    if (!start || !end || start.timestampSeconds >= end.timestampSeconds) {
+      return {
+        start: null,
+        end: null,
+      };
+    }
+
+    return {
+      start: start.timestampSeconds,
+      end: end.timestampSeconds,
+    };
+  }, [store.loopSelection.endMarkerId, store.loopSelection.startMarkerId, store.markers]);
+
+  const sourceKind = store.source?.kind ?? null;
+
+  const view = useMemo(
+    () => ({
+      source: store.source,
+      sourceKind,
+      title: store.source?.title ?? 'Waiting for a source',
+      isPlaying: store.isPlaying,
+      currentTime: store.currentTime,
+      duration: store.duration,
+      markers: store.markers,
+      markerCount: store.markers.length,
+      loopRange,
+      sessionNote: store.sessionNote,
+      error: store.error,
+      isReady: store.isReady,
+      waveform: sourceKind === 'local-audio' ? store.waveform : [],
+      showAudioCanvas: sourceKind === 'local-audio',
+      showMediaDisplay: sourceKind === 'local-video' || sourceKind === 'youtube',
+      isLoopActive: loopRange.start !== null && loopRange.end !== null,
+    }),
+    [loopRange, sourceKind, store],
+  );
+
   return {
-    state: store,
+    view,
     actions,
   };
 }

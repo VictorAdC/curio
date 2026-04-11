@@ -1,240 +1,98 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
 import { SessionNotes } from '../../features/practice-player/components/SessionNotes/SessionNotes';
-import { Timeline } from '../../features/practice-player/components/Timeline/Timeline';
 import { TransportControls } from '../../features/practice-player/components/TransportControls/TransportControls';
 import { usePracticePlayer } from '../../features/practice-player/hooks/usePracticePlayer';
-import { formatTime } from '../../features/practice-player/utils/time';
+import type { PracticeMarker } from '../../features/practice-player/types/practicePlayer';
+import { AudioPracticeCanvas } from './components/AudioPracticeCanvas';
+import { PracticeHeader } from './components/PracticeHeader';
+import { PracticePlayerHeader } from './components/PracticePlayerHeader';
+import { PracticeSummary } from './components/PracticeSummary';
+import { VideoPracticeCanvas } from './components/VideoPracticeCanvas';
 import styles from './PracticePage.module.css';
 
 export function PracticePage() {
-  const { state, actions } = usePracticePlayer();
-  const [hoveredMarker, setHoveredMarker] = useState<(typeof state.markers)[number] | null>(null);
-  const sourceKind = state.source?.kind ?? null;
-  const showAudioCanvas = sourceKind === 'local-audio';
-  const showMediaDisplay = sourceKind === 'local-video' || sourceKind === 'youtube';
-  const timelineWaveform = sourceKind === 'local-audio' ? state.waveform : [];
-
-  const loopRange = useMemo(() => {
-    const start = state.markers.find((marker) => marker.id === state.loopSelection.startMarkerId);
-    const end = state.markers.find((marker) => marker.id === state.loopSelection.endMarkerId);
-
-    if (!start || !end || start.timestampSeconds >= end.timestampSeconds) {
-      return {
-        start: null,
-        end: null,
-      };
-    }
-
-    return {
-      start: start.timestampSeconds,
-      end: end.timestampSeconds,
-    };
-  }, [state.loopSelection.endMarkerId, state.loopSelection.startMarkerId, state.markers]);
-
-  const overlayControls = (
-    <>
-      <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
-        Add marker
-      </button>
-      <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
-        Clear loop
-      </button>
-      <div className={styles.overlayMeta}>
-        <span>Loop start</span>
-        <strong>{loopRange.start !== null ? formatTime(loopRange.start) : '--:--'}</strong>
-      </div>
-      <div className={styles.overlayMeta}>
-        <span>Loop end</span>
-        <strong>{loopRange.end !== null ? formatTime(loopRange.end) : '--:--'}</strong>
-      </div>
-    </>
-  );
-
-  const markerSpotlight = hoveredMarker ? (
-    <article className={styles.markerSpotlight}>
-      <span className={styles.markerSpotlightLabel}>Marker</span>
-      <strong>{hoveredMarker.title}</strong>
-      <span>{formatTime(hoveredMarker.timestampSeconds)}</span>
-      <p>{hoveredMarker.note || 'Add a note to this marker to keep contextual practice guidance here.'}</p>
-    </article>
-  ) : null;
-
-  const audioControlsRow = (
-    <div className={styles.audioControlsRow}>
-      <div className={styles.audioActionsRow}>
-        <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
-          Add marker
-        </button>
-        <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
-          Clear loop
-        </button>
-      </div>
-      <div className={styles.audioLoopInfoRow}>
-        <div className={styles.overlayMeta}>
-          <span>Loop start</span>
-          <strong>{loopRange.start !== null ? formatTime(loopRange.start) : '--:--'}</strong>
-        </div>
-        <div className={styles.overlayMeta}>
-          <span>Loop end</span>
-          <strong>{loopRange.end !== null ? formatTime(loopRange.end) : '--:--'}</strong>
-        </div>
-      </div>
-    </div>
-  );
+  const { view, actions } = usePracticePlayer();
+  const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
 
   return (
     <main className={styles.page}>
-      <header className={styles.hero}>
-        <div>
-          <span className={styles.eyebrow}>Curio practice studio</span>
-          <h1>Practice page</h1>
-          <p>
-            Load local media or a YouTube performance, navigate precisely through the timeline, and build
-            loop-based study sessions with notes.
-          </p>
-        </div>
-      </header>
+      <PracticeHeader />
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
 
-      {state.error ? <div className={styles.error}>{state.error}</div> : null}
+      {view.error ? <div className={styles.error}>{view.error}</div> : null}
 
       <section className={styles.playerShell}>
-        <div className={styles.playerHeader}>
-          <div>
-            <span className={styles.eyebrow}>Now practicing</span>
-            <h2>{state.source?.title ?? 'Waiting for a source'}</h2>
-          </div>
-          <div className={styles.timeBlock}>
-            <strong>{formatTime(state.currentTime)}</strong>
-            <span>/ {formatTime(state.duration)}</span>
-          </div>
-        </div>
+        <PracticePlayerHeader title={view.title} currentTime={view.currentTime} duration={view.duration} />
 
         <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
 
-        {showMediaDisplay ? (
-          <div className={styles.videoCanvas}>
-            <div className={styles.playerArea}>
-              <video
-                ref={actions.setVideoElement}
-                className={sourceKind === 'local-video' ? styles.video : styles.hiddenMedia}
-                controls={false}
-                onClick={sourceKind === 'local-video' ? actions.togglePlayback : undefined}
-              />
-              <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
-              <div className={styles.overlayRail}>{overlayControls}</div>
-              {markerSpotlight}
-            </div>
-
-            <div className={styles.canvasFooter}>
-              <div className={styles.canvasTransport}>
-                <TransportControls
-                  isPlaying={state.isPlaying}
-                  onTogglePlayback={actions.togglePlayback}
-                  onJumpBackward={() => actions.jumpBy(-10)}
-                  onJumpForward={() => actions.jumpBy(10)}
-                />
-              </div>
-              <Timeline
-                currentTime={state.currentTime}
-                duration={state.duration}
-                markers={state.markers}
-                loopStart={loopRange.start}
-                loopEnd={loopRange.end}
-                waveform={[]}
-                onSeek={actions.seek}
-                variant="compact"
-                onMarkerHover={setHoveredMarker}
-                onMarkerLeave={() => setHoveredMarker(null)}
-              />
-            </div>
-          </div>
+        {view.showMediaDisplay ? (
+          <VideoPracticeCanvas
+            sourceKind={view.sourceKind}
+            currentTime={view.currentTime}
+            duration={view.duration}
+            markers={view.markers}
+            loopStart={view.loopRange.start}
+            loopEnd={view.loopRange.end}
+            isPlaying={view.isPlaying}
+            hoveredMarker={hoveredMarker}
+            onAddMarker={actions.addMarker}
+            onClearLoop={actions.clearLoop}
+            onTogglePlayback={actions.togglePlayback}
+            onJumpBy={actions.jumpBy}
+            onSeek={actions.seek}
+            onMarkerHover={setHoveredMarker}
+            onMarkerLeave={() => setHoveredMarker(null)}
+            setVideoElement={actions.setVideoElement}
+          />
         ) : null}
 
-        {showAudioCanvas ? (
-          <div className={styles.videoCanvas}>
-            <div className={`${styles.playerArea} ${styles.audioCanvasArea}`}>
-              {audioControlsRow}
-              <div className={styles.audioWaveStage}>
-                <Timeline
-                  currentTime={state.currentTime}
-                  duration={state.duration}
-                  markers={state.markers}
-                  loopStart={loopRange.start}
-                  loopEnd={loopRange.end}
-                  waveform={timelineWaveform}
-                  onSeek={actions.seek}
-                  onMarkerHover={setHoveredMarker}
-                  onMarkerLeave={() => setHoveredMarker(null)}
-                />
-              </div>
-              {markerSpotlight ? <div className={styles.audioMarkerRow}>{markerSpotlight}</div> : null}
-            </div>
-
-            <div className={styles.canvasFooter}>
-              <div className={styles.canvasTransport}>
-                <TransportControls
-                  isPlaying={state.isPlaying}
-                  onTogglePlayback={actions.togglePlayback}
-                  onJumpBackward={() => actions.jumpBy(-10)}
-                  onJumpForward={() => actions.jumpBy(10)}
-                />
-              </div>
-              <Timeline
-                currentTime={state.currentTime}
-                duration={state.duration}
-                markers={state.markers}
-                loopStart={loopRange.start}
-                loopEnd={loopRange.end}
-                waveform={[]}
-                onSeek={actions.seek}
-                variant="compact"
-                onMarkerHover={setHoveredMarker}
-                onMarkerLeave={() => setHoveredMarker(null)}
-              />
-            </div>
-          </div>
+        {view.showAudioCanvas ? (
+          <AudioPracticeCanvas
+            currentTime={view.currentTime}
+            duration={view.duration}
+            markers={view.markers}
+            loopStart={view.loopRange.start}
+            loopEnd={view.loopRange.end}
+            waveform={view.waveform}
+            isPlaying={view.isPlaying}
+            hoveredMarker={hoveredMarker}
+            onAddMarker={actions.addMarker}
+            onClearLoop={actions.clearLoop}
+            onTogglePlayback={actions.togglePlayback}
+            onJumpBy={actions.jumpBy}
+            onSeek={actions.seek}
+            onMarkerHover={setHoveredMarker}
+            onMarkerLeave={() => setHoveredMarker(null)}
+          />
         ) : null}
 
-        {!showMediaDisplay && !showAudioCanvas ? (
+        {!view.showMediaDisplay && !view.showAudioCanvas ? (
           <TransportControls
-            isPlaying={state.isPlaying}
+            isPlaying={view.isPlaying}
             onTogglePlayback={actions.togglePlayback}
             onJumpBackward={() => actions.jumpBy(-10)}
             onJumpForward={() => actions.jumpBy(10)}
           />
         ) : null}
 
-        <div className={styles.metaRow}>
-          <div className={styles.metaCard}>
-            <span>Readiness</span>
-            <strong>{state.isReady ? 'Ready' : 'Loading metadata'}</strong>
-          </div>
-          <div className={styles.metaCard}>
-            <span>Markers</span>
-            <strong>{state.markers.length}</strong>
-          </div>
-          <div className={styles.metaCard}>
-            <span>Loop</span>
-            <strong>{loopRange.start !== null && loopRange.end !== null ? 'Active' : 'Inactive'}</strong>
-          </div>
-        </div>
+        <PracticeSummary isReady={view.isReady} markerCount={view.markerCount} isLoopActive={view.isLoopActive} />
       </section>
 
       <section className={styles.lowerGrid}>
         <MarkerList
-          markers={state.markers}
+          markers={view.markers}
           onSeekToMarker={actions.seek}
-          onAssignLoopRole={(markerId, role) => state.assignLoopRole(markerId, role)}
-          onDeleteMarker={(markerId) => state.removeMarker(markerId)}
-          onUpdateMarker={(markerId, updates) => state.updateMarker(markerId, updates)}
+          onAssignLoopRole={actions.assignLoopRole}
+          onDeleteMarker={actions.removeMarker}
+          onUpdateMarker={actions.updateMarker}
           onAddMarker={actions.addMarker}
-          onClearLoop={() => state.clearLoop()}
+          onClearLoop={actions.clearLoop}
         />
-        <SessionNotes value={state.sessionNote} onChange={(value) => state.setSessionNote(value)} />
+        <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
       </section>
     </main>
   );
