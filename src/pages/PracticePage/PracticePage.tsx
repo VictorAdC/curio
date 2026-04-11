@@ -127,6 +127,7 @@ export function PracticePage() {
                 ref={actions.setVideoElement}
                 className={sourceKind === 'local-video' ? styles.video : styles.hiddenMedia}
                 controls={false}
+                onClick={sourceKind === 'local-video' ? actions.togglePlayback : undefined}
               />
               <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
               <div className={styles.overlayRail}>{overlayControls}</div>
