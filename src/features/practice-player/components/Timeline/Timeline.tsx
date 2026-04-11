@@ -13,6 +13,8 @@ interface TimelineProps {
   waveform: TimelineWaveformDatum[];
   onSeek: (seconds: number) => void;
   variant?: 'default' | 'compact';
+  onMarkerHover?: (marker: PracticeMarker) => void;
+  onMarkerLeave?: () => void;
 }
 
 export function Timeline({
@@ -24,6 +26,8 @@ export function Timeline({
   waveform,
   onSeek,
   variant = 'default',
+  onMarkerHover,
+  onMarkerLeave,
 }: TimelineProps) {
   const isDraggingRef = useRef(false);
   const isCompact = variant === 'compact';
@@ -48,6 +52,8 @@ export function Timeline({
           loopStart={loopStart}
           loopEnd={loopEnd}
           onSeek={onSeek}
+          onMarkerHover={onMarkerHover}
+          onMarkerLeave={onMarkerLeave}
         />
       </div>
     );
@@ -100,6 +106,8 @@ export function Timeline({
             key={marker.id}
             className={`${styles.marker} ${isCompact ? styles.compactMarker : ''}`}
             style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
+            onMouseEnter={() => onMarkerHover?.(marker)}
+            onMouseLeave={() => onMarkerLeave?.()}
           />
         ))}
         <div

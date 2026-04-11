@@ -10,6 +10,8 @@ interface WaveformTimelineProps {
   loopStart: number | null;
   loopEnd: number | null;
   onSeek: (seconds: number) => void;
+  onMarkerHover?: (marker: PracticeMarker) => void;
+  onMarkerLeave?: () => void;
 }
 
 export function WaveformTimeline({
@@ -20,6 +22,8 @@ export function WaveformTimeline({
   loopStart,
   loopEnd,
   onSeek,
+  onMarkerHover,
+  onMarkerLeave,
 }: WaveformTimelineProps) {
   const isDraggingRef = useRef(false);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -106,6 +110,8 @@ export function WaveformTimeline({
           className={styles.marker}
           title={marker.title}
           style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
+          onMouseEnter={() => onMarkerHover?.(marker)}
+          onMouseLeave={() => onMarkerLeave?.()}
         />
       ))}
     </div>
