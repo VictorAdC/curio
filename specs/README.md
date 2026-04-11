@@ -47,6 +47,16 @@ The `specs/` folder should document:
 - audio and media integration approach;
 - future feature specifications.
 
+## Folder Organization
+
+- `pages/`: page-by-page product requirements.
+- `features/`: reusable feature specifications that may span multiple pages.
+- `architecture/`: implementation-shaping technical architecture.
+- `system-design/`: high-level system structure and data flow.
+- `infra/`: build, deploy, CI, and environment conventions.
+- `testing/`: testing strategy and quality requirements.
+- `decisions/`: short decision records for important choices.
+
 ## Non-Goals For Now
 
 - No backend services.
