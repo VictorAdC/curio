@@ -9,16 +9,31 @@
 }
 
 .inputShell {
+  position: relative;
   width: min(760px, 100%);
 }
 
 .textInput {
   width: 100%;
-  padding: 1.05rem 1.15rem;
+  padding: 1.05rem 7rem 1.05rem 1.15rem;
   border: 1px solid rgba(16, 32, 51, 0.16);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.inlineLoadButton {
+  position: absolute;
+  top: 50%;
+  right: 0.7rem;
+  transform: translateY(-50%);
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #0f4cc8);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 14px 24px rgba(37, 99, 235, 0.18);
 }
 
 .secondaryRow {
@@ -43,14 +58,4 @@
   color: #31589a;
   text-decoration: underline;
   cursor: pointer;
-}
-
-.loadButton {
-  padding: 0.6rem 1rem;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #2563eb, #0f4cc8);
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 14px 24px rgba(37, 99, 235, 0.18);
 }

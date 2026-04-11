@@ -19,6 +19,9 @@ export function MediaSourcePicker({ onLocalFileSelected, onYouTubeLoad }: MediaS
           value={youtubeUrl}
           onChange={(event) => setYoutubeUrl(event.target.value)}
         />
+        <button className={styles.inlineLoadButton} type="button" onClick={() => onYouTubeLoad(youtubeUrl)}>
+          Load
+        </button>
       </div>
 
       <div className={styles.secondaryBlock}>
@@ -40,9 +43,6 @@ export function MediaSourcePicker({ onLocalFileSelected, onYouTubeLoad }: MediaS
             />
           </label>
         </div>
-        <button className={styles.loadButton} type="button" onClick={() => onYouTubeLoad(youtubeUrl)}>
-          Load
-        </button>
       </div>
     </section>
   );
