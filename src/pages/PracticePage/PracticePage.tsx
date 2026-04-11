@@ -61,6 +61,29 @@ export function PracticePage() {
     </article>
   ) : null;
 
+  const audioControlsRow = (
+    <div className={styles.audioControlsRow}>
+      <div className={styles.audioActionsRow}>
+        <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
+          Add bookmark
+        </button>
+        <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
+          Clear loop
+        </button>
+      </div>
+      <div className={styles.audioLoopInfoRow}>
+        <div className={styles.overlayMeta}>
+          <span>Loop start</span>
+          <strong>{loopRange.start !== null ? formatTime(loopRange.start) : '--:--'}</strong>
+        </div>
+        <div className={styles.overlayMeta}>
+          <span>Loop end</span>
+          <strong>{loopRange.end !== null ? formatTime(loopRange.end) : '--:--'}</strong>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
@@ -138,7 +161,7 @@ export function PracticePage() {
         {showAudioCanvas ? (
           <div className={styles.videoCanvas}>
             <div className={`${styles.playerArea} ${styles.audioCanvasArea}`}>
-              <div className={`${styles.overlayRail} ${styles.audioOverlayRail}`}>{overlayControls}</div>
+              {audioControlsRow}
               <div className={styles.audioWaveStage}>
                 <Timeline
                   currentTime={state.currentTime}

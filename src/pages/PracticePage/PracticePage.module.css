@@ -103,11 +103,12 @@
   padding: 1.25rem;
   align-items: stretch;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1fr) 220px;
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
   grid-template-areas:
-    "wave controls"
-    "marker marker";
+    "controls"
+    "wave"
+    "marker";
 }
 
 .video,
@@ -138,7 +139,6 @@
   display: grid;
   align-items: center;
   width: 100%;
-  padding-right: 0.25rem;
 }
 
 .audioMarkerRow {
@@ -163,11 +163,35 @@
   width: min(220px, calc(100% - 2rem));
 }
 
-.audioOverlayRail {
-  position: static;
+.audioControlsRow {
   grid-area: controls;
-  width: 220px;
-  justify-self: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.audioActionsRow,
+.audioLoopInfoRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.audioActionsRow > .overlayAction,
+.audioActionsRow > .overlayGhost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  padding-inline: 1.35rem;
+}
+
+.audioLoopInfoRow > .overlayMeta {
+  min-width: 190px;
+  min-height: 88px;
 }
 
 .overlayAction,
@@ -315,21 +339,16 @@
 
   .audioWaveStage {
     padding-top: 0;
-    padding-right: 0;
   }
 
-  .audioCanvasArea {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-      "controls"
-      "wave"
-      "marker";
+  .audioControlsRow {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .audioOverlayRail {
-    width: 100%;
-    justify-self: stretch;
+  .audioActionsRow,
+  .audioLoopInfoRow {
+    flex-direction: column;
   }
 
   .page {
