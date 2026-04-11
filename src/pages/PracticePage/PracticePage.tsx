@@ -36,7 +36,7 @@ export function PracticePage() {
   const overlayControls = (
     <>
       <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
-        Add bookmark
+        Add marker
       </button>
       <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
         Clear loop
@@ -54,10 +54,10 @@ export function PracticePage() {
 
   const markerSpotlight = hoveredMarker ? (
     <article className={styles.markerSpotlight}>
-      <span className={styles.markerSpotlightLabel}>Bookmark</span>
+      <span className={styles.markerSpotlightLabel}>Marker</span>
       <strong>{hoveredMarker.title}</strong>
       <span>{formatTime(hoveredMarker.timestampSeconds)}</span>
-      <p>{hoveredMarker.note || 'Add a note to this bookmark to keep contextual practice guidance here.'}</p>
+      <p>{hoveredMarker.note || 'Add a note to this marker to keep contextual practice guidance here.'}</p>
     </article>
   ) : null;
 
@@ -65,7 +65,7 @@ export function PracticePage() {
     <div className={styles.audioControlsRow}>
       <div className={styles.audioActionsRow}>
         <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
-          Add bookmark
+          Add marker
         </button>
         <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
           Clear loop
@@ -219,7 +219,7 @@ export function PracticePage() {
             <strong>{state.isReady ? 'Ready' : 'Loading metadata'}</strong>
           </div>
           <div className={styles.metaCard}>
-            <span>Bookmarks</span>
+            <span>Markers</span>
             <strong>{state.markers.length}</strong>
           </div>
           <div className={styles.metaCard}>

@@ -26,7 +26,7 @@ export function MarkerList({
     <section className={styles.root}>
       <div className={styles.header}>
         <div>
-          <h3>Bookmarks & loop points</h3>
+          <h3>Markers & loop points</h3>
           <p>Create reference points and assign one start and one end loop marker.</p>
         </div>
         <div className={styles.headerActions}>
@@ -41,7 +41,7 @@ export function MarkerList({
 
       <div className={styles.list}>
         {markers.length === 0 ? (
-          <p className={styles.empty}>No bookmarks yet. Add one at the current playback position.</p>
+          <p className={styles.empty}>No markers yet. Add one at the current playback position.</p>
         ) : null}
         {markers.map((marker) => (
           <article key={marker.id} className={styles.card}>
@@ -61,7 +61,7 @@ export function MarkerList({
                 </button>
               </div>
             </div>
-            <div className={styles.roleBadge}>{marker.loopRole === 'none' ? 'Bookmark' : `Loop ${marker.loopRole}`}</div>
+            <div className={styles.roleBadge}>{marker.loopRole === 'none' ? 'Marker' : `Loop ${marker.loopRole}`}</div>
             <MarkerEditor marker={marker} onChange={onUpdateMarker} />
           </article>
         ))}

@@ -118,7 +118,7 @@ export function Timeline({
 
       {isCompact ? (
         <div className={styles.compactMeta}>
-          <span>Bookmarks: {markers.length}</span>
+          <span>Markers: {markers.length}</span>
           <span>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>

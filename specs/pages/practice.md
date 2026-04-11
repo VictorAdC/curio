@@ -26,10 +26,10 @@ It allows a music student to load local media or a YouTube source, navigate prec
 - seek through the media by clicking or dragging on the timeline;
 - jump backward by `10` seconds;
 - jump forward by `10` seconds;
-- create multiple bookmarks at timestamps;
-- edit bookmark title and note;
-- assign one bookmark as loop start;
-- assign one bookmark as loop end;
+- create multiple markers at timestamps;
+- edit marker title and note;
+- assign one marker as loop start;
+- assign one marker as loop end;
 - clear loop assignment;
 - edit a session-wide practice note.
 
@@ -72,7 +72,7 @@ The page must provide a primary seek surface for navigation.
 The timeline should show:
 
 - current playback position;
-- bookmark positions;
+- marker positions;
 - active loop start and end points when set.
 
 ### 5. Transport Controls
@@ -85,11 +85,11 @@ The page must expose:
 
 Additional transport controls may be added later, but these are the minimum required controls in v1.
 
-### 6. Bookmark List
+### 6. Marker List
 
-The page must show a bookmark list for the current session.
+The page must show a marker list for the current session.
 
-Each bookmark stores:
+Each marker stores:
 
 - `id`;
 - `timestampSeconds`;
@@ -99,28 +99,28 @@ Each bookmark stores:
 
 The list should allow:
 
-- viewing bookmarks in timestamp order;
-- seeking to a bookmark;
-- editing bookmark title;
-- editing bookmark note;
+- viewing markers in timestamp order;
+- seeking to a marker;
+- editing marker title;
+- editing marker note;
 - assigning loop start;
 - assigning loop end;
-- removing a bookmark.
+- removing a marker.
 
 ### 7. Session Notes Area
 
-The page must include a general session note area separate from bookmark notes.
+The page must include a general session note area separate from marker notes.
 
 This note is for broad practice observations that are not tied to a single timestamp.
 
 ## Looping Model
 
-- users may create multiple bookmarks;
-- exactly two bookmarks can be assigned as active loop markers at a time;
-- one bookmark may be assigned as loop start;
-- one bookmark may be assigned as loop end;
+- users may create multiple markers;
+- exactly two markers can be assigned as active loop markers at a time;
+- one marker may be assigned as loop start;
+- one marker may be assigned as loop end;
 - loop playback becomes active only when both markers exist and the start timestamp is before the end timestamp;
-- bookmark records remain valid even when they are not assigned to the active loop;
+- marker records remain valid even when they are not assigned to the active loop;
 - if either loop marker is removed, loop playback must be disabled until a valid pair exists again.
 
 ## State And Persistence
@@ -130,10 +130,10 @@ The page should treat the current practice session as local-first state.
 V1 persistence should support local storage of:
 
 - active media session metadata when practical;
-- bookmarks for the current session;
+- markers for the current session;
 - loop marker assignment;
 - session note content;
-- bookmark note content;
+- marker note content;
 - last known playback position if this behavior is enabled later.
 
 The exact persistence storage may start in `localStorage`, with IndexedDB available later if the data model grows.
@@ -160,11 +160,11 @@ The page must handle the following cases clearly:
 ## Acceptance Scenarios
 
 - a user uploads a local audio file and sees waveform-based timeline navigation;
-- a user uploads a local video file and uses the same transport and bookmark workflow;
+- a user uploads a local video file and uses the same transport and marker workflow;
 - a user loads a YouTube URL and uses a seekable timeline without true waveform rendering;
 - a user clicks the timeline to seek to a new timestamp;
 - a user uses `-10s` and `+10s` to move through the media;
-- a user creates several bookmarks and selects two of them as loop boundaries;
-- a user adds notes to individual bookmarks;
-- a user writes a separate session note not tied to a bookmark;
-- loop playback only activates when both selected loop bookmarks are valid.
+- a user creates several markers and selects two of them as loop boundaries;
+- a user adds notes to individual markers;
+- a user writes a separate session note not tied to a marker;
+- loop playback only activates when both selected loop markers are valid.
