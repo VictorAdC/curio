@@ -167,3 +167,34 @@
   margin-right: 0.55rem;
   color: rgba(95, 111, 133, 0.72);
 }
+
+.bulkActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.bulkButton,
+.bulkDangerButton {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.bulkButton {
+  color: #5f6f85;
+}
+
+.bulkDangerButton {
+  color: #b91c1c;
+}
+
+.hiddenInput {
+  display: none;
+}

@@ -5,9 +5,12 @@ import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
 import type { PracticeMarker, PracticeMediaSource, PracticeSessionSummary } from '../types/practicePlayer';
 import {
+  clearAllPersistedPracticeSessions,
   createPracticeSessionSummary,
   deletePersistedPracticeSession,
+  exportPersistedPracticeSessions,
   getActivePracticeSessionId,
+  importPersistedPracticeSessions,
   listPersistedPracticeSessions,
   persistPracticeSession,
   renamePersistedPracticeSession,
@@ -293,6 +296,38 @@ export function usePracticePlayer() {
 
         if (result.nextActiveSessionId) {
           await loadPersistedSession(result.nextActiveSessionId);
+          return;
+        }
+
+        controllerRef.current?.destroy();
+        store.resetForNewSource();
+        store.setSource(null);
+        setActiveSession(null);
+      },
+      async clearAllSessions() {
+        await clearAllPersistedPracticeSessions();
+        releaseObjectUrl();
+        controllerRef.current?.destroy();
+        store.resetForNewSource();
+        store.setSource(null);
+        setActiveSession(null);
+        setSessionHistory([]);
+      },
+      async exportSessions() {
+        const { objectUrl, filename } = await exportPersistedPracticeSessions();
+        const anchor = document.createElement('a');
+        anchor.href = objectUrl;
+        anchor.download = filename;
+        anchor.click();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      },
+      async importSessions(file: File) {
+        const result = await importPersistedPracticeSessions(file);
+        setSessionHistory(result.sessions);
+        releaseObjectUrl();
+
+        if (result.activeSessionId) {
+          await loadPersistedSession(result.activeSessionId);
           return;
         }
 

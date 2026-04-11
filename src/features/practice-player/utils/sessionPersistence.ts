@@ -10,6 +10,7 @@ import type {
 
 const SESSIONS_STORAGE_KEY = 'curio.practice-sessions.v1';
 const ACTIVE_SESSION_ID_STORAGE_KEY = 'curio.practice-active-session.v1';
+const BACKUP_VERSION = 1;
 
 interface StoredMediaAsset {
   id: string;
@@ -51,6 +52,20 @@ interface RestoredPracticeSession {
   loopSelection: LoopSelection;
   sessionNote: string;
   waveform: TimelineWaveformDatum[];
+}
+
+interface PracticeSessionsBackup {
+  version: number;
+  exportedAt: string;
+  activeSessionId: string | null;
+  sessions: PersistedSessionSnapshot[];
+  mediaAssets: Array<{
+    id: string;
+    name: string;
+    type: string;
+    lastModified: number;
+    dataUrl: string;
+  }>;
 }
 
 class CurioPracticeDatabase extends Dexie {
@@ -103,6 +118,29 @@ function buildPersistedSource(source: PracticeMediaSource): PersistedPracticeMed
       persistedMediaId: source.sourceRef.persistedMediaId,
     },
   };
+}
+
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function dataUrlToBlob(dataUrl: string) {
+  const [header, data] = dataUrl.split(',');
+  const mimeMatch = header.match(/data:(.*?);base64/);
+  const mimeType = mimeMatch?.[1] ?? 'application/octet-stream';
+  const binaryString = window.atob(data);
+  const bytes = new Uint8Array(binaryString.length);
+
+  for (let index = 0; index < binaryString.length; index += 1) {
+    bytes[index] = binaryString.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type: mimeType });
 }
 
 export async function persistLocalMediaFile(sourceId: string, file: File) {
@@ -171,6 +209,11 @@ export function clearPersistedPracticeSession() {
   window.localStorage.removeItem(ACTIVE_SESSION_ID_STORAGE_KEY);
 }
 
+export async function clearAllPersistedPracticeSessions() {
+  await db.mediaAssets.clear();
+  clearPersistedPracticeSession();
+}
+
 export function renamePersistedPracticeSession(sessionId: string, name: string) {
   const sessions = readPersistedSessions().map((session) =>
     session.session.id === sessionId
@@ -223,6 +266,84 @@ export async function deletePersistedPracticeSession(sessionId: string) {
   return {
     sessions: remainingSessions.map((session) => session.session),
     nextActiveSessionId,
+  };
+}
+
+export async function exportPersistedPracticeSessions() {
+  const sessions = readPersistedSessions();
+  const localMediaIds = Array.from(
+    new Set(
+      sessions
+        .map((session) => session.source.sourceRef.persistedMediaId)
+        .filter((mediaId): mediaId is string => Boolean(mediaId)),
+    ),
+  );
+  const mediaAssets = await Promise.all(
+    localMediaIds.map(async (mediaId) => {
+      const asset = await db.mediaAssets.get(mediaId);
+
+      if (!asset) {
+        return null;
+      }
+
+      return {
+        id: asset.id,
+        name: asset.name,
+        type: asset.type,
+        lastModified: asset.lastModified,
+        dataUrl: await blobToDataUrl(asset.file),
+      };
+    }),
+  );
+
+  const backup: PracticeSessionsBackup = {
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    activeSessionId: getActivePracticeSessionId(),
+    sessions,
+    mediaAssets: mediaAssets.filter((asset): asset is NonNullable<typeof asset> => asset !== null),
+  };
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const objectUrl = URL.createObjectURL(blob);
+  const sanitizedTimestamp = backup.exportedAt.slice(0, 19).replace(/:/g, '-');
+
+  return {
+    objectUrl,
+    filename: `curio-practice-sessions-${sanitizedTimestamp}.json`,
+  };
+}
+
+export async function importPersistedPracticeSessions(file: File) {
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+
+  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+    throw new Error('Unsupported backup file.');
+  }
+
+  await clearAllPersistedPracticeSessions();
+
+  await Promise.all(
+    backup.mediaAssets.map(async (asset) => {
+      await db.mediaAssets.put({
+        id: asset.id,
+        name: asset.name,
+        type: asset.type,
+        lastModified: asset.lastModified,
+        file: dataUrlToBlob(asset.dataUrl),
+      });
+    }),
+  );
+
+  writePersistedSessions(sortSessionsDescending(backup.sessions));
+
+  if (backup.activeSessionId) {
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, backup.activeSessionId);
+  }
+
+  return {
+    sessions: listPersistedPracticeSessions(),
+    activeSessionId: backup.activeSessionId,
   };
 }
 

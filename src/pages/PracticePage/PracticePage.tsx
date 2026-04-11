@@ -138,6 +138,17 @@ export function PracticePage() {
               onDeleteSession={(sessionId) => {
                 void actions.deleteSession(sessionId);
               }}
+              onClearAll={() => {
+                void actions.clearAllSessions();
+                setIsSessionDrawerOpen(false);
+              }}
+              onExport={() => {
+                void actions.exportSessions();
+              }}
+              onImport={(file) => {
+                void actions.importSessions(file);
+                setIsSessionDrawerOpen(false);
+              }}
             />
           </aside>
         </div>

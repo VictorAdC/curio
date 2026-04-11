@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PracticeSessionSummary } from '../../types/practicePlayer';
 import styles from './SessionHistory.module.css';
 
@@ -8,6 +8,9 @@ interface SessionHistoryProps {
   onLoadSession: (sessionId: string) => void;
   onRenameSession: (sessionId: string, name: string) => void;
   onDeleteSession: (sessionId: string) => void;
+  onClearAll: () => void;
+  onExport: () => void;
+  onImport: (file: File) => void;
 }
 
 function SessionHistoryItem({
@@ -129,7 +132,12 @@ export function SessionHistory({
   onLoadSession,
   onRenameSession,
   onDeleteSession,
+  onClearAll,
+  onExport,
+  onImport,
 }: SessionHistoryProps) {
+  const importInputRef = useRef<HTMLInputElement | null>(null);
+
   return (
     <section className={styles.root}>
       <div className={styles.header}>
@@ -153,6 +161,42 @@ export function SessionHistory({
             onDeleteSession={onDeleteSession}
           />
         ))}
+      </div>
+
+      <div className={styles.bulkActions}>
+        <button className={styles.bulkButton} type="button" onClick={onExport}>
+          Download copy
+        </button>
+        <button className={styles.bulkButton} type="button" onClick={() => importInputRef.current?.click()}>
+          Upload copy
+        </button>
+        <button
+          className={styles.bulkDangerButton}
+          type="button"
+          onClick={() => {
+            if (window.confirm('Clear all saved sessions? This will remove all saved notes, markers, and local media snapshots.')) {
+              onClearAll();
+            }
+          }}
+        >
+          Clear all
+        </button>
+        <input
+          ref={importInputRef}
+          className={styles.hiddenInput}
+          type="file"
+          accept="application/json"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+
+            if (!file) {
+              return;
+            }
+
+            onImport(file);
+            event.currentTarget.value = '';
+          }}
+        />
       </div>
     </section>
   );
