@@ -5,6 +5,8 @@
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+  align-self: start;
+  min-width: 0;
 }
 
 .header {
@@ -27,6 +29,9 @@
 .list {
   display: grid;
   gap: 0.75rem;
+  max-height: min(44vh, 520px);
+  overflow: auto;
+  padding-right: 0.2rem;
 }
 
 .empty {
@@ -41,6 +46,7 @@
   border-radius: 18px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   background: rgba(248, 251, 255, 0.95);
+  min-width: 0;
 }
 
 .activeItem {
@@ -64,6 +70,10 @@
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .loadButton:hover {
@@ -95,4 +105,5 @@
   gap: 0.75rem;
   color: #5f6f85;
   font-size: 0.82rem;
+  flex-wrap: wrap;
 }

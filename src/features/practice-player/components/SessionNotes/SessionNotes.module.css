@@ -5,6 +5,8 @@
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  align-self: start;
+  min-width: 0;
 }
 
 .header {
@@ -27,6 +29,7 @@
 .textarea {
   width: 100%;
   min-height: 220px;
+  max-height: 320px;
   padding: 1rem;
   border: 1px solid rgba(49, 88, 154, 0.16);
   border-radius: 16px;
