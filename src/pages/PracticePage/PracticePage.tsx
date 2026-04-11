@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
+import { SessionHistory } from '../../features/practice-player/components/SessionHistory/SessionHistory';
 import { SessionNotes } from '../../features/practice-player/components/SessionNotes/SessionNotes';
 import { TransportControls } from '../../features/practice-player/components/TransportControls/TransportControls';
 import { usePracticePlayer } from '../../features/practice-player/hooks/usePracticePlayer';
@@ -92,7 +93,15 @@ export function PracticePage() {
           onAddMarker={actions.addMarker}
           onClearLoop={actions.clearLoop}
         />
-        <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
+        <div className={styles.sideColumn}>
+          <SessionHistory
+            sessions={view.sessionHistory}
+            activeSessionId={view.activeSessionId}
+            onLoadSession={actions.loadSession}
+            onRenameSession={actions.renameSession}
+          />
+          <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
+        </div>
       </section>
     </main>
   );

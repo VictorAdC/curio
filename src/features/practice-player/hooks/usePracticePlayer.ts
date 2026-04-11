@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { PracticePlayerController } from '../controllers/practicePlayerController';
 import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
-import type { PracticeMarker, PracticeMediaSource } from '../types/practicePlayer';
+import type { PracticeMarker, PracticeMediaSource, PracticeSessionSummary } from '../types/practicePlayer';
 import {
-  persistLocalMediaFile,
+  createPracticeSessionSummary,
+  getActivePracticeSessionId,
+  listPersistedPracticeSessions,
   persistPracticeSession,
   removePersistedLocalMediaFile,
+  renamePersistedPracticeSession,
+  persistLocalMediaFile,
   restorePracticeSession,
 } from '../utils/sessionPersistence';
 import { parseYouTubeVideoId } from '../utils/youtube';
@@ -23,6 +27,8 @@ export function usePracticePlayer() {
   const persistTimerRef = useRef<number | null>(null);
 
   const store = usePracticeSessionStore();
+  const [sessionHistory, setSessionHistory] = useState<PracticeSessionSummary[]>(() => listPersistedPracticeSessions());
+  const [activeSession, setActiveSession] = useState<PracticeSessionSummary | null>(null);
 
   const releaseObjectUrl = () => {
     if (objectUrlRef.current) {
@@ -31,12 +37,27 @@ export function usePracticePlayer() {
     }
   };
 
-  const clearPersistedLocalMediaForSource = async (source: PracticeMediaSource | null) => {
-    if (!source || source.kind === 'youtube') {
-      return;
+  const loadPersistedSession = async (sessionId?: string) => {
+    const restoredSession = await restorePracticeSession(sessionId);
+
+    if (!restoredSession) {
+      return null;
     }
 
-    await removePersistedLocalMediaFile(source.sourceRef.persistedMediaId ?? source.id);
+    if (restoredSession.source.sourceRef.objectUrl) {
+      releaseObjectUrl();
+      objectUrlRef.current = restoredSession.source.sourceRef.objectUrl;
+    }
+
+    store.hydrateSession(restoredSession);
+    setActiveSession(restoredSession.session);
+    setSessionHistory(listPersistedPracticeSessions());
+    await loadSourceIntoPlayer(restoredSession.source, {
+      fileForWaveform: restoredSession.source.sourceRef.file,
+      restoredCurrentTime: restoredSession.currentTime,
+    });
+
+    return restoredSession;
   };
 
   const loadSourceIntoPlayer = async (
@@ -111,27 +132,13 @@ export function usePracticePlayer() {
     restoredSessionRef.current = true;
 
     void (async () => {
-      const restoredSession = await restorePracticeSession();
-
-      if (!restoredSession) {
-        return;
-      }
-
-      if (restoredSession.source.sourceRef.objectUrl) {
-        releaseObjectUrl();
-        objectUrlRef.current = restoredSession.source.sourceRef.objectUrl;
-      }
-
-      store.hydrateSession(restoredSession);
-      await loadSourceIntoPlayer(restoredSession.source, {
-        fileForWaveform: restoredSession.source.sourceRef.file,
-        restoredCurrentTime: restoredSession.currentTime,
-      });
+      const activeSessionId = getActivePracticeSessionId();
+      await loadPersistedSession(activeSessionId ?? undefined);
     })();
-  }, [store]);
+  }, []);
 
   useEffect(() => {
-    if (!store.source) {
+    if (!store.source || !activeSession) {
       return;
     }
 
@@ -140,7 +147,7 @@ export function usePracticePlayer() {
     }
 
     persistTimerRef.current = window.setTimeout(() => {
-      persistPracticeSession(usePracticeSessionStore.getState());
+      persistPracticeSession(activeSession, usePracticeSessionStore.getState());
     }, 250);
 
     return () => {
@@ -156,6 +163,7 @@ export function usePracticePlayer() {
     store.sessionNote,
     store.source,
     store.waveform,
+    activeSession,
   ]);
 
   useEffect(() => {
@@ -184,16 +192,14 @@ export function usePracticePlayer() {
           return;
         }
 
-        await clearPersistedLocalMediaForSource(store.source);
         releaseObjectUrl();
-
-        const objectUrl = URL.createObjectURL(file);
-        objectUrlRef.current = objectUrl;
 
         store.resetForNewSource();
 
         const sourceId = nanoid();
         await persistLocalMediaFile(sourceId, file);
+        const objectUrl = URL.createObjectURL(file);
+        objectUrlRef.current = objectUrl;
 
         const source: PracticeMediaSource = {
           id: sourceId,
@@ -206,6 +212,7 @@ export function usePracticePlayer() {
             persistedMediaId: sourceId,
           },
         };
+        const session = createPracticeSessionSummary(source);
 
         store.hydrateSession({
           source,
@@ -220,6 +227,8 @@ export function usePracticePlayer() {
           waveform: [],
         });
         store.setError(null);
+        setActiveSession(session);
+        setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
         await loadSourceIntoPlayer(source, { fileForWaveform: file });
       },
       async loadYouTubeUrl(url: string) {
@@ -230,7 +239,6 @@ export function usePracticePlayer() {
           return;
         }
 
-        await clearPersistedLocalMediaForSource(store.source);
         releaseObjectUrl();
         store.resetForNewSource();
 
@@ -244,6 +252,7 @@ export function usePracticePlayer() {
             youtubeVideoId: videoId,
           },
         };
+        const session = createPracticeSessionSummary(source);
 
         store.hydrateSession({
           source,
@@ -258,7 +267,19 @@ export function usePracticePlayer() {
           waveform: [],
         });
         store.setError(null);
+        setActiveSession(session);
+        setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
         await loadSourceIntoPlayer(source);
+      },
+      async loadSession(sessionId: string) {
+        await loadPersistedSession(sessionId);
+      },
+      renameSession(sessionId: string, name: string) {
+        renamePersistedPracticeSession(sessionId, name);
+        setSessionHistory((currentSessions) =>
+          currentSessions.map((session) => (session.id === sessionId ? { ...session, name } : session)),
+        );
+        setActiveSession((currentSession) => (currentSession?.id === sessionId ? { ...currentSession, name } : currentSession));
       },
       togglePlayback() {
         if (store.isPlaying) {
@@ -335,11 +356,13 @@ export function usePracticePlayer() {
       error: store.error,
       isReady: store.isReady,
       waveform: sourceKind === 'local-audio' ? store.waveform : [],
+      sessionHistory,
+      activeSessionId: activeSession?.id ?? null,
       showAudioCanvas: sourceKind === 'local-audio',
       showMediaDisplay: sourceKind === 'local-video' || sourceKind === 'youtube',
       isLoopActive: loopRange.start !== null && loopRange.end !== null,
     }),
-    [loopRange, sourceKind, store],
+    [activeSession, loopRange, sessionHistory, sourceKind, store],
   );
 
   return {

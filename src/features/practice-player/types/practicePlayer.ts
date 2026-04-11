@@ -45,6 +45,15 @@ export interface PracticeSessionState {
   isReady: boolean;
 }
 
+export interface PracticeSessionSummary {
+  id: string;
+  name: string;
+  sourceTitle: string;
+  sourceKind: PracticeMediaKind;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PlaybackAdapter {
   load(source: PracticeMediaSource): Promise<void>;
   play(): Promise<void> | void;

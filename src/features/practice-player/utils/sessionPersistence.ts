@@ -3,11 +3,13 @@ import type {
   LoopSelection,
   PracticeMarker,
   PracticeMediaSource,
+  PracticeSessionSummary,
   PracticeSessionState,
   TimelineWaveformDatum,
 } from '../types/practicePlayer';
 
-const SESSION_STORAGE_KEY = 'curio.practice-session.v1';
+const SESSIONS_STORAGE_KEY = 'curio.practice-sessions.v1';
+const ACTIVE_SESSION_ID_STORAGE_KEY = 'curio.practice-active-session.v1';
 
 interface StoredMediaAsset {
   id: string;
@@ -18,6 +20,7 @@ interface StoredMediaAsset {
 }
 
 interface PersistedSessionSnapshot {
+  session: PracticeSessionSummary;
   source: PersistedPracticeMediaSource;
   currentTime: number;
   duration: number;
@@ -40,6 +43,7 @@ interface PersistedPracticeMediaSource {
 }
 
 interface RestoredPracticeSession {
+  session: PracticeSessionSummary;
   source: PracticeMediaSource;
   currentTime: number;
   duration: number;
@@ -61,6 +65,31 @@ class CurioPracticeDatabase extends Dexie {
 }
 
 const db = new CurioPracticeDatabase();
+
+function readPersistedSessions(): PersistedSessionSnapshot[] {
+  const rawSessions = window.localStorage.getItem(SESSIONS_STORAGE_KEY);
+
+  if (!rawSessions) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(rawSessions) as PersistedSessionSnapshot[];
+  } catch {
+    window.localStorage.removeItem(SESSIONS_STORAGE_KEY);
+    return [];
+  }
+}
+
+function writePersistedSessions(sessions: PersistedSessionSnapshot[]) {
+  window.localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+}
+
+function sortSessionsDescending(sessions: PersistedSessionSnapshot[]) {
+  return [...sessions].sort(
+    (left, right) => new Date(right.session.updatedAt).getTime() - new Date(left.session.updatedAt).getTime(),
+  );
+}
 
 function buildPersistedSource(source: PracticeMediaSource): PersistedPracticeMediaSource {
   return {
@@ -94,12 +123,35 @@ export async function removePersistedLocalMediaFile(sourceId: string | null | un
   await db.mediaAssets.delete(sourceId);
 }
 
-export function persistPracticeSession(state: PracticeSessionState) {
+export function listPersistedPracticeSessions(): PracticeSessionSummary[] {
+  return sortSessionsDescending(readPersistedSessions()).map((session) => session.session);
+}
+
+export function createPracticeSessionSummary(source: PracticeMediaSource): PracticeSessionSummary {
+  const timestamp = new Date().toISOString();
+
+  return {
+    id: source.id,
+    name: timestamp.replace('T', ' ').slice(0, 16),
+    sourceTitle: source.title,
+    sourceKind: source.kind,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+export function persistPracticeSession(session: PracticeSessionSummary, state: PracticeSessionState) {
   if (!state.source) {
     return;
   }
 
-  const snapshot: PersistedSessionSnapshot = {
+  const nextSnapshot: PersistedSessionSnapshot = {
+    session: {
+      ...session,
+      sourceTitle: state.source.title,
+      sourceKind: state.source.kind,
+      updatedAt: new Date().toISOString(),
+    },
     source: buildPersistedSource(state.source),
     currentTime: state.currentTime,
     duration: state.duration,
@@ -109,24 +161,54 @@ export function persistPracticeSession(state: PracticeSessionState) {
     waveform: state.waveform,
   };
 
-  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+  const sessions = readPersistedSessions().filter((item) => item.session.id !== session.id);
+  writePersistedSessions(sortSessionsDescending([...sessions, nextSnapshot]));
+  window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, session.id);
 }
 
 export function clearPersistedPracticeSession() {
-  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.localStorage.removeItem(SESSIONS_STORAGE_KEY);
+  window.localStorage.removeItem(ACTIVE_SESSION_ID_STORAGE_KEY);
 }
 
-export async function restorePracticeSession(): Promise<RestoredPracticeSession | null> {
-  try {
-    const rawSnapshot = window.localStorage.getItem(SESSION_STORAGE_KEY);
+export function renamePersistedPracticeSession(sessionId: string, name: string) {
+  const sessions = readPersistedSessions().map((session) =>
+    session.session.id === sessionId
+      ? {
+          ...session,
+          session: {
+            ...session.session,
+            name,
+            updatedAt: new Date().toISOString(),
+          },
+        }
+      : session,
+  );
 
-    if (!rawSnapshot) {
+  writePersistedSessions(sortSessionsDescending(sessions));
+}
+
+export function getActivePracticeSessionId() {
+  return window.localStorage.getItem(ACTIVE_SESSION_ID_STORAGE_KEY);
+}
+
+export async function restorePracticeSession(sessionId?: string): Promise<RestoredPracticeSession | null> {
+  try {
+    const sessions = readPersistedSessions();
+    const targetSessionId = sessionId ?? window.localStorage.getItem(ACTIVE_SESSION_ID_STORAGE_KEY);
+
+    if (!targetSessionId) {
       return null;
     }
 
-    const snapshot = JSON.parse(rawSnapshot) as PersistedSessionSnapshot;
+    const snapshot = sessions.find((session) => session.session.id === targetSessionId);
+
+    if (!snapshot) {
+      return null;
+    }
 
     if (snapshot.source.kind === 'youtube') {
+      window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, snapshot.session.id);
       return {
         ...snapshot,
         source: {
@@ -142,14 +224,12 @@ export async function restorePracticeSession(): Promise<RestoredPracticeSession 
     const persistedMediaId = snapshot.source.sourceRef.persistedMediaId;
 
     if (!persistedMediaId) {
-      clearPersistedPracticeSession();
       return null;
     }
 
     const storedMedia = await db.mediaAssets.get(persistedMediaId);
 
     if (!storedMedia) {
-      clearPersistedPracticeSession();
       return null;
     }
 
@@ -160,6 +240,7 @@ export async function restorePracticeSession(): Promise<RestoredPracticeSession 
 
     const objectUrl = URL.createObjectURL(file);
 
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, snapshot.session.id);
     return {
       ...snapshot,
       source: {
@@ -172,7 +253,6 @@ export async function restorePracticeSession(): Promise<RestoredPracticeSession 
       },
     };
   } catch {
-    clearPersistedPracticeSession();
     return null;
   }
 }
