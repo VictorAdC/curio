@@ -277,8 +277,12 @@ export async function deletePersistedPracticeSession(sessionId: string) {
   };
 }
 
-export async function exportPersistedPracticeSessions(includeMediaAssets: boolean) {
-  const sessions = readPersistedSessions();
+export async function exportPersistedPracticeSessions(includeMediaAssets: boolean, sessionIds?: string[]) {
+  const allSessions = readPersistedSessions();
+  const sessions =
+    sessionIds && sessionIds.length > 0
+      ? allSessions.filter((session) => sessionIds.includes(session.session.id))
+      : allSessions;
   const mediaAssets = includeMediaAssets
     ? await Promise.all(
         Array.from(
@@ -308,7 +312,8 @@ export async function exportPersistedPracticeSessions(includeMediaAssets: boolea
   const backup: PracticeSessionsBackup = {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
-    activeSessionId: getActivePracticeSessionId(),
+    activeSessionId:
+      sessions.length === 1 ? sessions[0].session.id : getActivePracticeSessionId(),
     sessions,
     mediaAssets: mediaAssets.filter((asset): asset is NonNullable<typeof asset> => asset !== null),
   };

@@ -10,8 +10,8 @@ interface SessionHistoryProps {
   onRenameSession: (sessionId: string, name: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onClearAll: () => void;
-  onExportLight: () => void;
-  onExport: () => void;
+  onExportLight: (sessionIds?: string[]) => void;
+  onExport: (sessionIds?: string[]) => void;
   onImport: (file: File) => void;
 }
 
@@ -142,6 +142,11 @@ export function SessionHistory({
 }: SessionHistoryProps) {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [selectedExportSessionIds, setSelectedExportSessionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSelectedExportSessionIds(sessions.map((session) => session.id));
+  }, [activeSessionId, isBackupModalOpen]);
 
   return (
     <section className={styles.root}>
@@ -223,12 +228,50 @@ export function SessionHistory({
                 <p className={styles.modalIntro}>
                   Light copies are smaller. Full copies include saved local audio and video, which can make the file much larger.
                 </p>
+                <div className={styles.scopeSection}>
+                  <span className={styles.scopeLabel}>What to include</span>
+                  <div className={styles.scopeActions}>
+                    <button
+                      className={styles.scopeActionButton}
+                      type="button"
+                      onClick={() => setSelectedExportSessionIds(sessions.map((session) => session.id))}
+                    >
+                      Select all
+                    </button>
+                    <button
+                      className={styles.scopeActionButton}
+                      type="button"
+                      onClick={() => setSelectedExportSessionIds([])}
+                    >
+                      Deselect all
+                    </button>
+                  </div>
+                  <div className={styles.scopeOptions}>
+                    {sessions.map((session) => (
+                      <label key={session.id} className={styles.scopeOption}>
+                        <input
+                          type="checkbox"
+                          checked={selectedExportSessionIds.includes(session.id)}
+                          onChange={(event) => {
+                            setSelectedExportSessionIds((currentIds) =>
+                              event.target.checked
+                                ? [...currentIds, session.id]
+                                : currentIds.filter((id) => id !== session.id),
+                            );
+                          }}
+                        />
+                        <span>{session.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div className={styles.modalOptions}>
                   <button
                     className={styles.modalOption}
                     type="button"
+                    disabled={selectedExportSessionIds.length === 0}
                     onClick={() => {
-                      onExportLight();
+                      onExportLight(selectedExportSessionIds.length === sessions.length ? undefined : selectedExportSessionIds);
                       setIsBackupModalOpen(false);
                     }}
                   >
@@ -238,8 +281,9 @@ export function SessionHistory({
                   <button
                     className={styles.modalOption}
                     type="button"
+                    disabled={selectedExportSessionIds.length === 0}
                     onClick={() => {
-                      onExport();
+                      onExport(selectedExportSessionIds.length === sessions.length ? undefined : selectedExportSessionIds);
                       setIsBackupModalOpen(false);
                     }}
                   >

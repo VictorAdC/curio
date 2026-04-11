@@ -325,16 +325,22 @@ export function usePracticePlayer() {
         setActiveSession(null);
         setSessionHistory([]);
       },
-      async exportSessions() {
-        const { objectUrl, filename } = await exportPersistedPracticeSessions(true);
+      async exportSessions(sessionIds?: string[]) {
+        const { objectUrl, filename } = await exportPersistedPracticeSessions(
+          true,
+          sessionIds,
+        );
         const anchor = document.createElement('a');
         anchor.href = objectUrl;
         anchor.download = filename;
         anchor.click();
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
       },
-      async exportLightSessions() {
-        const { objectUrl, filename } = await exportPersistedPracticeSessions(false);
+      async exportLightSessions(sessionIds?: string[]) {
+        const { objectUrl, filename } = await exportPersistedPracticeSessions(
+          false,
+          sessionIds,
+        );
         const anchor = document.createElement('a');
         anchor.href = objectUrl;
         anchor.download = filename;
