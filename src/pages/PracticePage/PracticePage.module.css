@@ -125,18 +125,6 @@
   width: 100%;
 }
 
-.audioMarkerRow {
-  grid-area: marker;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.audioMarkerRow .markerSpotlight {
-  position: static;
-  width: min(360px, 100%);
-  margin: 0;
-}
-
 .overlayRail {
   position: absolute;
   top: 1rem;
@@ -233,6 +221,7 @@
   background: rgba(7, 15, 28, 0.64);
   color: #edf3ff;
   backdrop-filter: blur(18px);
+  pointer-events: none;
 }
 
 .markerSpotlight strong,

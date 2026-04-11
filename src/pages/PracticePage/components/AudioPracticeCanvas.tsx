@@ -63,11 +63,7 @@ export function AudioPracticeCanvas({
             onMarkerLeave={onMarkerLeave}
           />
         </div>
-        {hoveredMarker ? (
-          <div className={styles.audioMarkerRow}>
-            <MarkerSpotlight marker={hoveredMarker} />
-          </div>
-        ) : null}
+        <MarkerSpotlight marker={hoveredMarker} />
       </div>
 
       <PracticePlaybackFooter
