@@ -11,6 +11,11 @@ export interface PracticeMediaSource {
     youtubeUrl?: string;
     youtubeVideoId?: string;
     persistedMediaId?: string;
+    fileName?: string;
+    fileType?: string;
+    fileSize?: number;
+    fileLastModified?: number;
+    mediaMissing?: boolean;
   };
 }
 
@@ -52,6 +57,7 @@ export interface PracticeSessionSummary {
   sourceKind: PracticeMediaKind;
   createdAt: string;
   updatedAt: string;
+  requiresMediaRelink?: boolean;
 }
 
 export interface PlaybackAdapter {

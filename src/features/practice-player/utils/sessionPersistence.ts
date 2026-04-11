@@ -40,6 +40,10 @@ interface PersistedPracticeMediaSource {
     youtubeUrl?: string;
     youtubeVideoId?: string;
     persistedMediaId?: string;
+    fileName?: string;
+    fileType?: string;
+    fileSize?: number;
+    fileLastModified?: number;
   };
 }
 
@@ -116,6 +120,10 @@ function buildPersistedSource(source: PracticeMediaSource): PersistedPracticeMed
       youtubeUrl: source.sourceRef.youtubeUrl,
       youtubeVideoId: source.sourceRef.youtubeVideoId,
       persistedMediaId: source.sourceRef.persistedMediaId,
+      fileName: source.sourceRef.fileName ?? source.sourceRef.file?.name,
+      fileType: source.sourceRef.fileType ?? source.sourceRef.file?.type,
+      fileSize: source.sourceRef.fileSize ?? source.sourceRef.file?.size,
+      fileLastModified: source.sourceRef.fileLastModified ?? source.sourceRef.file?.lastModified,
     },
   };
 }
@@ -269,32 +277,33 @@ export async function deletePersistedPracticeSession(sessionId: string) {
   };
 }
 
-export async function exportPersistedPracticeSessions() {
+export async function exportPersistedPracticeSessions(includeMediaAssets: boolean) {
   const sessions = readPersistedSessions();
-  const localMediaIds = Array.from(
-    new Set(
-      sessions
-        .map((session) => session.source.sourceRef.persistedMediaId)
-        .filter((mediaId): mediaId is string => Boolean(mediaId)),
-    ),
-  );
-  const mediaAssets = await Promise.all(
-    localMediaIds.map(async (mediaId) => {
-      const asset = await db.mediaAssets.get(mediaId);
+  const mediaAssets = includeMediaAssets
+    ? await Promise.all(
+        Array.from(
+          new Set(
+            sessions
+              .map((session) => session.source.sourceRef.persistedMediaId)
+              .filter((mediaId): mediaId is string => Boolean(mediaId)),
+          ),
+        ).map(async (mediaId) => {
+          const asset = await db.mediaAssets.get(mediaId);
 
-      if (!asset) {
-        return null;
-      }
+          if (!asset) {
+            return null;
+          }
 
-      return {
-        id: asset.id,
-        name: asset.name,
-        type: asset.type,
-        lastModified: asset.lastModified,
-        dataUrl: await blobToDataUrl(asset.file),
-      };
-    }),
-  );
+          return {
+            id: asset.id,
+            name: asset.name,
+            type: asset.type,
+            lastModified: asset.lastModified,
+            dataUrl: await blobToDataUrl(asset.file),
+          };
+        }),
+      )
+    : [];
 
   const backup: PracticeSessionsBackup = {
     version: BACKUP_VERSION,
@@ -310,7 +319,7 @@ export async function exportPersistedPracticeSessions() {
 
   return {
     objectUrl,
-    filename: `curio-practice-sessions-${sanitizedTimestamp}.json`,
+    filename: `curio-practice-sessions-${includeMediaAssets ? 'full' : 'light'}-${sanitizedTimestamp}.json`,
   };
 }
 
@@ -335,7 +344,25 @@ export async function importPersistedPracticeSessions(file: File) {
     }),
   );
 
-  writePersistedSessions(sortSessionsDescending(backup.sessions));
+  const importedSessions = sortSessionsDescending(
+    backup.sessions.map((session) => {
+      if (session.source.kind === 'youtube') {
+        return session;
+      }
+
+      const hasMediaAsset = backup.mediaAssets.some((asset) => asset.id === session.source.sourceRef.persistedMediaId);
+
+      return {
+        ...session,
+        session: {
+          ...session.session,
+          requiresMediaRelink: !hasMediaAsset,
+        },
+      };
+    }),
+  );
+
+  writePersistedSessions(importedSessions);
 
   if (backup.activeSessionId) {
     window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, backup.activeSessionId);
@@ -379,13 +406,47 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
     const persistedMediaId = snapshot.source.sourceRef.persistedMediaId;
 
     if (!persistedMediaId) {
-      return null;
+      return {
+        ...snapshot,
+        session: {
+          ...snapshot.session,
+          requiresMediaRelink: true,
+        },
+        source: {
+          ...snapshot.source,
+          sourceRef: {
+            persistedMediaId,
+            fileName: snapshot.source.sourceRef.fileName,
+            fileType: snapshot.source.sourceRef.fileType,
+            fileSize: snapshot.source.sourceRef.fileSize,
+            fileLastModified: snapshot.source.sourceRef.fileLastModified,
+            mediaMissing: true,
+          },
+        },
+      };
     }
 
     const storedMedia = await db.mediaAssets.get(persistedMediaId);
 
     if (!storedMedia) {
-      return null;
+      return {
+        ...snapshot,
+        session: {
+          ...snapshot.session,
+          requiresMediaRelink: true,
+        },
+        source: {
+          ...snapshot.source,
+          sourceRef: {
+            persistedMediaId,
+            fileName: snapshot.source.sourceRef.fileName,
+            fileType: snapshot.source.sourceRef.fileType,
+            fileSize: snapshot.source.sourceRef.fileSize,
+            fileLastModified: snapshot.source.sourceRef.fileLastModified,
+            mediaMissing: true,
+          },
+        },
+      };
     }
 
     const file = new File([storedMedia.file], storedMedia.name, {
@@ -404,6 +465,10 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
           file,
           objectUrl,
           persistedMediaId,
+          fileName: storedMedia.name,
+          fileType: storedMedia.type,
+          fileSize: storedMedia.file.size,
+          fileLastModified: storedMedia.lastModified,
         },
       },
     };

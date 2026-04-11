@@ -145,6 +145,15 @@
   font-weight: 700;
 }
 
+.warningBadge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .meta {
   display: flex;
   align-items: center;
@@ -197,4 +206,89 @@
 
 .hiddenInput {
   display: none;
+}
+
+.modalShell {
+  position: fixed;
+  inset: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.36);
+}
+
+.modalCard {
+  position: relative;
+  z-index: 1;
+  width: min(520px, calc(100vw - 2rem));
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.modalHeader h4,
+.modalIntro {
+  margin: 0;
+}
+
+.modalIntro {
+  color: #5f6f85;
+  line-height: 1.5;
+}
+
+.modalClose {
+  border: 0;
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modalOptions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.modalOption {
+  display: grid;
+  gap: 0.3rem;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  background: rgba(248, 251, 255, 0.95);
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.modalOption strong {
+  color: #0f2852;
+}
+
+.modalOption span {
+  color: #5f6f85;
+  line-height: 1.45;
 }

@@ -142,6 +142,9 @@ export function PracticePage() {
                 void actions.clearAllSessions();
                 setIsSessionDrawerOpen(false);
               }}
+              onExportLight={() => {
+                void actions.exportLightSessions();
+              }}
               onExport={() => {
                 void actions.exportSessions();
               }}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PracticeSessionSummary } from '../../types/practicePlayer';
 import styles from './SessionHistory.module.css';
 
@@ -9,6 +10,7 @@ interface SessionHistoryProps {
   onRenameSession: (sessionId: string, name: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onClearAll: () => void;
+  onExportLight: () => void;
   onExport: () => void;
   onImport: (file: File) => void;
 }
@@ -99,6 +101,7 @@ function SessionHistoryItem({
         )}
         <div className={styles.itemHeaderActions}>
           {isActive ? <span className={styles.activeBadge}>Open</span> : null}
+          {session.requiresMediaRelink ? <span className={styles.warningBadge}>Media missing</span> : null}
           <button
             className={styles.renameButton}
             type="button"
@@ -133,10 +136,12 @@ export function SessionHistory({
   onRenameSession,
   onDeleteSession,
   onClearAll,
+  onExportLight,
   onExport,
   onImport,
 }: SessionHistoryProps) {
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   return (
     <section className={styles.root}>
@@ -164,7 +169,7 @@ export function SessionHistory({
       </div>
 
       <div className={styles.bulkActions}>
-        <button className={styles.bulkButton} type="button" onClick={onExport}>
+        <button className={styles.bulkButton} type="button" onClick={() => setIsBackupModalOpen(true)}>
           Download copy
         </button>
         <button className={styles.bulkButton} type="button" onClick={() => importInputRef.current?.click()}>
@@ -198,6 +203,55 @@ export function SessionHistory({
           }}
         />
       </div>
+
+      {isBackupModalOpen
+        ? createPortal(
+            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label="Choose backup type">
+              <button
+                className={styles.modalBackdrop}
+                type="button"
+                aria-label="Close backup options"
+                onClick={() => setIsBackupModalOpen(false)}
+              />
+              <div className={styles.modalCard}>
+                <div className={styles.modalHeader}>
+                  <h4>Choose backup type</h4>
+                  <button className={styles.modalClose} type="button" onClick={() => setIsBackupModalOpen(false)}>
+                    Close
+                  </button>
+                </div>
+                <p className={styles.modalIntro}>
+                  Light copies are smaller. Full copies include saved local audio and video, which can make the file much larger.
+                </p>
+                <div className={styles.modalOptions}>
+                  <button
+                    className={styles.modalOption}
+                    type="button"
+                    onClick={() => {
+                      onExportLight();
+                      setIsBackupModalOpen(false);
+                    }}
+                  >
+                    <strong>Light copy</strong>
+                    <span>Session data only. Local media must be relinked after import.</span>
+                  </button>
+                  <button
+                    className={styles.modalOption}
+                    type="button"
+                    onClick={() => {
+                      onExport();
+                      setIsBackupModalOpen(false);
+                    }}
+                  >
+                    <strong>Full copy</strong>
+                    <span>Includes saved local audio and video for complete restoration.</span>
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

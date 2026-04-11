@@ -55,6 +55,14 @@ export function usePracticePlayer() {
     store.hydrateSession(restoredSession);
     setActiveSession(restoredSession.session);
     setSessionHistory(listPersistedPracticeSessions());
+
+    if (restoredSession.source.sourceRef.mediaMissing) {
+      store.setError(
+        `Local media is missing for "${restoredSession.source.title}". Import a full backup or re-upload the original file to play it.`,
+      );
+      return restoredSession;
+    }
+
     await loadSourceIntoPlayer(restoredSession.source, {
       fileForWaveform: restoredSession.source.sourceRef.file,
       restoredCurrentTime: restoredSession.currentTime,
@@ -213,6 +221,10 @@ export function usePracticePlayer() {
             file,
             objectUrl,
             persistedMediaId: sourceId,
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            fileLastModified: file.lastModified,
           },
         };
         const session = createPracticeSessionSummary(source);
@@ -314,7 +326,15 @@ export function usePracticePlayer() {
         setSessionHistory([]);
       },
       async exportSessions() {
-        const { objectUrl, filename } = await exportPersistedPracticeSessions();
+        const { objectUrl, filename } = await exportPersistedPracticeSessions(true);
+        const anchor = document.createElement('a');
+        anchor.href = objectUrl;
+        anchor.download = filename;
+        anchor.click();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      },
+      async exportLightSessions() {
+        const { objectUrl, filename } = await exportPersistedPracticeSessions(false);
         const anchor = document.createElement('a');
         anchor.href = objectUrl;
         anchor.download = filename;
