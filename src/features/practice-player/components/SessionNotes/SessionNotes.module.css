@@ -1,0 +1,35 @@
+.root {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.header h3,
+.header span {
+  margin: 0;
+}
+
+.header span {
+  color: #5f6f85;
+  font-size: 0.92rem;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 1rem;
+  border: 1px solid rgba(49, 88, 154, 0.16);
+  border-radius: 16px;
+  background: #fbfdff;
+  resize: vertical;
+}

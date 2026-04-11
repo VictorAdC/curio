@@ -1,0 +1,17 @@
+.root {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.title,
+.note {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(49, 88, 154, 0.16);
+  border-radius: 12px;
+  background: #fbfdff;
+}
+
+.note {
+  resize: vertical;
+}

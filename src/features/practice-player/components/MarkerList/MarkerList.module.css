@@ -1,0 +1,98 @@
+.root {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.header {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.header h3,
+.header p {
+  margin: 0;
+}
+
+.header p {
+  margin-top: 0.35rem;
+  color: #5f6f85;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.addButton,
+.clearButton,
+.actions button,
+.seekButton {
+  border: 0;
+  border-radius: 12px;
+  background: #edf3ff;
+  color: #123a7d;
+  font-weight: 700;
+}
+
+.addButton,
+.clearButton {
+  padding: 0.75rem 1rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 16px;
+  background: #f8fbff;
+  color: #5f6f85;
+}
+
+.card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(49, 88, 154, 0.12);
+  background: #fbfdff;
+}
+
+.cardHeader {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.seekButton {
+  padding: 0.7rem 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  padding: 0.65rem 0.85rem;
+}
+
+.roleBadge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #31589a;
+}
