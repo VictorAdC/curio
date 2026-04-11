@@ -7,6 +7,7 @@ interface SessionHistoryProps {
   activeSessionId: string | null;
   onLoadSession: (sessionId: string) => void;
   onRenameSession: (sessionId: string, name: string) => void;
+  onDeleteSession: (sessionId: string) => void;
 }
 
 function SessionHistoryItem({
@@ -14,11 +15,13 @@ function SessionHistoryItem({
   isActive,
   onLoadSession,
   onRenameSession,
+  onDeleteSession,
 }: {
   session: PracticeSessionSummary;
   isActive: boolean;
   onLoadSession: (sessionId: string) => void;
   onRenameSession: (sessionId: string, name: string) => void;
+  onDeleteSession: (sessionId: string) => void;
 }) {
   const [draftName, setDraftName] = useState(session.name);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,45 +45,75 @@ function SessionHistoryItem({
   };
 
   return (
-    <article className={`${styles.item} ${isActive ? styles.activeItem : ''}`}>
+    <article
+      className={`${styles.item} ${styles.clickableItem} ${isActive ? styles.activeItem : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onLoadSession(session.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onLoadSession(session.id);
+        }
+      }}
+    >
       <div className={styles.itemHeader}>
-        <button className={styles.loadButton} type="button" onClick={() => onLoadSession(session.id)}>
-          {session.name}
-        </button>
+        {isEditing ? (
+          <div className={styles.inlineEditWrap}>
+            <input
+              className={styles.inlineNameInput}
+              type="text"
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              onBlur={commitName}
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.currentTarget.blur();
+                }
+                if (event.key === 'Escape') {
+                  setDraftName(session.name);
+                  setIsEditing(false);
+                }
+              }}
+              aria-label={`Session name for ${session.sourceTitle}`}
+              autoFocus
+            />
+            <span className={styles.editingBadge}>Editing</span>
+          </div>
+        ) : (
+          <button
+            className={styles.loadButton}
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setDraftName(session.name);
+              setIsEditing(true);
+            }}
+          >
+            {session.name}
+          </button>
+        )}
         <div className={styles.itemHeaderActions}>
           {isActive ? <span className={styles.activeBadge}>Open</span> : null}
           <button
             className={styles.renameButton}
             type="button"
-            onClick={() => {
-              setDraftName(session.name);
-              setIsEditing(true);
+            onClick={(event) => {
+              event.stopPropagation();
+              if (
+                window.confirm(
+                  `Delete session "${session.name}"? This will remove its saved notes, markers, and local media snapshot.`,
+                )
+              ) {
+                onDeleteSession(session.id);
+              }
             }}
           >
-            Rename
+            Delete
           </button>
         </div>
       </div>
-      {isEditing ? (
-        <input
-          className={styles.nameInput}
-          type="text"
-          value={draftName}
-          onChange={(event) => setDraftName(event.target.value)}
-          onBlur={commitName}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.currentTarget.blur();
-            }
-            if (event.key === 'Escape') {
-              setDraftName(session.name);
-              setIsEditing(false);
-            }
-          }}
-          aria-label={`Session name for ${session.sourceTitle}`}
-          autoFocus
-        />
-      ) : null}
       <div className={styles.meta}>
         <span>{session.sourceTitle}</span>
         <span>{session.sourceKind}</span>
@@ -95,6 +128,7 @@ export function SessionHistory({
   activeSessionId,
   onLoadSession,
   onRenameSession,
+  onDeleteSession,
 }: SessionHistoryProps) {
   return (
     <section className={styles.root}>
@@ -116,6 +150,7 @@ export function SessionHistory({
             isActive={session.id === activeSessionId}
             onLoadSession={onLoadSession}
             onRenameSession={onRenameSession}
+            onDeleteSession={onDeleteSession}
           />
         ))}
       </div>

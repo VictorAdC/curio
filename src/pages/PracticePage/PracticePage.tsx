@@ -135,6 +135,9 @@ export function PracticePage() {
                 setIsSessionDrawerOpen(false);
               }}
               onRenameSession={actions.renameSession}
+              onDeleteSession={(sessionId) => {
+                void actions.deleteSession(sessionId);
+              }}
             />
           </aside>
         </div>

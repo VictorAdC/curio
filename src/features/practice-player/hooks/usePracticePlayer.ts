@@ -6,10 +6,10 @@ import { usePracticeSessionStore } from '../store/practiceSessionStore';
 import type { PracticeMarker, PracticeMediaSource, PracticeSessionSummary } from '../types/practicePlayer';
 import {
   createPracticeSessionSummary,
+  deletePersistedPracticeSession,
   getActivePracticeSessionId,
   listPersistedPracticeSessions,
   persistPracticeSession,
-  removePersistedLocalMediaFile,
   renamePersistedPracticeSession,
   persistLocalMediaFile,
   restorePracticeSession,
@@ -281,6 +281,26 @@ export function usePracticePlayer() {
         );
         setActiveSession((currentSession) => (currentSession?.id === sessionId ? { ...currentSession, name } : currentSession));
       },
+      async deleteSession(sessionId: string) {
+        const result = await deletePersistedPracticeSession(sessionId);
+        setSessionHistory(result.sessions);
+
+        if (activeSession?.id !== sessionId) {
+          return;
+        }
+
+        releaseObjectUrl();
+
+        if (result.nextActiveSessionId) {
+          await loadPersistedSession(result.nextActiveSessionId);
+          return;
+        }
+
+        controllerRef.current?.destroy();
+        store.resetForNewSource();
+        store.setSource(null);
+        setActiveSession(null);
+      },
       togglePlayback() {
         if (store.isPlaying) {
           controllerRef.current?.pause();
@@ -319,7 +339,7 @@ export function usePracticePlayer() {
         store.setSessionNote(value);
       },
     }),
-    [store],
+    [activeSession, store],
   );
 
   const loopRange = useMemo(() => {

@@ -192,6 +192,40 @@ export function getActivePracticeSessionId() {
   return window.localStorage.getItem(ACTIVE_SESSION_ID_STORAGE_KEY);
 }
 
+export async function deletePersistedPracticeSession(sessionId: string) {
+  const sessions = readPersistedSessions();
+  const targetSession = sessions.find((session) => session.session.id === sessionId);
+
+  if (!targetSession) {
+    return {
+      sessions: listPersistedPracticeSessions(),
+      nextActiveSessionId: getActivePracticeSessionId(),
+    };
+  }
+
+  if (targetSession.source.kind !== 'youtube') {
+    await removePersistedLocalMediaFile(targetSession.source.sourceRef.persistedMediaId ?? targetSession.source.id);
+  }
+
+  const remainingSessions = sortSessionsDescending(sessions.filter((session) => session.session.id !== sessionId));
+  writePersistedSessions(remainingSessions);
+
+  const currentActiveSessionId = getActivePracticeSessionId();
+  const nextActiveSessionId =
+    currentActiveSessionId === sessionId ? (remainingSessions[0]?.session.id ?? null) : currentActiveSessionId;
+
+  if (nextActiveSessionId) {
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, nextActiveSessionId);
+  } else {
+    window.localStorage.removeItem(ACTIVE_SESSION_ID_STORAGE_KEY);
+  }
+
+  return {
+    sessions: remainingSessions.map((session) => session.session),
+    nextActiveSessionId,
+  };
+}
+
 export async function restorePracticeSession(sessionId?: string): Promise<RestoredPracticeSession | null> {
   try {
     const sessions = readPersistedSessions();
