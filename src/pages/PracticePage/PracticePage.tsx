@@ -16,10 +16,22 @@ import styles from './PracticePage.module.css';
 export function PracticePage() {
   const { view, actions } = usePracticePlayer();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
+  const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
 
   return (
     <main className={styles.page}>
-      <PracticeHeader />
+      <div className={styles.heroRow}>
+        <PracticeHeader />
+        <div className={styles.utilityRow}>
+          <button
+            className={styles.sessionDrawerButton}
+            type="button"
+            onClick={() => setIsSessionDrawerOpen(true)}
+          >
+            Sessions
+          </button>
+        </div>
+      </div>
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
 
@@ -93,16 +105,40 @@ export function PracticePage() {
           onAddMarker={actions.addMarker}
           onClearLoop={actions.clearLoop}
         />
-        <div className={styles.sideColumn}>
-          <SessionHistory
-            sessions={view.sessionHistory}
-            activeSessionId={view.activeSessionId}
-            onLoadSession={actions.loadSession}
-            onRenameSession={actions.renameSession}
-          />
-          <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
-        </div>
+        <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
       </section>
+
+      {isSessionDrawerOpen ? (
+        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label="Session history">
+          <button
+            className={styles.sessionDrawerBackdrop}
+            type="button"
+            aria-label="Close session history"
+            onClick={() => setIsSessionDrawerOpen(false)}
+          />
+          <aside className={styles.sessionDrawer}>
+            <div className={styles.sessionDrawerHeader}>
+              <span className={styles.eyebrow}>Saved sessions</span>
+              <button
+                className={styles.sessionDrawerClose}
+                type="button"
+                onClick={() => setIsSessionDrawerOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+            <SessionHistory
+              sessions={view.sessionHistory}
+              activeSessionId={view.activeSessionId}
+              onLoadSession={(sessionId) => {
+                void actions.loadSession(sessionId);
+                setIsSessionDrawerOpen(false);
+              }}
+              onRenameSession={actions.renameSession}
+            />
+          </aside>
+        </div>
+      ) : null}
     </main>
   );
 }

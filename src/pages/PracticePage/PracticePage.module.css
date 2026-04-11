@@ -6,10 +6,42 @@
   gap: 1.5rem;
 }
 
+.heroRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
 .hero {
   display: grid;
   gap: 1rem;
   align-items: end;
+}
+
+.utilityRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.sessionDrawerButton,
+.sessionDrawerClose {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.1rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sessionDrawerButton {
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
+}
+
+.sessionDrawerClose {
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
 }
 
 .hero h1,
@@ -273,15 +305,45 @@
 .lowerGrid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.9fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.9fr);
   align-items: start;
 }
 
-.sideColumn {
+.sessionDrawerShell {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sessionDrawerBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.34);
+}
+
+.sessionDrawer {
+  position: relative;
+  z-index: 1;
+  width: min(460px, calc(100vw - 1.5rem));
+  height: 100vh;
+  padding: 1.25rem;
   display: grid;
-  gap: 1.5rem;
   align-content: start;
-  min-width: 0;
+  gap: 1rem;
+  background: rgba(241, 246, 255, 0.96);
+  backdrop-filter: blur(24px);
+  box-shadow: -24px 0 48px rgba(15, 23, 42, 0.18);
+  overflow: auto;
+}
+
+.sessionDrawerHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
 }
 
 .error {
@@ -294,8 +356,17 @@
 
 @media (max-width: 960px) {
   .hero,
+  .heroRow,
   .lowerGrid {
     grid-template-columns: 1fr;
+  }
+
+  .utilityRow {
+    justify-content: stretch;
+  }
+
+  .sessionDrawerButton {
+    width: 100%;
   }
 
   .overlayRail {
