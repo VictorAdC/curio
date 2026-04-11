@@ -1,29 +1,23 @@
 import { useRef } from 'react';
-import type { PracticeMarker, TimelineWaveformDatum } from '../../types/practicePlayer';
+import type { TimelineWaveformDatum } from '../../types/practicePlayer';
 import styles from './WaveformTimeline.module.css';
 
 interface WaveformTimelineProps {
   waveform: TimelineWaveformDatum[];
   currentTime: number;
   duration: number;
-  markers: PracticeMarker[];
   loopStart: number | null;
   loopEnd: number | null;
   onSeek: (seconds: number) => void;
-  onMarkerHover?: (marker: PracticeMarker) => void;
-  onMarkerLeave?: () => void;
 }
 
 export function WaveformTimeline({
   waveform,
   currentTime,
   duration,
-  markers,
   loopStart,
   loopEnd,
   onSeek,
-  onMarkerHover,
-  onMarkerLeave,
 }: WaveformTimelineProps) {
   const isDraggingRef = useRef(false);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -103,17 +97,6 @@ export function WaveformTimeline({
       </div>
 
       <div className={styles.playhead} style={{ left: `${progress}%` }} />
-
-      {markers.map((marker) => (
-        <span
-          key={marker.id}
-          className={styles.marker}
-          title={marker.title}
-          style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
-          onMouseEnter={() => onMarkerHover?.(marker)}
-          onMouseLeave={() => onMarkerLeave?.()}
-        />
-      ))}
     </div>
   );
 }

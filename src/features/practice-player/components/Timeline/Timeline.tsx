@@ -48,12 +48,9 @@ export function Timeline({
           waveform={waveform}
           currentTime={currentTime}
           duration={duration}
-          markers={markers}
           loopStart={loopStart}
           loopEnd={loopEnd}
           onSeek={onSeek}
-          onMarkerHover={onMarkerHover}
-          onMarkerLeave={onMarkerLeave}
         />
       </div>
     );
