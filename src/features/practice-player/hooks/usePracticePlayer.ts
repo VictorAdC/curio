@@ -92,6 +92,8 @@ export function usePracticePlayer() {
         store.setSource(source);
         store.setError(null);
 
+        await controllerRef.current?.load(source);
+
         if (isAudio) {
           try {
             const waveform = await buildWaveformFromFile(file);
@@ -100,14 +102,6 @@ export function usePracticePlayer() {
             store.setWaveform([]);
           }
         }
-
-        if (!isAudio) {
-          await new Promise<void>((resolve) => {
-            window.requestAnimationFrame(() => resolve());
-          });
-        }
-
-        await controllerRef.current?.load(source);
       },
       async loadYouTubeUrl(url: string) {
         const videoId = parseYouTubeVideoId(url);

@@ -124,8 +124,10 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
   destroy() {
     if (this.frameHandle) {
       window.cancelAnimationFrame(this.frameHandle);
+      this.frameHandle = null;
     }
 
+    this.player?.pauseVideo();
     this.player?.destroy();
     this.player = null;
   }

@@ -18,6 +18,7 @@ export class PracticePlayerController {
 
   async load(source: PracticeMediaSource) {
     this.adapter?.destroy();
+    this.resetMediaSurfaces();
 
     if (source.kind === 'youtube') {
       this.adapter = new YouTubePlayerAdapter({
@@ -80,6 +81,28 @@ export class PracticePlayerController {
 
   destroy() {
     this.adapter?.destroy();
+    this.resetMediaSurfaces();
     this.adapter = null;
+  }
+
+  private resetMediaSurfaces() {
+    const audioElement = this.options.getMediaElement('local-audio');
+    const videoElement = this.options.getMediaElement('local-video');
+
+    for (const element of [audioElement, videoElement]) {
+      if (!element) {
+        continue;
+      }
+
+      element.pause();
+      element.removeAttribute('src');
+      element.load();
+    }
+
+    const youtubeRoot = document.getElementById(this.options.youtubeElementId);
+
+    if (youtubeRoot) {
+      youtubeRoot.replaceChildren();
+    }
   }
 }

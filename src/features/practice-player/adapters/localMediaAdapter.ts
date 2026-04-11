@@ -73,6 +73,7 @@ export class LocalMediaAdapter implements PlaybackAdapter {
   }
 
   destroy() {
+    this.options.mediaElement.pause();
     this.options.mediaElement.removeEventListener('timeupdate', this.handleTimeUpdate);
     this.options.mediaElement.removeEventListener('loadedmetadata', this.handleLoadedMetadata);
     this.options.mediaElement.removeEventListener('play', this.handlePlay);
