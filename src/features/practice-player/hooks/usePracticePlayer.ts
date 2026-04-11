@@ -92,6 +92,12 @@ export function usePracticePlayer() {
         store.setSource(source);
         store.setError(null);
 
+        if (isVideo) {
+          await new Promise<void>((resolve) => {
+            window.requestAnimationFrame(() => resolve());
+          });
+        }
+
         await controllerRef.current?.load(source);
 
         if (isAudio) {
