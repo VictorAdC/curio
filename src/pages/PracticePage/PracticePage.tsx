@@ -14,6 +14,15 @@ export function PracticePage() {
   const showMediaDisplay = sourceKind === 'local-video' || sourceKind === 'youtube';
   const showTimeline = state.source !== null;
   const timelineWaveform = sourceKind === 'local-audio' ? state.waveform : [];
+  const currentMarker = useMemo(() => {
+    if (state.markers.length === 0) {
+      return null;
+    }
+
+    return [...state.markers]
+      .reverse()
+      .find((marker) => marker.timestampSeconds <= state.currentTime + 0.25) ?? state.markers[0];
+  }, [state.currentTime, state.markers]);
 
   const loopRange = useMemo(() => {
     const start = state.markers.find((marker) => marker.id === state.loopSelection.startMarkerId);
@@ -69,17 +78,66 @@ export function PracticePage() {
         <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
 
         {showMediaDisplay ? (
-          <div className={styles.playerArea}>
-            <video
-              ref={actions.setVideoElement}
-              className={sourceKind === 'local-video' ? styles.video : styles.hiddenMedia}
-              controls={false}
-            />
-            <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
+          <div className={styles.videoCanvas}>
+            <div className={styles.playerArea}>
+              <video
+                ref={actions.setVideoElement}
+                className={sourceKind === 'local-video' ? styles.video : styles.hiddenMedia}
+                controls={false}
+              />
+              <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
+
+              <div className={styles.overlayRail}>
+                <button className={styles.overlayAction} type="button" onClick={actions.addMarker}>
+                  Add bookmark
+                </button>
+                <button className={styles.overlayGhost} type="button" onClick={() => state.clearLoop()}>
+                  Clear loop
+                </button>
+                <div className={styles.overlayMeta}>
+                  <span>Loop start</span>
+                  <strong>{loopRange.start !== null ? formatTime(loopRange.start) : '--:--'}</strong>
+                </div>
+                <div className={styles.overlayMeta}>
+                  <span>Loop end</span>
+                  <strong>{loopRange.end !== null ? formatTime(loopRange.end) : '--:--'}</strong>
+                </div>
+              </div>
+
+              {currentMarker ? (
+                <article className={styles.markerSpotlight}>
+                  <span className={styles.markerSpotlightLabel}>Current marker</span>
+                  <strong>{currentMarker.title}</strong>
+                  <span>{formatTime(currentMarker.timestampSeconds)}</span>
+                  <p>{currentMarker.note || 'Add a note to this bookmark to keep contextual practice guidance here.'}</p>
+                </article>
+              ) : null}
+            </div>
+
+            <div className={styles.canvasFooter}>
+              <div className={styles.canvasTransport}>
+                <TransportControls
+                  isPlaying={state.isPlaying}
+                  onTogglePlayback={actions.togglePlayback}
+                  onJumpBackward={() => actions.jumpBy(-10)}
+                  onJumpForward={() => actions.jumpBy(10)}
+                />
+              </div>
+              <Timeline
+                currentTime={state.currentTime}
+                duration={state.duration}
+                markers={state.markers}
+                loopStart={loopRange.start}
+                loopEnd={loopRange.end}
+                waveform={[]}
+                onSeek={actions.seek}
+                variant="compact"
+              />
+            </div>
           </div>
         ) : null}
 
-        {showTimeline ? (
+        {!showMediaDisplay && showTimeline ? (
           <Timeline
             currentTime={state.currentTime}
             duration={state.duration}
@@ -91,12 +149,14 @@ export function PracticePage() {
           />
         ) : null}
 
-        <TransportControls
-          isPlaying={state.isPlaying}
-          onTogglePlayback={actions.togglePlayback}
-          onJumpBackward={() => actions.jumpBy(-10)}
-          onJumpForward={() => actions.jumpBy(10)}
-        />
+        {!showMediaDisplay ? (
+          <TransportControls
+            isPlaying={state.isPlaying}
+            onTogglePlayback={actions.togglePlayback}
+            onJumpBackward={() => actions.jumpBy(-10)}
+            onJumpForward={() => actions.jumpBy(10)}
+          />
+        ) : null}
 
         <div className={styles.metaRow}>
           <div className={styles.metaCard}>

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type { PracticeMarker, TimelineWaveformDatum } from '../../types/practicePlayer';
+import { formatTime } from '../../utils/time';
 import { WaveformTimeline } from '../WaveformTimeline/WaveformTimeline';
 import styles from './Timeline.module.css';
 
@@ -11,6 +12,7 @@ interface TimelineProps {
   loopEnd: number | null;
   waveform: TimelineWaveformDatum[];
   onSeek: (seconds: number) => void;
+  variant?: 'default' | 'compact';
 }
 
 export function Timeline({
@@ -21,8 +23,10 @@ export function Timeline({
   loopEnd,
   waveform,
   onSeek,
+  variant = 'default',
 }: TimelineProps) {
   const isDraggingRef = useRef(false);
+  const isCompact = variant === 'compact';
 
   const handleSeekFromTrack = (clientX: number, left: number, width: number) => {
     if (duration <= 0) {
@@ -33,9 +37,9 @@ export function Timeline({
     onSeek(Math.max(0, Math.min(1, ratio)) * duration);
   };
 
-  return (
-    <div className={styles.root}>
-      {waveform.length > 0 ? (
+  if (waveform.length > 0) {
+    return (
+      <div className={styles.root}>
         <WaveformTimeline
           waveform={waveform}
           currentTime={currentTime}
@@ -45,56 +49,73 @@ export function Timeline({
           loopEnd={loopEnd}
           onSeek={onSeek}
         />
-      ) : (
-        <div
-          className={styles.genericTrack}
-          onPointerDown={(event) => {
-            const rect = event.currentTarget.getBoundingClientRect();
-            isDraggingRef.current = true;
-            event.currentTarget.setPointerCapture(event.pointerId);
-            handleSeekFromTrack(event.clientX, rect.left, rect.width);
-          }}
-          onPointerMove={(event) => {
-            if (!isDraggingRef.current) {
-              return;
-            }
+      </div>
+    );
+  }
 
-            const rect = event.currentTarget.getBoundingClientRect();
-            handleSeekFromTrack(event.clientX, rect.left, rect.width);
-          }}
-          onPointerUp={(event) => {
-            const rect = event.currentTarget.getBoundingClientRect();
-            handleSeekFromTrack(event.clientX, rect.left, rect.width);
-            isDraggingRef.current = false;
-            event.currentTarget.releasePointerCapture(event.pointerId);
-          }}
-          onPointerCancel={(event) => {
-            isDraggingRef.current = false;
-            event.currentTarget.releasePointerCapture(event.pointerId);
-          }}
-          role="button"
-          tabIndex={duration > 0 ? 0 : -1}
-          aria-label="Seek through media timeline"
-        >
-          <div className={styles.genericProgress} style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
-          {loopStart !== null && loopEnd !== null && duration > 0 ? (
-            <div
-              className={styles.loopRange}
-              style={{
-                left: `${(loopStart / duration) * 100}%`,
-                width: `${((loopEnd - loopStart) / duration) * 100}%`,
-              }}
-            />
-          ) : null}
-          {markers.map((marker) => (
-            <span
-              key={marker.id}
-              className={styles.marker}
-              style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
-            />
-          ))}
+  return (
+    <div className={`${styles.root} ${isCompact ? styles.compactShell : ''}`}>
+      <div
+        className={`${styles.genericTrack} ${isCompact ? styles.compactTrack : ''}`}
+        onPointerDown={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          isDraggingRef.current = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          handleSeekFromTrack(event.clientX, rect.left, rect.width);
+        }}
+        onPointerMove={(event) => {
+          if (!isDraggingRef.current) {
+            return;
+          }
+
+          const rect = event.currentTarget.getBoundingClientRect();
+          handleSeekFromTrack(event.clientX, rect.left, rect.width);
+        }}
+        onPointerUp={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          handleSeekFromTrack(event.clientX, rect.left, rect.width);
+          isDraggingRef.current = false;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+        onPointerCancel={(event) => {
+          isDraggingRef.current = false;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+        role="button"
+        tabIndex={duration > 0 ? 0 : -1}
+        aria-label="Seek through media timeline"
+      >
+        <div className={styles.genericProgress} style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
+        {loopStart !== null && loopEnd !== null && duration > 0 ? (
+          <div
+            className={styles.loopRange}
+            style={{
+              left: `${(loopStart / duration) * 100}%`,
+              width: `${((loopEnd - loopStart) / duration) * 100}%`,
+            }}
+          />
+        ) : null}
+        {markers.map((marker) => (
+          <span
+            key={marker.id}
+            className={`${styles.marker} ${isCompact ? styles.compactMarker : ''}`}
+            style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
+          />
+        ))}
+        <div
+          className={`${styles.playhead} ${isCompact ? styles.compactPlayhead : ''}`}
+          style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+        />
+      </div>
+
+      {isCompact ? (
+        <div className={styles.compactMeta}>
+          <span>Bookmarks: {markers.length}</span>
+          <span>
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
