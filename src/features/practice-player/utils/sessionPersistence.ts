@@ -72,6 +72,20 @@ interface PracticeSessionsBackup {
   }>;
 }
 
+export interface PracticeSessionsBackupPreview {
+  file: File;
+  sessions: PracticeSessionSummary[];
+  activeSessionId: string | null;
+  includesMediaAssets: boolean;
+  collidingSessionIds: string[];
+}
+
+interface ImportPracticeSessionsOptions {
+  sessionIds?: string[];
+  mode: 'replace' | 'append';
+  collisionStrategy?: 'replace' | 'duplicate';
+}
+
 class CurioPracticeDatabase extends Dexie {
   mediaAssets!: Table<StoredMediaAsset, string>;
 
@@ -376,6 +390,139 @@ export async function importPersistedPracticeSessions(file: File) {
   return {
     sessions: listPersistedPracticeSessions(),
     activeSessionId: backup.activeSessionId,
+  };
+}
+
+export async function inspectPracticeSessionsBackup(file: File): Promise<PracticeSessionsBackupPreview> {
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+
+  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+    throw new Error('Unsupported backup file.');
+  }
+
+  const existingSessionIds = new Set(readPersistedSessions().map((session) => session.session.id));
+
+  return {
+    file,
+    sessions: backup.sessions.map((session) => session.session),
+    activeSessionId: backup.activeSessionId,
+    includesMediaAssets: backup.mediaAssets.length > 0,
+    collidingSessionIds: backup.sessions
+      .map((session) => session.session.id)
+      .filter((sessionId) => existingSessionIds.has(sessionId)),
+  };
+}
+
+export async function importSelectedPracticeSessions(
+  file: File,
+  options: ImportPracticeSessionsOptions,
+) {
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+
+  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+    throw new Error('Unsupported backup file.');
+  }
+
+  const selectedSessions =
+    options.sessionIds && options.sessionIds.length > 0
+      ? backup.sessions.filter((session) => options.sessionIds?.includes(session.session.id))
+      : backup.sessions;
+  const existingSessionsById = new Map(readPersistedSessions().map((session) => [session.session.id, session] as const));
+
+  const normalizedSessions = selectedSessions.map((session) => {
+    const hasCollision = existingSessionsById.has(session.session.id);
+
+    if (!hasCollision || options.mode === 'replace' || options.collisionStrategy !== 'duplicate') {
+      return session;
+    }
+
+    const duplicatedId = crypto.randomUUID();
+
+    return {
+      ...session,
+      session: {
+        ...session.session,
+        id: duplicatedId,
+        name: `${session.session.name} copy`,
+        updatedAt: new Date().toISOString(),
+      },
+      source: {
+        ...session.source,
+        id: duplicatedId,
+        sourceRef: {
+          ...session.source.sourceRef,
+          persistedMediaId: session.source.kind === 'youtube' ? undefined : duplicatedId,
+        },
+      },
+    };
+  });
+  const selectedMediaAssetIds = new Set(
+    normalizedSessions
+      .map((session) => session.source.sourceRef.persistedMediaId)
+      .filter((mediaId): mediaId is string => Boolean(mediaId)),
+  );
+  const selectedMediaAssets = backup.mediaAssets.filter((asset) => selectedMediaAssetIds.has(asset.id));
+
+  if (options.mode === 'replace') {
+    await clearAllPersistedPracticeSessions();
+  }
+
+  const existingSessions =
+    options.mode === 'append'
+      ? readPersistedSessions().filter(
+          (existingSession) => !normalizedSessions.some((selectedSession) => selectedSession.session.id === existingSession.session.id),
+        )
+      : [];
+
+  await Promise.all(
+    selectedMediaAssets.map(async (asset) => {
+      const matchingSession = normalizedSessions.find((session) => session.source.sourceRef.persistedMediaId === asset.id);
+      const nextAssetId = matchingSession?.source.sourceRef.persistedMediaId ?? asset.id;
+      await db.mediaAssets.put({
+        id: nextAssetId,
+        name: asset.name,
+        type: asset.type,
+        lastModified: asset.lastModified,
+        file: dataUrlToBlob(asset.dataUrl),
+      });
+    }),
+  );
+
+  const importedSessions = sortSessionsDescending(
+    normalizedSessions.map((session) => {
+      if (session.source.kind === 'youtube') {
+        return session;
+      }
+
+      const hasMediaAsset = selectedMediaAssets.some((asset) => asset.id === session.source.sourceRef.persistedMediaId);
+
+      return {
+        ...session,
+        session: {
+          ...session.session,
+          requiresMediaRelink: !hasMediaAsset,
+        },
+      };
+    }),
+  );
+
+  const mergedSessions = sortSessionsDescending([...existingSessions, ...importedSessions]);
+  writePersistedSessions(mergedSessions);
+
+  const nextActiveSessionId =
+    backup.activeSessionId && importedSessions.some((session) => session.session.id === backup.activeSessionId)
+      ? backup.activeSessionId
+      : importedSessions[0]?.session.id ?? existingSessions[0]?.session.id ?? null;
+
+  if (nextActiveSessionId) {
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, nextActiveSessionId);
+  } else {
+    window.localStorage.removeItem(ACTIVE_SESSION_ID_STORAGE_KEY);
+  }
+
+  return {
+    sessions: listPersistedPracticeSessions(),
+    activeSessionId: nextActiveSessionId,
   };
 }
 

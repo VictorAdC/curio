@@ -10,6 +10,8 @@ import {
   deletePersistedPracticeSession,
   exportPersistedPracticeSessions,
   getActivePracticeSessionId,
+  inspectPracticeSessionsBackup,
+  importSelectedPracticeSessions,
   importPersistedPracticeSessions,
   listPersistedPracticeSessions,
   persistPracticeSession,
@@ -347,8 +349,16 @@ export function usePracticePlayer() {
         anchor.click();
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
       },
-      async importSessions(file: File) {
-        const result = await importPersistedPracticeSessions(file);
+      async prepareImportSessions(file: File) {
+        return inspectPracticeSessionsBackup(file);
+      },
+      async importSessions(
+        file: File,
+        options?: { sessionIds?: string[]; mode: 'replace' | 'append'; collisionStrategy?: 'replace' | 'duplicate' },
+      ) {
+        const result = options
+          ? await importSelectedPracticeSessions(file, options)
+          : await importPersistedPracticeSessions(file);
         setSessionHistory(result.sessions);
         releaseObjectUrl();
 

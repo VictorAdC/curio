@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { PracticeSessionSummary } from '../../types/practicePlayer';
+import type { PracticeSessionsBackupPreview } from '../../utils/sessionPersistence';
 import styles from './SessionHistory.module.css';
 
 interface SessionHistoryProps {
@@ -12,7 +13,11 @@ interface SessionHistoryProps {
   onClearAll: () => void;
   onExportLight: (sessionIds?: string[]) => void;
   onExport: (sessionIds?: string[]) => void;
-  onImport: (file: File) => void;
+  onPrepareImport: (file: File) => Promise<PracticeSessionsBackupPreview>;
+  onImport: (
+    file: File,
+    options: { sessionIds?: string[]; mode: 'replace' | 'append'; collisionStrategy?: 'replace' | 'duplicate' },
+  ) => void;
 }
 
 function SessionHistoryItem({
@@ -138,15 +143,28 @@ export function SessionHistory({
   onClearAll,
   onExportLight,
   onExport,
+  onPrepareImport,
   onImport,
 }: SessionHistoryProps) {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [selectedExportSessionIds, setSelectedExportSessionIds] = useState<string[]>([]);
+  const [importPreview, setImportPreview] = useState<PracticeSessionsBackupPreview | null>(null);
+  const [selectedImportSessionIds, setSelectedImportSessionIds] = useState<string[]>([]);
+  const [importMode, setImportMode] = useState<'replace' | 'append'>('append');
+  const [collisionStrategy, setCollisionStrategy] = useState<'replace' | 'duplicate'>('replace');
 
   useEffect(() => {
     setSelectedExportSessionIds(sessions.map((session) => session.id));
   }, [activeSessionId, isBackupModalOpen]);
+
+  useEffect(() => {
+    if (!importPreview) {
+      return;
+    }
+
+    setSelectedImportSessionIds(importPreview.sessions.map((session) => session.id));
+  }, [importPreview]);
 
   return (
     <section className={styles.root}>
@@ -203,7 +221,11 @@ export function SessionHistory({
               return;
             }
 
-            onImport(file);
+            void onPrepareImport(file).then((preview) => {
+              setImportPreview(preview);
+              setImportMode('append');
+              setCollisionStrategy('replace');
+            });
             event.currentTarget.value = '';
           }}
         />
@@ -289,6 +311,133 @@ export function SessionHistory({
                   >
                     <strong>Full copy</strong>
                     <span>Includes saved local audio and video for complete restoration.</span>
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {importPreview
+        ? createPortal(
+            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label="Choose import sessions">
+              <button
+                className={styles.modalBackdrop}
+                type="button"
+                aria-label="Close import options"
+                onClick={() => setImportPreview(null)}
+              />
+              <div className={styles.modalCard}>
+                <div className={styles.modalHeader}>
+                  <h4>Import sessions</h4>
+                  <button className={styles.modalClose} type="button" onClick={() => setImportPreview(null)}>
+                    Close
+                  </button>
+                </div>
+                <p className={styles.modalIntro}>
+                  Choose which sessions to import and whether they should replace your current ones or be appended to them.
+                </p>
+                <div className={styles.scopeSection}>
+                  <span className={styles.scopeLabel}>Import mode</span>
+                  <div className={styles.scopeActions}>
+                    <button
+                      className={`${styles.scopeModeButton} ${importMode === 'append' ? styles.scopeModeButtonActive : ''}`}
+                      type="button"
+                      onClick={() => setImportMode('append')}
+                    >
+                      Append
+                    </button>
+                    <button
+                      className={`${styles.scopeModeButton} ${importMode === 'replace' ? styles.scopeModeButtonActive : ''}`}
+                      type="button"
+                      onClick={() => setImportMode('replace')}
+                    >
+                      Replace current
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.scopeSection}>
+                  <span className={styles.scopeLabel}>Sessions to import</span>
+                  <div className={styles.scopeActions}>
+                    <button
+                      className={styles.scopeActionButton}
+                      type="button"
+                      onClick={() => setSelectedImportSessionIds(importPreview.sessions.map((session) => session.id))}
+                    >
+                      Select all
+                    </button>
+                    <button
+                      className={styles.scopeActionButton}
+                      type="button"
+                      onClick={() => setSelectedImportSessionIds([])}
+                    >
+                      Deselect all
+                    </button>
+                  </div>
+                  <div className={styles.scopeOptions}>
+                    {importPreview.sessions.map((session) => (
+                      <label key={session.id} className={styles.scopeOption}>
+                        <input
+                          type="checkbox"
+                          checked={selectedImportSessionIds.includes(session.id)}
+                          onChange={(event) => {
+                            setSelectedImportSessionIds((currentIds) =>
+                              event.target.checked
+                                ? [...currentIds, session.id]
+                                : currentIds.filter((id) => id !== session.id),
+                            );
+                          }}
+                        />
+                        <span>{session.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {importMode === 'append' && importPreview.collidingSessionIds.length > 0 ? (
+                  <div className={styles.scopeSection}>
+                    <span className={styles.scopeLabel}>If a session already exists</span>
+                    <div className={styles.scopeActions}>
+                      <button
+                        className={`${styles.scopeModeButton} ${collisionStrategy === 'replace' ? styles.scopeModeButtonActive : ''}`}
+                        type="button"
+                        onClick={() => setCollisionStrategy('replace')}
+                      >
+                        Replace it
+                      </button>
+                      <button
+                        className={`${styles.scopeModeButton} ${collisionStrategy === 'duplicate' ? styles.scopeModeButtonActive : ''}`}
+                        type="button"
+                        onClick={() => setCollisionStrategy('duplicate')}
+                      >
+                        Duplicate it
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+                <div className={styles.modalOptions}>
+                  <button
+                    className={styles.modalOption}
+                    type="button"
+                    disabled={selectedImportSessionIds.length === 0}
+                    onClick={() => {
+                      onImport(importPreview.file, {
+                        sessionIds:
+                          selectedImportSessionIds.length === importPreview.sessions.length
+                            ? undefined
+                            : selectedImportSessionIds,
+                        mode: importMode,
+                        collisionStrategy,
+                      });
+                      setImportPreview(null);
+                    }}
+                  >
+                    <strong>Import selected sessions</strong>
+                    <span>
+                      {importMode === 'replace'
+                        ? 'Current saved sessions will be cleared before import.'
+                        : 'Selected sessions will be added to your current saved sessions.'}
+                    </span>
                   </button>
                 </div>
               </div>
