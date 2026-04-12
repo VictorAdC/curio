@@ -76,6 +76,7 @@ describe('SessionHistory organization controls', () => {
 
     renderSessionHistory();
 
+    await user.click(screen.getByRole('button', { name: 'Show filters' }));
     await user.selectOptions(screen.getByRole('combobox', { name: 'Source type' }), 'youtube');
 
     expect(screen.getByRole('button', { name: 'YouTube Session' })).toBeInTheDocument();

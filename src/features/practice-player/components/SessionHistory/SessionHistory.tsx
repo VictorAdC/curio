@@ -129,7 +129,7 @@ function SessionHistoryItem({
           {isActive ? <span className={styles.activeBadge}>{t('practice.sessionHistory.open')}</span> : null}
           {session.requiresMediaRelink ? <span className={styles.warningBadge}>{t('practice.sessionHistory.mediaMissing')}</span> : null}
           <button
-            className={styles.renameButton}
+            className={styles.deleteButton}
             type="button"
             onClick={(event) => {
               event.stopPropagation();
@@ -181,6 +181,8 @@ export function SessionHistory({
   const [searchQuery, setSearchQuery] = useState('');
   const [sourceFilter, setSourceFilter] = useState<'all' | PracticeSessionSummary['sourceKind']>('all');
   const [sortOrder, setSortOrder] = useState<'recent' | 'oldest' | 'name'>('recent');
+  const [isStorageDialogOpen, setIsStorageDialogOpen] = useState(false);
+  const [areFiltersOpen, setAreFiltersOpen] = useState(false);
 
   useEffect(() => {
     setSelectedExportSessionIds(sessions.map((session) => session.id));
@@ -242,51 +244,25 @@ export function SessionHistory({
       ) : null}
 
       {storageHealth ? (
-        <section className={styles.storageCard}>
-          <div className={styles.storageHeader}>
-            <div>
-              <h4>{t('practice.persistence.storageTitle')}</h4>
-              <p>{t(`practice.persistence.storageStatus.${storageHealth.status}`)}</p>
+        <section className={styles.storagePanel}>
+          <button
+            className={styles.storageSummary}
+            type="button"
+            onClick={() => setIsStorageDialogOpen(true)}
+          >
+            <div className={styles.storageSummaryText}>
+              <strong>{t('practice.persistence.storageTitle')}</strong>
+              <span>
+                {t(`practice.persistence.storageSummary.${storageHealth.status}`, {
+                  sessions: storageHealth.sessionCount,
+                  size: formatBytes(storageHealth.totalStoredBytes),
+                })}
+              </span>
             </div>
             <span className={`${styles.storageBadge} ${styles[`storageBadge${storageHealth.status[0].toUpperCase()}${storageHealth.status.slice(1)}`]}`}>
               {t(`practice.persistence.storageBadge.${storageHealth.status}`)}
             </span>
-          </div>
-          <div className={styles.storageStats}>
-            <div className={styles.storageStat}>
-              <span>{t('practice.persistence.storage.sessions')}</span>
-              <strong>{storageHealth.sessionCount}</strong>
-            </div>
-            <div className={styles.storageStat}>
-              <span>{t('practice.persistence.storage.media')}</span>
-              <strong>{storageHealth.mediaAssetCount}</strong>
-            </div>
-            <div className={styles.storageStat}>
-              <span>{t('practice.persistence.storage.savedData')}</span>
-              <strong>{formatBytes(storageHealth.totalStoredBytes)}</strong>
-            </div>
-            <div className={styles.storageStat}>
-              <span>{t('practice.persistence.storage.missingMedia')}</span>
-              <strong>{storageHealth.missingMediaCount}</strong>
-            </div>
-          </div>
-          {storageHealth.storageEstimateSupported && storageHealth.quotaBytes ? (
-            <p className={styles.storageMeta}>
-              {t('practice.persistence.storage.browserUsage', {
-                used: formatBytes(storageHealth.usageBytes ?? 0),
-                quota: formatBytes(storageHealth.quotaBytes),
-              })}
-            </p>
-          ) : (
-            <p className={styles.storageMeta}>{t('practice.persistence.storage.browserEstimateUnavailable')}</p>
-          )}
-          <p className={styles.storageHelp}>
-            {t(
-              storageHealth.persisted
-                ? 'practice.persistence.storage.helpPersistent'
-                : 'practice.persistence.storage.helpEphemeral',
-            )}
-          </p>
+          </button>
         </section>
       ) : null}
 
@@ -298,7 +274,18 @@ export function SessionHistory({
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder={t('practice.sessions.searchPlaceholder')}
         />
-        <div className={styles.filterRow}>
+        <div className={styles.filterActions}>
+          <button
+            className={styles.filterToggle}
+            type="button"
+            onClick={() => setAreFiltersOpen((current) => !current)}
+            aria-expanded={areFiltersOpen}
+          >
+            {t(areFiltersOpen ? 'practice.sessions.filtersHide' : 'practice.sessions.filtersShow')}
+          </button>
+        </div>
+        {areFiltersOpen ? (
+          <div className={styles.filterRow}>
           <select
             className={styles.filterSelect}
             value={sourceFilter}
@@ -320,7 +307,8 @@ export function SessionHistory({
             <option value="oldest">{t('practice.sessions.sort.oldest')}</option>
             <option value="name">{t('practice.sessions.sort.name')}</option>
           </select>
-        </div>
+          </div>
+        ) : null}
       </div>
 
       <div className={styles.list}>
@@ -342,12 +330,14 @@ export function SessionHistory({
       </div>
 
       <div className={styles.bulkActions}>
-        <button className={styles.bulkButton} type="button" onClick={() => setIsBackupModalOpen(true)}>
-          {t('practice.sessionHistory.download')}
-        </button>
-        <button className={styles.bulkButton} type="button" onClick={() => importInputRef.current?.click()}>
-          {t('practice.sessionHistory.upload')}
-        </button>
+        <div className={styles.bulkPrimaryActions}>
+          <button className={styles.bulkButton} type="button" onClick={() => setIsBackupModalOpen(true)}>
+            {t('practice.sessionHistory.download')}
+          </button>
+          <button className={styles.bulkButton} type="button" onClick={() => importInputRef.current?.click()}>
+            {t('practice.sessionHistory.upload')}
+          </button>
+        </div>
         <button
           className={styles.bulkDangerButton}
           type="button"
@@ -589,6 +579,74 @@ export function SessionHistory({
                         : t('practice.sessionHistory.importAppendDescription')}
                     </span>
                   </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {storageHealth && isStorageDialogOpen
+        ? createPortal(
+            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label={t('practice.persistence.storageDialogLabel')}>
+              <button
+                className={styles.modalBackdrop}
+                type="button"
+                aria-label={t('practice.persistence.storageCloseAria')}
+                onClick={() => setIsStorageDialogOpen(false)}
+              />
+              <div className={styles.modalCard}>
+                <div className={styles.modalHeader}>
+                  <h4>{t('practice.persistence.storageTitle')}</h4>
+                  <button className={styles.modalClose} type="button" onClick={() => setIsStorageDialogOpen(false)}>
+                    {t('practice.sessionHistory.modalClose')}
+                  </button>
+                </div>
+                <div className={styles.storageCard}>
+                  <div className={styles.storageHeader}>
+                    <div>
+                      <h4>{t('practice.persistence.storageTitle')}</h4>
+                      <p>{t(`practice.persistence.storageStatus.${storageHealth.status}`)}</p>
+                    </div>
+                    <span className={`${styles.storageBadge} ${styles[`storageBadge${storageHealth.status[0].toUpperCase()}${storageHealth.status.slice(1)}`]}`}>
+                      {t(`practice.persistence.storageBadge.${storageHealth.status}`)}
+                    </span>
+                  </div>
+                  <div className={styles.storageStats}>
+                    <div className={styles.storageStat}>
+                      <span>{t('practice.persistence.storage.sessions')}</span>
+                      <strong>{storageHealth.sessionCount}</strong>
+                    </div>
+                    <div className={styles.storageStat}>
+                      <span>{t('practice.persistence.storage.media')}</span>
+                      <strong>{storageHealth.mediaAssetCount}</strong>
+                    </div>
+                    <div className={styles.storageStat}>
+                      <span>{t('practice.persistence.storage.savedData')}</span>
+                      <strong>{formatBytes(storageHealth.totalStoredBytes)}</strong>
+                    </div>
+                    <div className={styles.storageStat}>
+                      <span>{t('practice.persistence.storage.missingMedia')}</span>
+                      <strong>{storageHealth.missingMediaCount}</strong>
+                    </div>
+                  </div>
+                  {storageHealth.storageEstimateSupported && storageHealth.quotaBytes ? (
+                    <p className={styles.storageMeta}>
+                      {t('practice.persistence.storage.browserUsage', {
+                        used: formatBytes(storageHealth.usageBytes ?? 0),
+                        quota: formatBytes(storageHealth.quotaBytes),
+                      })}
+                    </p>
+                  ) : (
+                    <p className={styles.storageMeta}>{t('practice.persistence.storage.browserEstimateUnavailable')}</p>
+                  )}
+                  <p className={styles.storageHelp}>
+                    {t(
+                      storageHealth.persisted
+                        ? 'practice.persistence.storage.helpPersistent'
+                        : 'practice.persistence.storage.helpEphemeral',
+                    )}
+                  </p>
                 </div>
               </div>
             </div>,

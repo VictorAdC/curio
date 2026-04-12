@@ -38,6 +38,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.sessions.sort.recent': 'Most recent',
     'practice.sessions.sort.oldest': 'Oldest',
     'practice.sessions.sort.name': 'Name',
+    'practice.sessions.filtersShow': 'Show filters',
+    'practice.sessions.filtersHide': 'Hide filters',
 
     'practice.persistence.dismiss': 'Dismiss',
     'practice.persistence.relinkSuccess': 'Local media was relinked successfully.',
@@ -52,6 +54,9 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.persistence.storageStatus.healthy': 'Local session storage looks healthy.',
     'practice.persistence.storageStatus.warning': 'Some sessions need attention or browser storage is getting tight.',
     'practice.persistence.storageStatus.limited': 'Browser storage is constrained. Save a backup soon.',
+    'practice.persistence.storageSummary.healthy': '{sessions} sessions saved · {size}',
+    'practice.persistence.storageSummary.warning': '{sessions} sessions saved · {size} · attention needed',
+    'practice.persistence.storageSummary.limited': '{sessions} sessions saved · {size} · backup recommended',
     'practice.persistence.storageBadge.healthy': 'Healthy',
     'practice.persistence.storageBadge.warning': 'Attention',
     'practice.persistence.storageBadge.limited': 'Limited',
@@ -62,6 +67,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.persistence.storage.browserUsage': 'Browser storage usage: {used} of {quota}',
     'practice.persistence.storage.browserEstimateUnavailable':
       'Browser storage usage could not be estimated here.',
+    'practice.persistence.storageDialogLabel': 'Storage health details',
+    'practice.persistence.storageCloseAria': 'Close storage health details',
     'practice.persistence.storage.helpPersistent':
       'This browser is allowing persistent storage. Backups are still recommended because clearing site data can remove sessions.',
     'practice.persistence.storage.helpEphemeral':
@@ -210,6 +217,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.sessions.sort.recent': 'Mais recentes',
     'practice.sessions.sort.oldest': 'Mais antigas',
     'practice.sessions.sort.name': 'Nome',
+    'practice.sessions.filtersShow': 'Mostrar filtros',
+    'practice.sessions.filtersHide': 'Ocultar filtros',
 
     'practice.persistence.dismiss': 'Fechar',
     'practice.persistence.relinkSuccess': 'A mídia local foi vinculada novamente com sucesso.',
@@ -224,6 +233,9 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.persistence.storageStatus.healthy': 'O armazenamento local das sessões parece saudável.',
     'practice.persistence.storageStatus.warning': 'Algumas sessões exigem atenção ou o armazenamento do navegador está ficando apertado.',
     'practice.persistence.storageStatus.limited': 'O armazenamento do navegador está limitado. Salve um backup em breve.',
+    'practice.persistence.storageSummary.healthy': '{sessions} sessões salvas · {size}',
+    'practice.persistence.storageSummary.warning': '{sessions} sessões salvas · {size} · atenção necessária',
+    'practice.persistence.storageSummary.limited': '{sessions} sessões salvas · {size} · backup recomendado',
     'practice.persistence.storageBadge.healthy': 'Saudável',
     'practice.persistence.storageBadge.warning': 'Atenção',
     'practice.persistence.storageBadge.limited': 'Limitado',
@@ -234,6 +246,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.persistence.storage.browserUsage': 'Uso do armazenamento do navegador: {used} de {quota}',
     'practice.persistence.storage.browserEstimateUnavailable':
       'Não foi possível estimar o uso do armazenamento do navegador aqui.',
+    'practice.persistence.storageDialogLabel': 'Detalhes da saúde do armazenamento',
+    'practice.persistence.storageCloseAria': 'Fechar detalhes da saúde do armazenamento',
     'practice.persistence.storage.helpPersistent':
       'Este navegador está permitindo armazenamento persistente. Mesmo assim, backups continuam recomendados porque limpar os dados do site pode remover sessões.',
     'practice.persistence.storage.helpEphemeral':
