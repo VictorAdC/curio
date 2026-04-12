@@ -108,9 +108,55 @@ Suggested scope:
 - grouping by piece name;
 - filtering in session history.
 
+### 7. Extract Audio From Local Video
+
+Priority: medium
+
+User value:
+
+- reduces storage usage when the user only needs the sound from a local video;
+- makes full-backup downloads lighter for practice sessions that do not need the visual track.
+
+Suggested scope:
+
+- when a local video is selected, offer an explicit choice to keep the full video or extract audio only;
+- if audio-only is chosen, persist the derived session as local audio instead of local video;
+- make the storage tradeoff clear before saving the session;
+- keep the original video workflow available when visual reference is important.
+
+### 8. Download Saved Local Media
+
+Priority: medium
+
+User value:
+
+- lets the user recover audio or video from a saved session or imported full backup;
+- makes local media more portable when the browser is being used as the main working copy.
+
+Suggested scope:
+
+- allow downloading the saved local audio or video file from a session;
+- support this for sessions restored from full backups as well as sessions created locally;
+- make it clear when media is unavailable because the session came from a light backup;
+- keep the download action secondary so it does not compete with normal practice controls.
+
 ## Longer-Term Product Ideas
 
 These are useful, but not as urgent as the items above.
+
+### Tablature And Score Sync Spike
+
+- evaluate a future page tab or secondary panel for tablature, chord charts, or simplified score content;
+- explore whether a tab or score view can stay synchronized with playback time;
+- assess what formats are realistic for v1 of this idea, such as plain text chords, tablature snippets, or structured imported data;
+- document whether synchronization should be manual, marker-assisted, or fully time-based.
+
+### Marker Experience Review
+
+- review how markers are currently created, displayed, and edited across the player, timeline, and marker list;
+- identify friction in loop assignment, marker discovery, note editing, and timeline representation;
+- evaluate improvements such as richer marker states, grouping, categories, inline quick actions, or better visual prominence on the timeline;
+- produce concrete UX recommendations before expanding marker functionality further.
 
 ### Practice Templates
 
@@ -142,7 +188,9 @@ These are useful, but not as urgent as the items above.
 2. quick loop actions;
 3. keyboard shortcuts;
 4. marker categories;
-5. better YouTube metadata.
+5. better YouTube metadata;
+6. optional audio extraction for local video uploads;
+7. saved media download for recovery and portability.
 
 ## Spec Follow-Ups
 
@@ -153,3 +201,7 @@ The following topics are good candidates for their own feature or architecture s
 - `session-organization.md`
 - `marker-categories.md`
 - `backup-and-recovery.md`
+- `video-audio-extraction.md`
+- `media-download.md`
+- `tab-sync-spike.md`
+- `marker-experience-review.md`
