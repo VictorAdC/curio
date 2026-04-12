@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
-  align-items: end;
+  align-items: start;
 }
 
 .hero {
@@ -21,27 +21,77 @@
 
 .utilityRow {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
 }
 
 .sessionDrawerButton,
-.sessionDrawerClose {
+.sessionDrawerClose,
+.localeToggle {
   border: 0;
   border-radius: 999px;
-  padding: 0.75rem 1.1rem;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
 .sessionDrawerButton {
+  padding: 0.75rem 1.1rem;
   background: rgba(15, 40, 82, 0.08);
   color: #123a7d;
 }
 
-.sessionDrawerClose {
+.localeToggle {
+  padding: 0;
+  background: transparent;
+}
+
+.localeToggleTrack {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  min-width: 108px;
+  padding: 0.28rem;
+  border-radius: 999px;
   background: rgba(15, 40, 82, 0.08);
   color: #123a7d;
+}
+
+.localeToggleThumb {
+  position: absolute;
+  top: 0.28rem;
+  left: 0.28rem;
+  width: calc(50% - 0.28rem);
+  height: calc(100% - 0.56rem);
+  border-radius: 999px;
+  background: #123a7d;
+  transition: transform 160ms ease;
+}
+
+.localeToggleThumbPortuguese {
+  transform: translateX(100%);
+}
+
+.localeToggleOption {
+  position: relative;
+  z-index: 1;
+  padding: 0.5rem 0.85rem;
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: #123a7d;
+}
+
+.sessionDrawerClose {
+  padding: 0.75rem 1.1rem;
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
+}
+
+.localeToggleOptionActive {
+  color: white;
 }
 
 .hero h1,

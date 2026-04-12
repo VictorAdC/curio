@@ -20,6 +20,7 @@ It allows a music student to load local media or a YouTube source, navigate prec
 
 ## Main Actions
 
+- switch the interface language between English and Portuguese;
 - upload a local audio or video file;
 - load a YouTube media source from a URL;
 - reopen a previously saved local practice session;
@@ -58,6 +59,10 @@ The page should show:
 - total duration when available.
 
 Session-history access may live in a nearby utility action rather than inside the playback header itself.
+
+The header may also include a language selector if the application exposes localization controls at the page level.
+
+The current control may be implemented as a compact toggle between supported languages rather than as a dropdown.
 
 ### 3. Main Player Area
 
@@ -174,6 +179,22 @@ The Practice page is a top-level destination in the application navigation.
 
 Users should be able to enter the page directly as a primary study workflow, not as a modal or secondary tool.
 
+## Localization
+
+The Practice page must support at least:
+
+- English;
+- Portuguese.
+
+Behavior rules:
+
+- the current language should be selectable through a visible app-level control;
+- the current language preference should persist locally in the browser across reloads;
+- the current language preference should not be part of practice session data, session history, or backup files;
+- all user-facing text on the page should come from translation keys rather than hardcoded strings;
+- dynamic text such as warnings, confirmations, and labels with values must also support translation;
+- future text additions should require dictionary updates, not component rewrites.
+
 ## Validation And Error Handling
 
 The page must handle the following cases clearly:
@@ -188,6 +209,7 @@ The page must handle the following cases clearly:
 - switching to a new media source must create a fresh session and must not leave an invalid active loop;
 - importing a local-file session without embedded media must show a recoverable missing-media state;
 - relinking media should compare the uploaded file with stored metadata and warn if the file appears different from the original.
+- missing-media recovery text and relink warnings must respect the selected language.
 
 ## Acceptance Scenarios
 

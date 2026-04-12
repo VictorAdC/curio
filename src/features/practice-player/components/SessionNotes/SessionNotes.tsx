@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './SessionNotes.module.css';
 
 interface SessionNotesProps {
@@ -6,16 +7,18 @@ interface SessionNotesProps {
 }
 
 export function SessionNotes({ value, onChange }: SessionNotesProps) {
+  const { t } = useI18n();
+
   return (
     <section className={styles.root}>
       <div className={styles.header}>
-        <h3>Session notes</h3>
-        <span>Saved locally for this practice session.</span>
+        <h3>{t('practice.sessionNotes.title')}</h3>
+        <span>{t('practice.sessionNotes.saved')}</span>
       </div>
       <textarea
         className={styles.textarea}
         rows={10}
-        placeholder="Write general observations for the session, phrasing reminders, or passages to revisit..."
+        placeholder={t('practice.sessionNotes.placeholder')}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />

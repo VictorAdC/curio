@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useI18n } from '../../../../i18n/I18nProvider';
 import type { TimelineWaveformDatum } from '../../types/practicePlayer';
 import styles from './WaveformTimeline.module.css';
 
@@ -21,6 +22,7 @@ export function WaveformTimeline({
 }: WaveformTimelineProps) {
   const isDraggingRef = useRef(false);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const { t } = useI18n();
 
   const seekFromPointer = (clientX: number, element: HTMLDivElement) => {
     if (duration <= 0) {
@@ -71,7 +73,7 @@ export function WaveformTimeline({
           onSeek(currentTime);
         }
       }}
-      aria-label="Seek through audio waveform"
+      aria-label={t('practice.timeline.seekWaveformAria')}
     >
       {loopStart !== null && loopEnd !== null && duration > 0 ? (
         <div

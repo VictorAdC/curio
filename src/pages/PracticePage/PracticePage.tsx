@@ -6,6 +6,7 @@ import { SessionNotes } from '../../features/practice-player/components/SessionN
 import { TransportControls } from '../../features/practice-player/components/TransportControls/TransportControls';
 import { usePracticePlayer } from '../../features/practice-player/hooks/usePracticePlayer';
 import type { PracticeMarker } from '../../features/practice-player/types/practicePlayer';
+import { useI18n } from '../../i18n/I18nProvider';
 import { AudioPracticeCanvas } from './components/AudioPracticeCanvas';
 import { PracticeHeader } from './components/PracticeHeader';
 import { PracticePlayerHeader } from './components/PracticePlayerHeader';
@@ -15,6 +16,7 @@ import styles from './PracticePage.module.css';
 
 export function PracticePage() {
   const { view, actions } = usePracticePlayer();
+  const { locale, setLocale, t } = useI18n();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
@@ -25,11 +27,24 @@ export function PracticePage() {
         <PracticeHeader />
         <div className={styles.utilityRow}>
           <button
+            className={styles.localeToggle}
+            type="button"
+            onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
+            aria-label={t('language.label')}
+            title={t('language.label')}
+          >
+            <span className={styles.localeToggleTrack}>
+              <span className={`${styles.localeToggleThumb} ${locale === 'pt-BR' ? styles.localeToggleThumbPortuguese : ''}`} />
+              <span className={`${styles.localeToggleOption} ${locale === 'en' ? styles.localeToggleOptionActive : ''}`}>EN</span>
+              <span className={`${styles.localeToggleOption} ${locale === 'pt-BR' ? styles.localeToggleOptionActive : ''}`}>PT</span>
+            </span>
+          </button>
+          <button
             className={styles.sessionDrawerButton}
             type="button"
             onClick={() => setIsSessionDrawerOpen(true)}
           >
-            Sessions
+            {t('practice.sessions.button')}
           </button>
         </div>
       </div>
@@ -46,7 +61,7 @@ export function PracticePage() {
                 type="button"
                 onClick={() => relinkInputRef.current?.click()}
               >
-                Re-upload media
+                {t('practice.player.hiddenMediaRelink')}
               </button>
               <input
                 ref={relinkInputRef}
@@ -62,7 +77,16 @@ export function PracticePage() {
 
                   const warning = actions.inspectRelinkSessionMedia(view.activeSessionId, file);
 
-                  if (warning && !window.confirm(warning.message)) {
+                  if (
+                    warning &&
+                    !window.confirm(
+                      t('practice.player.error.relinkWarning', {
+                        details: warning.mismatches
+                          .map((mismatch) => t(`practice.player.error.relinkDetail.${mismatch}`))
+                          .join(', '),
+                      }),
+                    )
+                  ) {
                     event.currentTarget.value = '';
                     return;
                   }
@@ -148,22 +172,22 @@ export function PracticePage() {
       </section>
 
       {isSessionDrawerOpen ? (
-        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label="Session history">
+        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label={t('practice.sessions.dialogLabel')}>
           <button
             className={styles.sessionDrawerBackdrop}
             type="button"
-            aria-label="Close session history"
+            aria-label={t('practice.sessions.closeAria')}
             onClick={() => setIsSessionDrawerOpen(false)}
           />
           <aside className={styles.sessionDrawer}>
             <div className={styles.sessionDrawerHeader}>
-              <span className={styles.eyebrow}>Saved sessions</span>
+              <span className={styles.eyebrow}>{t('practice.sessions.savedEyebrow')}</span>
               <button
                 className={styles.sessionDrawerClose}
                 type="button"
                 onClick={() => setIsSessionDrawerOpen(false)}
               >
-                Close
+                {t('practice.sessions.close')}
               </button>
             </div>
             <SessionHistory

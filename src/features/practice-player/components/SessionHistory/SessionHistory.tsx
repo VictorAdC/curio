@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useI18n } from '../../../../i18n/I18nProvider';
 import type { PracticeSessionSummary } from '../../types/practicePlayer';
 import type { PracticeSessionsBackupPreview } from '../../utils/sessionPersistence';
 import styles from './SessionHistory.module.css';
@@ -35,6 +36,7 @@ function SessionHistoryItem({
 }) {
   const [draftName, setDraftName] = useState(session.name);
   const [isEditing, setIsEditing] = useState(false);
+  const { t, formatDateTime } = useI18n();
 
   useEffect(() => {
     setDraftName(session.name);
@@ -86,10 +88,10 @@ function SessionHistoryItem({
                   setIsEditing(false);
                 }
               }}
-              aria-label={`Session name for ${session.sourceTitle}`}
+              aria-label={t('practice.sessionHistory.nameAria', { title: session.sourceTitle })}
               autoFocus
             />
-            <span className={styles.editingBadge}>Editing</span>
+            <span className={styles.editingBadge}>{t('practice.sessionHistory.editing')}</span>
           </div>
         ) : (
           <button
@@ -105,8 +107,8 @@ function SessionHistoryItem({
           </button>
         )}
         <div className={styles.itemHeaderActions}>
-          {isActive ? <span className={styles.activeBadge}>Open</span> : null}
-          {session.requiresMediaRelink ? <span className={styles.warningBadge}>Media missing</span> : null}
+          {isActive ? <span className={styles.activeBadge}>{t('practice.sessionHistory.open')}</span> : null}
+          {session.requiresMediaRelink ? <span className={styles.warningBadge}>{t('practice.sessionHistory.mediaMissing')}</span> : null}
           <button
             className={styles.renameButton}
             type="button"
@@ -114,21 +116,21 @@ function SessionHistoryItem({
               event.stopPropagation();
               if (
                 window.confirm(
-                  `Delete session "${session.name}"? This will remove its saved notes, markers, and local media snapshot.`,
+                  t('practice.sessionHistory.deleteConfirm', { name: session.name }),
                 )
               ) {
                 onDeleteSession(session.id);
               }
             }}
           >
-            Delete
+            {t('practice.sessionHistory.delete')}
           </button>
         </div>
       </div>
       <div className={styles.meta}>
         <span>{session.sourceTitle}</span>
-        <span>{session.sourceKind}</span>
-        <span>{new Date(session.updatedAt).toLocaleString()}</span>
+        <span>{t(`practice.sourceKind.${session.sourceKind}`)}</span>
+        <span>{formatDateTime(session.updatedAt)}</span>
       </div>
     </article>
   );
@@ -146,6 +148,7 @@ export function SessionHistory({
   onPrepareImport,
   onImport,
 }: SessionHistoryProps) {
+  const { t } = useI18n();
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [selectedExportSessionIds, setSelectedExportSessionIds] = useState<string[]>([]);
@@ -170,14 +173,14 @@ export function SessionHistory({
     <section className={styles.root}>
       <div className={styles.header}>
         <div>
-          <h3>Session history</h3>
-          <p>Reload a previous session or rename it for easier recall.</p>
+          <h3>{t('practice.sessionHistory.title')}</h3>
+          <p>{t('practice.sessionHistory.description')}</p>
         </div>
       </div>
 
       <div className={styles.list}>
         {sessions.length === 0 ? (
-          <p className={styles.empty}>No sessions yet. Load a source to start your first one.</p>
+          <p className={styles.empty}>{t('practice.sessionHistory.empty')}</p>
         ) : null}
         {sessions.map((session) => (
           <SessionHistoryItem
@@ -193,21 +196,21 @@ export function SessionHistory({
 
       <div className={styles.bulkActions}>
         <button className={styles.bulkButton} type="button" onClick={() => setIsBackupModalOpen(true)}>
-          Download copy
+          {t('practice.sessionHistory.download')}
         </button>
         <button className={styles.bulkButton} type="button" onClick={() => importInputRef.current?.click()}>
-          Upload copy
+          {t('practice.sessionHistory.upload')}
         </button>
         <button
           className={styles.bulkDangerButton}
           type="button"
           onClick={() => {
-            if (window.confirm('Clear all saved sessions? This will remove all saved notes, markers, and local media snapshots.')) {
+            if (window.confirm(t('practice.sessionHistory.clearAllConfirm'))) {
               onClearAll();
             }
           }}
         >
-          Clear all
+          {t('practice.sessionHistory.clearAll')}
         </button>
         <input
           ref={importInputRef}
@@ -233,39 +236,39 @@ export function SessionHistory({
 
       {isBackupModalOpen
         ? createPortal(
-            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label="Choose backup type">
+            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label={t('practice.sessionHistory.backupDialogLabel')}>
               <button
                 className={styles.modalBackdrop}
                 type="button"
-                aria-label="Close backup options"
+                aria-label={t('practice.sessionHistory.backupCloseAria')}
                 onClick={() => setIsBackupModalOpen(false)}
               />
               <div className={styles.modalCard}>
                 <div className={styles.modalHeader}>
-                  <h4>Choose backup type</h4>
+                  <h4>{t('practice.sessionHistory.backupTitle')}</h4>
                   <button className={styles.modalClose} type="button" onClick={() => setIsBackupModalOpen(false)}>
-                    Close
+                    {t('practice.sessionHistory.modalClose')}
                   </button>
                 </div>
                 <p className={styles.modalIntro}>
-                  Light copies are smaller. Full copies include saved local audio and video, which can make the file much larger.
+                  {t('practice.sessionHistory.backupIntro')}
                 </p>
                 <div className={styles.scopeSection}>
-                  <span className={styles.scopeLabel}>What to include</span>
+                  <span className={styles.scopeLabel}>{t('practice.sessionHistory.scope')}</span>
                   <div className={styles.scopeActions}>
                     <button
                       className={styles.scopeActionButton}
                       type="button"
                       onClick={() => setSelectedExportSessionIds(sessions.map((session) => session.id))}
                     >
-                      Select all
+                      {t('practice.sessionHistory.selectAll')}
                     </button>
                     <button
                       className={styles.scopeActionButton}
                       type="button"
                       onClick={() => setSelectedExportSessionIds([])}
                     >
-                      Deselect all
+                      {t('practice.sessionHistory.deselectAll')}
                     </button>
                   </div>
                   <div className={styles.scopeOptions}>
@@ -297,8 +300,8 @@ export function SessionHistory({
                       setIsBackupModalOpen(false);
                     }}
                   >
-                    <strong>Light copy</strong>
-                    <span>Session data only. Local media must be relinked after import.</span>
+                    <strong>{t('practice.sessionHistory.lightCopy')}</strong>
+                    <span>{t('practice.sessionHistory.lightCopyDescription')}</span>
                   </button>
                   <button
                     className={styles.modalOption}
@@ -309,8 +312,8 @@ export function SessionHistory({
                       setIsBackupModalOpen(false);
                     }}
                   >
-                    <strong>Full copy</strong>
-                    <span>Includes saved local audio and video for complete restoration.</span>
+                    <strong>{t('practice.sessionHistory.fullCopy')}</strong>
+                    <span>{t('practice.sessionHistory.fullCopyDescription')}</span>
                   </button>
                 </div>
               </div>
@@ -321,58 +324,58 @@ export function SessionHistory({
 
       {importPreview
         ? createPortal(
-            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label="Choose import sessions">
+            <div className={styles.modalShell} role="dialog" aria-modal="true" aria-label={t('practice.sessionHistory.importDialogLabel')}>
               <button
                 className={styles.modalBackdrop}
                 type="button"
-                aria-label="Close import options"
+                aria-label={t('practice.sessionHistory.importCloseAria')}
                 onClick={() => setImportPreview(null)}
               />
               <div className={styles.modalCard}>
                 <div className={styles.modalHeader}>
-                  <h4>Import sessions</h4>
+                  <h4>{t('practice.sessionHistory.importTitle')}</h4>
                   <button className={styles.modalClose} type="button" onClick={() => setImportPreview(null)}>
-                    Close
+                    {t('practice.sessionHistory.modalClose')}
                   </button>
                 </div>
                 <p className={styles.modalIntro}>
-                  Choose which sessions to import and whether they should replace your current ones or be appended to them.
+                  {t('practice.sessionHistory.importIntro')}
                 </p>
                 <div className={styles.scopeSection}>
-                  <span className={styles.scopeLabel}>Import mode</span>
+                  <span className={styles.scopeLabel}>{t('practice.sessionHistory.importMode')}</span>
                   <div className={styles.scopeActions}>
                     <button
                       className={`${styles.scopeModeButton} ${importMode === 'append' ? styles.scopeModeButtonActive : ''}`}
                       type="button"
                       onClick={() => setImportMode('append')}
                     >
-                      Append
+                      {t('practice.sessionHistory.append')}
                     </button>
                     <button
                       className={`${styles.scopeModeButton} ${importMode === 'replace' ? styles.scopeModeButtonActive : ''}`}
                       type="button"
                       onClick={() => setImportMode('replace')}
                     >
-                      Replace current
+                      {t('practice.sessionHistory.replaceCurrent')}
                     </button>
                   </div>
                 </div>
                 <div className={styles.scopeSection}>
-                  <span className={styles.scopeLabel}>Sessions to import</span>
+                  <span className={styles.scopeLabel}>{t('practice.sessionHistory.sessionsToImport')}</span>
                   <div className={styles.scopeActions}>
                     <button
                       className={styles.scopeActionButton}
                       type="button"
                       onClick={() => setSelectedImportSessionIds(importPreview.sessions.map((session) => session.id))}
                     >
-                      Select all
+                      {t('practice.sessionHistory.selectAll')}
                     </button>
                     <button
                       className={styles.scopeActionButton}
                       type="button"
                       onClick={() => setSelectedImportSessionIds([])}
                     >
-                      Deselect all
+                      {t('practice.sessionHistory.deselectAll')}
                     </button>
                   </div>
                   <div className={styles.scopeOptions}>
@@ -396,21 +399,21 @@ export function SessionHistory({
                 </div>
                 {importMode === 'append' && importPreview.collidingSessionIds.length > 0 ? (
                   <div className={styles.scopeSection}>
-                    <span className={styles.scopeLabel}>If a session already exists</span>
+                    <span className={styles.scopeLabel}>{t('practice.sessionHistory.collisionLabel')}</span>
                     <div className={styles.scopeActions}>
                       <button
                         className={`${styles.scopeModeButton} ${collisionStrategy === 'replace' ? styles.scopeModeButtonActive : ''}`}
                         type="button"
                         onClick={() => setCollisionStrategy('replace')}
                       >
-                        Replace it
+                        {t('practice.sessionHistory.replaceIt')}
                       </button>
                       <button
                         className={`${styles.scopeModeButton} ${collisionStrategy === 'duplicate' ? styles.scopeModeButtonActive : ''}`}
                         type="button"
                         onClick={() => setCollisionStrategy('duplicate')}
                       >
-                        Duplicate it
+                        {t('practice.sessionHistory.duplicateIt')}
                       </button>
                     </div>
                   </div>
@@ -432,11 +435,11 @@ export function SessionHistory({
                       setImportPreview(null);
                     }}
                   >
-                    <strong>Import selected sessions</strong>
+                    <strong>{t('practice.sessionHistory.importSelected')}</strong>
                     <span>
                       {importMode === 'replace'
-                        ? 'Current saved sessions will be cleared before import.'
-                        : 'Selected sessions will be added to your current saved sessions.'}
+                        ? t('practice.sessionHistory.importReplaceDescription')
+                        : t('practice.sessionHistory.importAppendDescription')}
                     </span>
                   </button>
                 </div>

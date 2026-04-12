@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './TransportControls.module.css';
 
 interface TransportControlsProps {
@@ -13,16 +14,18 @@ export function TransportControls({
   onJumpBackward,
   onJumpForward,
 }: TransportControlsProps) {
+  const { t } = useI18n();
+
   return (
     <div className={styles.root}>
       <button className={styles.secondary} type="button" onClick={onJumpBackward}>
-        -10s
+        {t('practice.transport.backward')}
       </button>
       <button className={styles.primary} type="button" onClick={onTogglePlayback}>
-        {isPlaying ? 'Pause' : 'Play'}
+        {isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}
       </button>
       <button className={styles.secondary} type="button" onClick={onJumpForward}>
-        +10s
+        {t('practice.transport.forward')}
       </button>
     </div>
   );

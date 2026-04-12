@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './MediaSourcePicker.module.css';
 
 interface MediaSourcePickerProps {
@@ -8,6 +9,7 @@ interface MediaSourcePickerProps {
 
 export function MediaSourcePicker({ onLocalFileSelected, onYouTubeLoad }: MediaSourcePickerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const { t } = useI18n();
 
   return (
     <section className={styles.root}>
@@ -15,20 +17,20 @@ export function MediaSourcePicker({ onLocalFileSelected, onYouTubeLoad }: MediaS
         <input
           className={styles.textInput}
           type="url"
-          placeholder="Paste a YouTube link"
+          placeholder={t('practice.media.youtubePlaceholder')}
           value={youtubeUrl}
           onChange={(event) => setYoutubeUrl(event.target.value)}
         />
         <button className={styles.inlineLoadButton} type="button" onClick={() => onYouTubeLoad(youtubeUrl)}>
-          Load
+          {t('practice.media.load')}
         </button>
       </div>
 
       <div className={styles.secondaryBlock}>
         <div className={styles.secondaryRow}>
-          <span className={styles.secondaryText}>or</span>
+          <span className={styles.secondaryText}>{t('practice.media.or')}</span>
           <label className={styles.fileLink}>
-            load a local audio or video file
+            {t('practice.media.localFile')}
             <input
               className={styles.hiddenInput}
               type="file"

@@ -43,6 +43,7 @@ Integration tests should cover:
 
 - React component behavior through user interaction;
 - Zustand store integration with UI;
+- localization-driven UI text and language switching behavior;
 - `localStorage` persistence flows;
 - IndexedDB flows through Dexie for persisted local media;
 - audio-related orchestration using mocked browser APIs;
@@ -72,6 +73,7 @@ Manual testing will still be required for:
 - seek, loop, and playback edge cases;
 - large local-media persistence behavior and browser storage limits;
 - backup size differences between light and full copies;
+- translated copy review for tone, truncation, and layout impact;
 - mobile browser checks;
 - performance and responsiveness during audio interaction.
 

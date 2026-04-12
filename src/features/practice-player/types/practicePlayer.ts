@@ -61,7 +61,6 @@ export interface PracticeSessionSummary {
 }
 
 export interface MediaRelinkWarning {
-  message: string;
   mismatches: Array<'name' | 'type' | 'size' | 'lastModified'>;
 }
 

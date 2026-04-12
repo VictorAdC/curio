@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { nanoid } from 'nanoid';
+import { useI18n } from '../../../i18n/I18nProvider';
 import { PracticePlayerController } from '../controllers/practicePlayerController';
 import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
@@ -30,6 +31,7 @@ import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
 export function usePracticePlayer() {
+  const { t } = useI18n();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controllerRef = useRef<PracticePlayerController | null>(null);
@@ -67,7 +69,7 @@ export function usePracticePlayer() {
 
     if (restoredSession.source.sourceRef.mediaMissing) {
       store.setError(
-        `Local media is missing for "${restoredSession.source.title}". Import a full backup or re-upload the original file to play it.`,
+        t('practice.player.error.missingMedia', { title: restoredSession.source.title }),
       );
       return restoredSession;
     }
@@ -208,7 +210,7 @@ export function usePracticePlayer() {
         const isVideo = file.type.startsWith('video/');
 
         if (!isAudio && !isVideo) {
-          store.setError('Unsupported file type. Please upload an audio or video file.');
+          store.setError(t('practice.player.error.unsupportedFile'));
           return;
         }
 
@@ -259,7 +261,7 @@ export function usePracticePlayer() {
         const videoId = parseYouTubeVideoId(url);
 
         if (!videoId) {
-          store.setError('Invalid YouTube URL. Please use a valid YouTube link.');
+          store.setError(t('practice.player.error.invalidYoutube'));
           return;
         }
 
@@ -408,7 +410,7 @@ export function usePracticePlayer() {
         store.addMarker({
           id: nanoid(),
           timestampSeconds: store.currentTime,
-          title: `Marker ${store.markers.length + 1}`,
+          title: `${t('practice.markerSpotlight.label')} ${store.markers.length + 1}`,
           note: '',
           loopRole: 'none',
         });
@@ -429,7 +431,7 @@ export function usePracticePlayer() {
         store.setSessionNote(value);
       },
     }),
-    [activeSession, store],
+    [activeSession, store, t],
   );
 
   const loopRange = useMemo(() => {
@@ -455,7 +457,7 @@ export function usePracticePlayer() {
     () => ({
       source: store.source,
       sourceKind,
-      title: store.source?.title ?? 'Waiting for a source',
+      title: store.source?.title ?? t('practice.player.waitingForSource'),
       isPlaying: store.isPlaying,
       currentTime: store.currentTime,
       duration: store.duration,
@@ -472,7 +474,7 @@ export function usePracticePlayer() {
       showMediaDisplay: sourceKind === 'local-video' || sourceKind === 'youtube',
       isLoopActive: loopRange.start !== null && loopRange.end !== null,
     }),
-    [activeSession, loopRange, sessionHistory, sourceKind, store],
+    [activeSession, loopRange, sessionHistory, sourceKind, store, t],
   );
 
   return {

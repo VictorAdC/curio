@@ -1,4 +1,5 @@
 import { formatTime } from '../../../features/practice-player/utils/time';
+import { useI18n } from '../../../i18n/I18nProvider';
 import styles from '../PracticePage.module.css';
 
 interface PracticeControlCardsProps {
@@ -16,6 +17,7 @@ export function PracticeControlCards({
   onAddMarker,
   onClearLoop,
 }: PracticeControlCardsProps) {
+  const { t } = useI18n();
   const loopStartLabel = loopStart !== null ? formatTime(loopStart) : '--:--';
   const loopEndLabel = loopEnd !== null ? formatTime(loopEnd) : '--:--';
 
@@ -24,19 +26,19 @@ export function PracticeControlCards({
       <div className={styles.audioControlsRow}>
         <div className={styles.audioActionsRow}>
           <button className={styles.overlayAction} type="button" onClick={onAddMarker}>
-            Add marker
+            {t('practice.controls.addMarker')}
           </button>
           <button className={styles.overlayGhost} type="button" onClick={onClearLoop}>
-            Clear loop
+            {t('practice.controls.clearLoop')}
           </button>
         </div>
         <div className={styles.audioLoopInfoRow}>
           <div className={styles.overlayMeta}>
-            <span>Loop start</span>
+            <span>{t('practice.controls.loopStart')}</span>
             <strong>{loopStartLabel}</strong>
           </div>
           <div className={styles.overlayMeta}>
-            <span>Loop end</span>
+            <span>{t('practice.controls.loopEnd')}</span>
             <strong>{loopEndLabel}</strong>
           </div>
         </div>
@@ -47,17 +49,17 @@ export function PracticeControlCards({
   return (
     <div className={styles.overlayRail}>
       <button className={styles.overlayAction} type="button" onClick={onAddMarker}>
-        Add marker
+        {t('practice.controls.addMarker')}
       </button>
       <button className={styles.overlayGhost} type="button" onClick={onClearLoop}>
-        Clear loop
+        {t('practice.controls.clearLoop')}
       </button>
       <div className={styles.overlayMeta}>
-        <span>Loop start</span>
+        <span>{t('practice.controls.loopStart')}</span>
         <strong>{loopStartLabel}</strong>
       </div>
       <div className={styles.overlayMeta}>
-        <span>Loop end</span>
+        <span>{t('practice.controls.loopEnd')}</span>
         <strong>{loopEndLabel}</strong>
       </div>
     </div>

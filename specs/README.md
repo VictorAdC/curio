@@ -24,6 +24,7 @@ Build a browser-based music learning support app that is simple to access, works
 - Vite will be used as the build tool and dev environment.
 - TypeScript will be used across the codebase.
 - CSS Modules will be used for component styling.
+- The frontend will include a localization layer so user-facing text can be translated without rewriting components.
 
 ### State and Data
 

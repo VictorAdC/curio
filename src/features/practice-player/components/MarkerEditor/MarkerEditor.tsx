@@ -1,4 +1,5 @@
 import type { PracticeMarker } from '../../types/practicePlayer';
+import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './MarkerEditor.module.css';
 
 interface MarkerEditorProps {
@@ -7,6 +8,8 @@ interface MarkerEditorProps {
 }
 
 export function MarkerEditor({ marker, onChange }: MarkerEditorProps) {
+  const { t } = useI18n();
+
   return (
     <div className={styles.root}>
       <input
@@ -17,7 +20,7 @@ export function MarkerEditor({ marker, onChange }: MarkerEditorProps) {
       <textarea
         className={styles.note}
         rows={3}
-        placeholder="Add a note for this practice moment..."
+        placeholder={t('practice.markerEditor.notePlaceholder')}
         value={marker.note}
         onChange={(event) => onChange(marker.id, { note: event.target.value })}
       />

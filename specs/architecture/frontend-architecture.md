@@ -14,7 +14,8 @@ The frontend should be organized around:
 - `features` for reusable product capabilities;
 - `components` only for truly app-wide shared UI if needed later;
 - `store` or feature-local stores for state ownership;
-- `utils` for pure helper logic.
+- `utils` for pure helper logic;
+- an app-level localization layer for user-facing text.
 
 The Practice page should be the first consumer of a reusable `practice-player` feature module.
 
@@ -23,6 +24,9 @@ The Practice page should be the first consumer of a reusable `practice-player` f
 ```text
 src/
   app/
+  i18n/
+    I18nProvider.tsx
+    messages.ts
   pages/
     PracticePage/
       PracticePage.tsx
@@ -75,6 +79,8 @@ For the Practice page, the page module should arrange the source picker, player 
 
 Route-level pages may also own temporary page-specific presentation wrappers such as a session drawer shell, as long as the underlying session feature behavior stays inside the reusable feature module.
 
+Pages may render language controls, but they should consume a shared localization provider rather than own translation state themselves.
+
 ### Feature Modules
 
 Feature modules should own reusable product behavior.
@@ -93,6 +99,8 @@ The `practice-player` feature should contain:
 ### Shared Components
 
 Generic app-wide components should only be extracted to a global shared area if they are not specific to the practice workflow.
+
+Localization infrastructure belongs in an app-level shared area rather than inside a single feature module.
 
 Examples that should remain inside `practice-player`:
 
@@ -162,6 +170,8 @@ Hooks should coordinate behavior, not become hidden stores.
 
 The main feature-facing hook should expose a stable page-level view model and explicit actions, so route components do not depend directly on internal Zustand mutators.
 
+When hooks need to surface user-facing status or error text, they should consume the localization layer or return structured status data that can be translated at the page boundary.
+
 ### Store
 
 State should live in a feature-local Zustand store.
@@ -206,6 +216,21 @@ Expected utility areas:
 - session serialization and persistence;
 - backup export and import helpers;
 - local-media relink validation.
+
+Translation dictionaries should be maintained in a dedicated localization area rather than mixed into feature utilities.
+
+## Localization Rules
+
+- user-facing UI copy must be referenced through translation keys;
+- dynamic strings such as confirmations and warnings must support interpolation through the localization layer;
+- adding a new language should primarily require a new dictionary, not component rewrites;
+- date, time, and locale-sensitive formatting should come from the selected locale when practical.
+
+Current preference behavior:
+
+- the selected language may be persisted locally in browser storage;
+- language preference should be treated as app-level UI state, not as practice-session state;
+- session exports and imports should not carry language preference.
 
 ## Design Rules
 

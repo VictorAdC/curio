@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import type { PracticeMarker, TimelineWaveformDatum } from '../../types/practicePlayer';
 import { formatTime } from '../../utils/time';
 import { WaveformTimeline } from '../WaveformTimeline/WaveformTimeline';
+import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './Timeline.module.css';
 
 interface TimelineProps {
@@ -31,6 +32,7 @@ export function Timeline({
 }: TimelineProps) {
   const isDraggingRef = useRef(false);
   const isCompact = variant === 'compact';
+  const { t } = useI18n();
 
   const handleSeekFromTrack = (clientX: number, left: number, width: number) => {
     if (duration <= 0) {
@@ -86,7 +88,7 @@ export function Timeline({
         }}
         role="button"
         tabIndex={duration > 0 ? 0 : -1}
-        aria-label="Seek through media timeline"
+        aria-label={t('practice.timeline.seekMediaAria')}
       >
         <div className={styles.genericProgress} style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
         {loopStart !== null && loopEnd !== null && duration > 0 ? (
@@ -115,7 +117,7 @@ export function Timeline({
 
       {isCompact ? (
         <div className={styles.compactMeta}>
-          <span>Markers: {markers.length}</span>
+          <span>{t('practice.timeline.markersCount', { count: markers.length })}</span>
           <span>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>

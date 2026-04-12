@@ -323,22 +323,8 @@ export function getPracticeSessionMediaRelinkWarning(sessionId: string, file: Fi
     return null;
   }
 
-  const mismatchLabels = mismatches.map((mismatch) => {
-    switch (mismatch) {
-      case 'type':
-        return 'file type';
-      case 'size':
-        return 'file size';
-      case 'name':
-        return 'file name';
-      case 'lastModified':
-        return 'last modified date';
-    }
-  });
-
   return {
     mismatches,
-    message: `This file differs from the original session media (${mismatchLabels.join(', ')}). Use it anyway?`,
   };
 }
 
