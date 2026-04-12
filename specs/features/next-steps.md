@@ -19,28 +19,6 @@ The current product already has:
 
 The next steps should improve quality, reduce technical debt, and expand study value without breaking the current local-first model.
 
-## Recommended Near-Term Improvements
-
-### 1. Testing For Critical Session Flows
-
-Priority: high
-
-Goals:
-
-- protect the most important local-first behavior from regressions;
-- make future UI changes safer.
-
-Suggested work:
-
-- integration tests for session restore after reload;
-- integration tests for session import and export;
-- integration tests for light-backup missing-media recovery;
-- Playwright coverage for the highest-value persistence flows.
-
-Why it matters:
-
-- the most complex product behavior is now in session persistence rather than in layout alone.
-
 ## Recommended Near-Term Features
 
 ### 1. Playback Speed Control
@@ -156,8 +134,7 @@ These are useful, but not as urgent as the items above.
 
 ### Quality First
 
-1. automated coverage for session restore and backup flows;
-2. stronger relink verification and recovery feedback.
+1. stronger relink verification and recovery feedback.
 
 ### Product Value Next
 

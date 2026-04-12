@@ -180,6 +180,10 @@ function dataUrlToBlob(dataUrl: string) {
   return new Blob([bytes], { type: mimeType });
 }
 
+function normalizeStoredBlob(file: StoredMediaAsset['file'], mimeType: string) {
+  return file instanceof Blob ? file : new Blob([file], { type: mimeType });
+}
+
 export async function persistLocalMediaFile(sourceId: string, file: File) {
   await db.mediaAssets.put({
     id: sourceId,
@@ -444,7 +448,7 @@ export async function relinkPersistedPracticeSessionMedia(sessionId: string, fil
   };
 }
 
-export async function exportPersistedPracticeSessions(includeMediaAssets: boolean, sessionIds?: string[]) {
+export async function createPracticeSessionsBackup(includeMediaAssets: boolean, sessionIds?: string[]) {
   const allSessions = readPersistedSessions();
   const sessions =
     sessionIds && sessionIds.length > 0
@@ -470,7 +474,7 @@ export async function exportPersistedPracticeSessions(includeMediaAssets: boolea
             name: asset.name,
             type: asset.type,
             lastModified: asset.lastModified,
-            dataUrl: await blobToDataUrl(asset.file),
+            dataUrl: await blobToDataUrl(normalizeStoredBlob(asset.file, asset.type)),
           };
         }),
       )
@@ -484,6 +488,12 @@ export async function exportPersistedPracticeSessions(includeMediaAssets: boolea
     sessions,
     mediaAssets: mediaAssets.filter((asset): asset is NonNullable<typeof asset> => asset !== null),
   };
+
+  return backup;
+}
+
+export async function exportPersistedPracticeSessions(includeMediaAssets: boolean, sessionIds?: string[]) {
+  const backup = await createPracticeSessionsBackup(includeMediaAssets, sessionIds);
 
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   const objectUrl = URL.createObjectURL(blob);
@@ -754,7 +764,7 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
       };
     }
 
-    const file = new File([storedMedia.file], storedMedia.name, {
+    const file = new File([normalizeStoredBlob(storedMedia.file, storedMedia.type)], storedMedia.name, {
       type: storedMedia.type,
       lastModified: storedMedia.lastModified,
     });

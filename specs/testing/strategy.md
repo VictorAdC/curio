@@ -65,6 +65,16 @@ Playwright should be used for a limited number of critical flows, such as:
 
 The E2E suite should stay small and focused on high-value scenarios.
 
+## Current Implemented Coverage
+
+The current repository now includes automated coverage for critical local-first session behavior:
+
+- Vitest integration tests for restore-after-reload at the persistence layer;
+- Vitest integration tests for full-backup export and import round-trips;
+- Vitest integration tests for light-backup import and missing-media relink recovery at the persistence layer;
+- Playwright coverage for restoring a saved local session after reload;
+- Playwright coverage for a full-backup export, clear, import, and restore round-trip through the real UI.
+
 ## Manual Validation Scope
 
 Manual testing will still be required for:
