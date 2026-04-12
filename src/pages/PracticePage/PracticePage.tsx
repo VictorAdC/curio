@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
 import { SessionHistory } from '../../features/practice-player/components/SessionHistory/SessionHistory';
@@ -17,6 +17,7 @@ export function PracticePage() {
   const { view, actions } = usePracticePlayer();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
+  const relinkInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <main className={styles.page}>
@@ -35,7 +36,38 @@ export function PracticePage() {
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
 
-      {view.error ? <div className={styles.error}>{view.error}</div> : null}
+      {view.error ? (
+        <div className={styles.error}>
+          <span>{view.error}</span>
+          {view.source?.sourceRef.mediaMissing && view.activeSessionId ? (
+            <>
+              <button
+                className={styles.errorAction}
+                type="button"
+                onClick={() => relinkInputRef.current?.click()}
+              >
+                Re-upload media
+              </button>
+              <input
+                ref={relinkInputRef}
+                className={styles.hiddenFileInput}
+                type="file"
+                accept="audio/*,video/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+
+                  if (!file || !view.activeSessionId) {
+                    return;
+                  }
+
+                  void actions.relinkSessionMedia(view.activeSessionId, file);
+                  event.currentTarget.value = '';
+                }}
+              />
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       <section className={styles.playerShell}>
         <PracticePlayerHeader title={view.title} currentTime={view.currentTime} duration={view.duration} />
@@ -148,8 +180,9 @@ export function PracticePage() {
               onExport={() => {
                 void actions.exportSessions();
               }}
-              onImport={(file) => {
-                void actions.importSessions(file);
+              onPrepareImport={(file) => actions.prepareImportSessions(file)}
+              onImport={(file, options) => {
+                void actions.importSessions(file, options);
                 setIsSessionDrawerOpen(false);
               }}
             />

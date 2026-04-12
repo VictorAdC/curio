@@ -347,11 +347,31 @@
 }
 
 .error {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
   padding: 1rem 1.2rem;
   border-radius: 18px;
   background: rgba(239, 68, 68, 0.1);
   color: #991b1b;
   font-weight: 600;
+}
+
+.errorAction {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  background: rgba(185, 28, 28, 0.1);
+  color: #991b1b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hiddenFileInput {
+  display: none;
 }
 
 @media (max-width: 960px) {
