@@ -204,10 +204,12 @@ The current playback stack supports saved practice sessions.
 - Local audio and video files are persisted separately in IndexedDB through Dexie.
 - Reload restores the most recently active session when possible.
 - New source selection creates a new session instead of overwriting an older one.
+- The session drawer should expose storage-health feedback derived from local session counts, missing-media counts, persisted local-media size, and browser storage estimates when available.
 - Light backups include session data only.
 - Full backups include session data plus embedded local media.
 - Light-backup imports for local files must support later media relinking.
 - Media relinking should warn when the uploaded file diverges from stored metadata, but still allow explicit user confirmation.
+- Persistence operations should surface explicit feedback states for success, warning, and failure so the UI does not rely only on generic player errors.
 
 ## Component-Level Validation Targets
 

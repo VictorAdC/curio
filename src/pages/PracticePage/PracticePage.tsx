@@ -55,6 +55,15 @@ export function PracticePage() {
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
 
+      {view.persistenceFeedback ? (
+        <div className={`${styles.persistenceFeedback} ${styles[`persistenceFeedback${view.persistenceFeedback.tone[0].toUpperCase()}${view.persistenceFeedback.tone.slice(1)}`]}`}>
+          <span>{view.persistenceFeedback.message}</span>
+          <button className={styles.persistenceFeedbackDismiss} type="button" onClick={actions.dismissPersistenceFeedback}>
+            {t('practice.persistence.dismiss')}
+          </button>
+        </div>
+      ) : null}
+
       {view.error ? (
         <div className={styles.error}>
           <span>{view.error}</span>
@@ -197,6 +206,9 @@ export function PracticePage() {
             <SessionHistory
               sessions={view.sessionHistory}
               activeSessionId={view.activeSessionId}
+              storageHealth={view.storageHealth}
+              persistenceFeedback={view.persistenceFeedback}
+              onDismissFeedback={actions.dismissPersistenceFeedback}
               onLoadSession={(sessionId) => {
                 void actions.loadSession(sessionId);
                 setIsSessionDrawerOpen(false);
@@ -209,11 +221,11 @@ export function PracticePage() {
                 void actions.clearAllSessions();
                 setIsSessionDrawerOpen(false);
               }}
-              onExportLight={() => {
-                void actions.exportLightSessions();
+              onExportLight={(sessionIds) => {
+                void actions.exportLightSessions(sessionIds);
               }}
-              onExport={() => {
-                void actions.exportSessions();
+              onExport={(sessionIds) => {
+                void actions.exportSessions(sessionIds);
               }}
               onPrepareImport={(file) => actions.prepareImportSessions(file)}
               onImport={(file, options) => {

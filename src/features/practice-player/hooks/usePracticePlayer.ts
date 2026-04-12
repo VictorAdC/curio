@@ -8,7 +8,9 @@ import type {
   MediaRelinkWarning,
   PracticeMarker,
   PracticeMediaSource,
+  PracticePersistenceFeedback,
   PracticeSessionSummary,
+  PracticeStorageHealth,
 } from '../types/practicePlayer';
 import {
   clearAllPersistedPracticeSessions,
@@ -16,6 +18,7 @@ import {
   deletePersistedPracticeSession,
   exportPersistedPracticeSessions,
   getActivePracticeSessionId,
+  getPracticeStorageHealth,
   getPracticeSessionMediaRelinkWarning,
   inspectPracticeSessionsBackup,
   importSelectedPracticeSessions,
@@ -44,6 +47,8 @@ export function usePracticePlayer() {
   const store = usePracticeSessionStore();
   const [sessionHistory, setSessionHistory] = useState<PracticeSessionSummary[]>(() => listPersistedPracticeSessions());
   const [activeSession, setActiveSession] = useState<PracticeSessionSummary | null>(null);
+  const [storageHealth, setStorageHealth] = useState<PracticeStorageHealth | null>(null);
+  const [persistenceFeedback, setPersistenceFeedback] = useState<PracticePersistenceFeedback | null>(null);
 
   const releaseObjectUrl = () => {
     if (objectUrlRef.current) {
@@ -68,6 +73,11 @@ export function usePracticePlayer() {
       default:
         return t('practice.player.error.generic');
     }
+  };
+
+  const refreshStorageHealth = async () => {
+    const nextHealth = await getPracticeStorageHealth().catch(() => null);
+    setStorageHealth(nextHealth);
   };
 
   const loadPersistedSession = async (sessionId?: string) => {
@@ -184,6 +194,7 @@ export function usePracticePlayer() {
     void (async () => {
       const activeSessionId = getActivePracticeSessionId();
       await loadPersistedSession(activeSessionId ?? undefined);
+      await refreshStorageHealth();
     })();
   }, []);
 
@@ -198,6 +209,7 @@ export function usePracticePlayer() {
 
     persistTimerRef.current = window.setTimeout(() => {
       persistPracticeSession(activeSession, usePracticeSessionStore.getState());
+      void refreshStorageHealth();
     }, 250);
 
     return () => {
@@ -283,6 +295,7 @@ export function usePracticePlayer() {
         store.setError(null);
         setActiveSession(session);
         setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
+        await refreshStorageHealth();
         try {
           await loadSourceIntoPlayer(source, { fileForWaveform: file });
         } catch {}
@@ -325,6 +338,7 @@ export function usePracticePlayer() {
         store.setError(null);
         setActiveSession(session);
         setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
+        await refreshStorageHealth();
         try {
           await loadSourceIntoPlayer(source);
         } catch {}
@@ -345,6 +359,10 @@ export function usePracticePlayer() {
       async relinkSessionMedia(sessionId: string, file: File) {
         const result = await relinkPersistedPracticeSessionMedia(sessionId, file).catch((error) => {
           store.setError(getLocalizedErrorMessage(error));
+          setPersistenceFeedback({
+            tone: 'error',
+            message: getLocalizedErrorMessage(error),
+          });
           return null;
         });
 
@@ -353,6 +371,12 @@ export function usePracticePlayer() {
         }
 
         setSessionHistory(result.sessions);
+        setPersistenceFeedback({
+          tone: 'success',
+          message: t('practice.persistence.relinkSuccess'),
+        });
+        store.setError(null);
+        await refreshStorageHealth();
 
         if (activeSession?.id === sessionId) {
           releaseObjectUrl();
@@ -362,6 +386,11 @@ export function usePracticePlayer() {
       async deleteSession(sessionId: string) {
         const result = await deletePersistedPracticeSession(sessionId);
         setSessionHistory(result.sessions);
+        setPersistenceFeedback({
+          tone: 'info',
+          message: t('practice.persistence.deleteSuccess'),
+        });
+        await refreshStorageHealth();
 
         if (activeSession?.id !== sessionId) {
           return;
@@ -387,34 +416,68 @@ export function usePracticePlayer() {
         store.setSource(null);
         setActiveSession(null);
         setSessionHistory([]);
+        setPersistenceFeedback({
+          tone: 'warning',
+          message: t('practice.persistence.clearAllSuccess'),
+        });
+        await refreshStorageHealth();
       },
       async exportSessions(sessionIds?: string[]) {
-        const { objectUrl, filename } = await exportPersistedPracticeSessions(
-          true,
-          sessionIds,
-        );
-        const anchor = document.createElement('a');
-        anchor.href = objectUrl;
-        anchor.download = filename;
-        anchor.click();
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+        try {
+          const { objectUrl, filename } = await exportPersistedPracticeSessions(
+            true,
+            sessionIds,
+          );
+          const anchor = document.createElement('a');
+          anchor.href = objectUrl;
+          anchor.download = filename;
+          anchor.click();
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+          setPersistenceFeedback({
+            tone: 'success',
+            message: t('practice.persistence.exportFullSuccess'),
+          });
+        } catch (error) {
+          const message = getLocalizedErrorMessage(error);
+          setPersistenceFeedback({
+            tone: 'error',
+            message,
+          });
+        }
       },
       async exportLightSessions(sessionIds?: string[]) {
-        const { objectUrl, filename } = await exportPersistedPracticeSessions(
-          false,
-          sessionIds,
-        );
-        const anchor = document.createElement('a');
-        anchor.href = objectUrl;
-        anchor.download = filename;
-        anchor.click();
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+        try {
+          const { objectUrl, filename } = await exportPersistedPracticeSessions(
+            false,
+            sessionIds,
+          );
+          const anchor = document.createElement('a');
+          anchor.href = objectUrl;
+          anchor.download = filename;
+          anchor.click();
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+          setPersistenceFeedback({
+            tone: 'success',
+            message: t('practice.persistence.exportLightSuccess'),
+          });
+        } catch (error) {
+          const message = getLocalizedErrorMessage(error);
+          setPersistenceFeedback({
+            tone: 'error',
+            message,
+          });
+        }
       },
       async prepareImportSessions(file: File) {
         try {
           return await inspectPracticeSessionsBackup(file);
         } catch (error) {
-          store.setError(getLocalizedErrorMessage(error));
+          const message = getLocalizedErrorMessage(error);
+          store.setError(message);
+          setPersistenceFeedback({
+            tone: 'error',
+            message,
+          });
           throw error;
         }
       },
@@ -428,7 +491,12 @@ export function usePracticePlayer() {
               duplicateSuffix: t('practice.sessionHistory.duplicateSuffix'),
             })
           : importPersistedPracticeSessions(file)).catch((error) => {
-            store.setError(getLocalizedErrorMessage(error));
+            const message = getLocalizedErrorMessage(error);
+            store.setError(message);
+            setPersistenceFeedback({
+              tone: 'error',
+              message,
+            });
             return null;
           });
 
@@ -436,6 +504,15 @@ export function usePracticePlayer() {
           return;
         }
         setSessionHistory(result.sessions);
+        await refreshStorageHealth();
+        const relinkCount = result.sessions.filter((session) => session.requiresMediaRelink).length;
+        setPersistenceFeedback({
+          tone: relinkCount > 0 ? 'warning' : 'success',
+          message:
+            relinkCount > 0
+              ? t('practice.persistence.importSuccessWithRelink', { count: relinkCount })
+              : t('practice.persistence.importSuccess'),
+        });
         releaseObjectUrl();
 
         if (result.activeSessionId) {
@@ -485,6 +562,9 @@ export function usePracticePlayer() {
       setSessionNote(value: string) {
         store.setSessionNote(value);
       },
+      dismissPersistenceFeedback() {
+        setPersistenceFeedback(null);
+      },
     }),
     [activeSession, localeCode, store, t],
   );
@@ -524,12 +604,14 @@ export function usePracticePlayer() {
       isReady: store.isReady,
       waveform: sourceKind === 'local-audio' ? store.waveform : [],
       sessionHistory,
+      storageHealth,
       activeSessionId: activeSession?.id ?? null,
+      persistenceFeedback,
       showAudioCanvas: sourceKind === 'local-audio',
       showMediaDisplay: sourceKind === 'local-video' || sourceKind === 'youtube',
       isLoopActive: loopRange.start !== null && loopRange.end !== null,
     }),
-    [activeSession, loopRange, sessionHistory, sourceKind, store, t],
+    [activeSession, loopRange, persistenceFeedback, sessionHistory, sourceKind, storageHealth, store, t],
   );
 
   return {

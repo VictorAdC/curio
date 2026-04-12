@@ -21,29 +21,7 @@ The next steps should improve quality, reduce technical debt, and expand study v
 
 ## Recommended Near-Term Improvements
 
-### 1. Persistence Quality And Safety
-
-Priority: high
-
-Goals:
-
-- make local persistence more transparent and reliable;
-- reduce confusion when media restore fails or browser storage is limited;
-- improve confidence in relink and backup flows.
-
-Suggested work:
-
-- add storage-health feedback in the session drawer;
-- show clearer success and failure feedback for import, export, and relink actions;
-- improve local-media relink validation, potentially with stronger file verification later;
-- document browser-storage limits and failure behavior.
-
-Why it matters:
-
-- the current product depends heavily on local persistence;
-- data loss or unclear recovery behavior would damage trust quickly.
-
-### 2. Testing For Critical Session Flows
+### 1. Testing For Critical Session Flows
 
 Priority: high
 
@@ -178,9 +156,8 @@ These are useful, but not as urgent as the items above.
 
 ### Quality First
 
-1. persistence feedback and safety improvements;
-2. automated coverage for session restore and backup flows;
-3. stronger relink verification and recovery feedback.
+1. automated coverage for session restore and backup flows;
+2. stronger relink verification and recovery feedback.
 
 ### Product Value Next
 

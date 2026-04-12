@@ -38,6 +38,9 @@ function renderSessionHistory() {
       <SessionHistory
         sessions={sessions}
         activeSessionId={null}
+        storageHealth={null}
+        persistenceFeedback={null}
+        onDismissFeedback={vi.fn()}
         onLoadSession={vi.fn()}
         onRenameSession={vi.fn()}
         onDeleteSession={vi.fn()}

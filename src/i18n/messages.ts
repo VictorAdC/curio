@@ -39,6 +39,34 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.sessions.sort.oldest': 'Oldest',
     'practice.sessions.sort.name': 'Name',
 
+    'practice.persistence.dismiss': 'Dismiss',
+    'practice.persistence.relinkSuccess': 'Local media was relinked successfully.',
+    'practice.persistence.deleteSuccess': 'Saved session removed.',
+    'practice.persistence.clearAllSuccess': 'All saved sessions and local media snapshots were cleared.',
+    'practice.persistence.exportFullSuccess': 'Full backup downloaded.',
+    'practice.persistence.exportLightSuccess': 'Light backup downloaded.',
+    'practice.persistence.importSuccess': 'Sessions imported successfully.',
+    'practice.persistence.importSuccessWithRelink':
+      'Sessions imported. {count} session(s) still need local media to be relinked.',
+    'practice.persistence.storageTitle': 'Storage health',
+    'practice.persistence.storageStatus.healthy': 'Local session storage looks healthy.',
+    'practice.persistence.storageStatus.warning': 'Some sessions need attention or browser storage is getting tight.',
+    'practice.persistence.storageStatus.limited': 'Browser storage is constrained. Save a backup soon.',
+    'practice.persistence.storageBadge.healthy': 'Healthy',
+    'practice.persistence.storageBadge.warning': 'Attention',
+    'practice.persistence.storageBadge.limited': 'Limited',
+    'practice.persistence.storage.sessions': 'Saved sessions',
+    'practice.persistence.storage.media': 'Saved media files',
+    'practice.persistence.storage.savedData': 'Curio data',
+    'practice.persistence.storage.missingMedia': 'Missing media',
+    'practice.persistence.storage.browserUsage': 'Browser storage usage: {used} of {quota}',
+    'practice.persistence.storage.browserEstimateUnavailable':
+      'Browser storage usage could not be estimated here.',
+    'practice.persistence.storage.helpPersistent':
+      'This browser is allowing persistent storage. Backups are still recommended because clearing site data can remove sessions.',
+    'practice.persistence.storage.helpEphemeral':
+      'This browser may clear site storage. Keep backups for any session you want to preserve.',
+
     'practice.player.nowPracticing': 'Now practicing',
     'practice.player.waitingForSource': 'Waiting for a source',
     'practice.player.youtubeSourceTitle': 'YouTube Practice Source',
@@ -182,6 +210,34 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.sessions.sort.recent': 'Mais recentes',
     'practice.sessions.sort.oldest': 'Mais antigas',
     'practice.sessions.sort.name': 'Nome',
+
+    'practice.persistence.dismiss': 'Fechar',
+    'practice.persistence.relinkSuccess': 'A mídia local foi vinculada novamente com sucesso.',
+    'practice.persistence.deleteSuccess': 'Sessão salva removida.',
+    'practice.persistence.clearAllSuccess': 'Todas as sessões salvas e cópias locais de mídia foram removidas.',
+    'practice.persistence.exportFullSuccess': 'Backup completo baixado.',
+    'practice.persistence.exportLightSuccess': 'Backup leve baixado.',
+    'practice.persistence.importSuccess': 'Sessões importadas com sucesso.',
+    'practice.persistence.importSuccessWithRelink':
+      'Sessões importadas. {count} sessão(ões) ainda precisam reenviar a mídia local.',
+    'practice.persistence.storageTitle': 'Saúde do armazenamento',
+    'practice.persistence.storageStatus.healthy': 'O armazenamento local das sessões parece saudável.',
+    'practice.persistence.storageStatus.warning': 'Algumas sessões exigem atenção ou o armazenamento do navegador está ficando apertado.',
+    'practice.persistence.storageStatus.limited': 'O armazenamento do navegador está limitado. Salve um backup em breve.',
+    'practice.persistence.storageBadge.healthy': 'Saudável',
+    'practice.persistence.storageBadge.warning': 'Atenção',
+    'practice.persistence.storageBadge.limited': 'Limitado',
+    'practice.persistence.storage.sessions': 'Sessões salvas',
+    'practice.persistence.storage.media': 'Arquivos de mídia salvos',
+    'practice.persistence.storage.savedData': 'Dados do Curio',
+    'practice.persistence.storage.missingMedia': 'Mídia ausente',
+    'practice.persistence.storage.browserUsage': 'Uso do armazenamento do navegador: {used} de {quota}',
+    'practice.persistence.storage.browserEstimateUnavailable':
+      'Não foi possível estimar o uso do armazenamento do navegador aqui.',
+    'practice.persistence.storage.helpPersistent':
+      'Este navegador está permitindo armazenamento persistente. Mesmo assim, backups continuam recomendados porque limpar os dados do site pode remover sessões.',
+    'practice.persistence.storage.helpEphemeral':
+      'Este navegador pode limpar o armazenamento do site. Mantenha backups das sessões que você quiser preservar.',
 
     'practice.player.nowPracticing': 'Praticando agora',
     'practice.player.waitingForSource': 'Aguardando uma fonte',

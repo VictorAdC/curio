@@ -46,6 +46,7 @@ Integration tests should cover:
 - localization-driven UI text and language switching behavior;
 - `localStorage` persistence flows;
 - IndexedDB flows through Dexie for persisted local media;
+- storage-health UI behavior and persistence feedback messaging;
 - audio-related orchestration using mocked browser APIs;
 - YouTube integration boundaries using mocks or adapters.
 
@@ -59,6 +60,7 @@ Playwright should be used for a limited number of critical flows, such as:
 - core study-session flows;
 - session export and import flows;
 - missing-media recovery after importing a light backup;
+- storage-health warnings and persistence action feedback;
 - essential playback-related UI behavior.
 
 The E2E suite should stay small and focused on high-value scenarios.

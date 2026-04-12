@@ -64,6 +64,25 @@ export interface MediaRelinkWarning {
   mismatches: Array<'name' | 'type' | 'size' | 'lastModified'>;
 }
 
+export interface PracticeStorageHealth {
+  sessionCount: number;
+  missingMediaCount: number;
+  mediaAssetCount: number;
+  mediaBytes: number;
+  localStorageBytes: number;
+  totalStoredBytes: number;
+  storageEstimateSupported: boolean;
+  usageBytes: number | null;
+  quotaBytes: number | null;
+  persisted: boolean | null;
+  status: 'healthy' | 'warning' | 'limited';
+}
+
+export interface PracticePersistenceFeedback {
+  tone: 'success' | 'warning' | 'error' | 'info';
+  message: string;
+}
+
 export interface PlaybackAdapter {
   load(source: PracticeMediaSource): Promise<void>;
   play(): Promise<void> | void;

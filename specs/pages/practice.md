@@ -138,6 +138,7 @@ The preferred model is:
 - inline rename by editing the session name in place;
 - delete with confirmation;
 - backup and restore actions grouped at the end of the drawer.
+- a storage-health area in the drawer that summarizes saved-session counts, local-media footprint, missing-media counts, and browser-storage caveats.
 
 ## Looping Model
 
@@ -172,6 +173,8 @@ Behavior rules:
 - light backups export session data without embedded local media;
 - full backups export session data plus embedded local media;
 - importing a light backup may create sessions that require local-media relinking before playback can resume.
+- persistence actions such as import, export, delete, clear, and relink should produce explicit success, warning, or failure feedback rather than failing silently.
+- the session drawer should explain that browser storage may still be cleared outside the app, so backups remain recommended even when local persistence looks healthy.
 
 ## Navigation Assumption
 
@@ -210,6 +213,8 @@ The page must handle the following cases clearly:
 - importing a local-file session without embedded media must show a recoverable missing-media state;
 - relinking media should compare the uploaded file with stored metadata and warn if the file appears different from the original.
 - missing-media recovery text and relink warnings must respect the selected language.
+- import, export, relink, delete, and clear-all flows must report clearer success or failure feedback.
+- the session drawer should expose browser-storage health when the platform can estimate it, and should fall back to an explanatory note when it cannot.
 
 ## Acceptance Scenarios
 

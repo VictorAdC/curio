@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useI18n } from '../../../../i18n/I18nProvider';
-import type { PracticeSessionSummary } from '../../types/practicePlayer';
+import type {
+  PracticePersistenceFeedback,
+  PracticeSessionSummary,
+  PracticeStorageHealth,
+} from '../../types/practicePlayer';
 import type { PracticeSessionsBackupPreview } from '../../utils/sessionPersistence';
 import styles from './SessionHistory.module.css';
 
 interface SessionHistoryProps {
   sessions: PracticeSessionSummary[];
   activeSessionId: string | null;
+  storageHealth: PracticeStorageHealth | null;
+  persistenceFeedback: PracticePersistenceFeedback | null;
+  onDismissFeedback: () => void;
   onLoadSession: (sessionId: string) => void;
   onRenameSession: (sessionId: string, name: string) => void;
   onDeleteSession: (sessionId: string) => void;
@@ -19,6 +26,18 @@ interface SessionHistoryProps {
     file: File,
     options: { sessionIds?: string[]; mode: 'replace' | 'append'; collisionStrategy?: 'replace' | 'duplicate' },
   ) => void;
+}
+
+function formatBytes(value: number) {
+  if (value < 1024) {
+    return `${value} B`;
+  }
+
+  if (value < 1024 * 1024) {
+    return `${Math.max(1, Math.round(value / 1024))} KB`;
+  }
+
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function SessionHistoryItem({
@@ -139,6 +158,9 @@ function SessionHistoryItem({
 export function SessionHistory({
   sessions,
   activeSessionId,
+  storageHealth,
+  persistenceFeedback,
+  onDismissFeedback,
   onLoadSession,
   onRenameSession,
   onDeleteSession,
@@ -209,6 +231,64 @@ export function SessionHistory({
           <p>{t('practice.sessionHistory.description')}</p>
         </div>
       </div>
+
+      {persistenceFeedback ? (
+        <div className={`${styles.feedback} ${styles[`feedback${persistenceFeedback.tone[0].toUpperCase()}${persistenceFeedback.tone.slice(1)}`]}`}>
+          <p>{persistenceFeedback.message}</p>
+          <button className={styles.feedbackDismiss} type="button" onClick={onDismissFeedback}>
+            {t('practice.persistence.dismiss')}
+          </button>
+        </div>
+      ) : null}
+
+      {storageHealth ? (
+        <section className={styles.storageCard}>
+          <div className={styles.storageHeader}>
+            <div>
+              <h4>{t('practice.persistence.storageTitle')}</h4>
+              <p>{t(`practice.persistence.storageStatus.${storageHealth.status}`)}</p>
+            </div>
+            <span className={`${styles.storageBadge} ${styles[`storageBadge${storageHealth.status[0].toUpperCase()}${storageHealth.status.slice(1)}`]}`}>
+              {t(`practice.persistence.storageBadge.${storageHealth.status}`)}
+            </span>
+          </div>
+          <div className={styles.storageStats}>
+            <div className={styles.storageStat}>
+              <span>{t('practice.persistence.storage.sessions')}</span>
+              <strong>{storageHealth.sessionCount}</strong>
+            </div>
+            <div className={styles.storageStat}>
+              <span>{t('practice.persistence.storage.media')}</span>
+              <strong>{storageHealth.mediaAssetCount}</strong>
+            </div>
+            <div className={styles.storageStat}>
+              <span>{t('practice.persistence.storage.savedData')}</span>
+              <strong>{formatBytes(storageHealth.totalStoredBytes)}</strong>
+            </div>
+            <div className={styles.storageStat}>
+              <span>{t('practice.persistence.storage.missingMedia')}</span>
+              <strong>{storageHealth.missingMediaCount}</strong>
+            </div>
+          </div>
+          {storageHealth.storageEstimateSupported && storageHealth.quotaBytes ? (
+            <p className={styles.storageMeta}>
+              {t('practice.persistence.storage.browserUsage', {
+                used: formatBytes(storageHealth.usageBytes ?? 0),
+                quota: formatBytes(storageHealth.quotaBytes),
+              })}
+            </p>
+          ) : (
+            <p className={styles.storageMeta}>{t('practice.persistence.storage.browserEstimateUnavailable')}</p>
+          )}
+          <p className={styles.storageHelp}>
+            {t(
+              storageHealth.persisted
+                ? 'practice.persistence.storage.helpPersistent'
+                : 'practice.persistence.storage.helpEphemeral',
+            )}
+          </p>
+        </section>
+      ) : null}
 
       <div className={styles.filters}>
         <input
