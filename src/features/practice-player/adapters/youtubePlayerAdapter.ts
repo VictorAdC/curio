@@ -1,4 +1,5 @@
 import type { PlaybackAdapter, PracticeMediaSource } from '../types/practicePlayer';
+import { PracticeError } from '../utils/errors';
 import { clampTime } from '../utils/time';
 
 interface YouTubeAdapterOptions {
@@ -49,7 +50,7 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
     const videoId = source.sourceRef.youtubeVideoId;
 
     if (!videoId) {
-      throw new Error('Missing YouTube video id');
+      throw new PracticeError('YOUTUBE_VIDEO_ID_MISSING');
     }
 
     const yt = await loadYouTubeApi();

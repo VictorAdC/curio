@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useI18n } from '../../../../i18n/I18nProvider';
 import type { PracticeSessionSummary } from '../../types/practicePlayer';
@@ -156,6 +156,9 @@ export function SessionHistory({
   const [selectedImportSessionIds, setSelectedImportSessionIds] = useState<string[]>([]);
   const [importMode, setImportMode] = useState<'replace' | 'append'>('append');
   const [collisionStrategy, setCollisionStrategy] = useState<'replace' | 'duplicate'>('replace');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sourceFilter, setSourceFilter] = useState<'all' | PracticeSessionSummary['sourceKind']>('all');
+  const [sortOrder, setSortOrder] = useState<'recent' | 'oldest' | 'name'>('recent');
 
   useEffect(() => {
     setSelectedExportSessionIds(sessions.map((session) => session.id));
@@ -169,6 +172,35 @@ export function SessionHistory({
     setSelectedImportSessionIds(importPreview.sessions.map((session) => session.id));
   }, [importPreview]);
 
+  const filteredSessions = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const nextSessions = sessions.filter((session) => {
+      const matchesFilter = sourceFilter === 'all' || session.sourceKind === sourceFilter;
+
+      if (!matchesFilter) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      return [session.name, session.sourceTitle].some((value) => value.toLowerCase().includes(normalizedQuery));
+    });
+
+    return nextSessions.sort((left, right) => {
+      switch (sortOrder) {
+        case 'oldest':
+          return new Date(left.updatedAt).getTime() - new Date(right.updatedAt).getTime();
+        case 'name':
+          return left.name.localeCompare(right.name);
+        case 'recent':
+        default:
+          return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+      }
+    });
+  }, [searchQuery, sessions, sortOrder, sourceFilter]);
+
   return (
     <section className={styles.root}>
       <div className={styles.header}>
@@ -178,11 +210,46 @@ export function SessionHistory({
         </div>
       </div>
 
+      <div className={styles.filters}>
+        <input
+          className={styles.searchInput}
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder={t('practice.sessions.searchPlaceholder')}
+        />
+        <div className={styles.filterRow}>
+          <select
+            className={styles.filterSelect}
+            value={sourceFilter}
+            onChange={(event) => setSourceFilter(event.target.value as typeof sourceFilter)}
+            aria-label={t('practice.sessions.filter.label')}
+          >
+            <option value="all">{t('practice.sessions.filter.all')}</option>
+            <option value="local-audio">{t('practice.sourceKind.local-audio')}</option>
+            <option value="local-video">{t('practice.sourceKind.local-video')}</option>
+            <option value="youtube">{t('practice.sourceKind.youtube')}</option>
+          </select>
+          <select
+            className={styles.filterSelect}
+            value={sortOrder}
+            onChange={(event) => setSortOrder(event.target.value as typeof sortOrder)}
+            aria-label={t('practice.sessions.sort.label')}
+          >
+            <option value="recent">{t('practice.sessions.sort.recent')}</option>
+            <option value="oldest">{t('practice.sessions.sort.oldest')}</option>
+            <option value="name">{t('practice.sessions.sort.name')}</option>
+          </select>
+        </div>
+      </div>
+
       <div className={styles.list}>
         {sessions.length === 0 ? (
           <p className={styles.empty}>{t('practice.sessionHistory.empty')}</p>
+        ) : filteredSessions.length === 0 ? (
+          <p className={styles.empty}>{t('practice.sessionHistory.emptyFiltered')}</p>
         ) : null}
-        {sessions.map((session) => (
+        {filteredSessions.map((session) => (
           <SessionHistoryItem
             key={session.id}
             session={session}

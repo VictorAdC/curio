@@ -232,6 +232,14 @@ Current preference behavior:
 - language preference should be treated as app-level UI state, not as practice-session state;
 - session exports and imports should not carry language preference.
 
+### Translation-Key Conventions
+
+- translation keys should be grouped by feature or page area, such as `practice.sessionHistory.*`;
+- generic app-level keys may live under broader namespaces such as `language.*`;
+- components should prefer referencing short, stable keys rather than embedding large translated fragments inline;
+- locale-sensitive defaults such as session names should be generated through localized helpers rather than hardcoded English-like formats;
+- low-level adapters and persistence utilities should surface structured errors or codes, not user-facing English strings.
+
 ## Design Rules
 
 - page modules own layout, not playback logic;

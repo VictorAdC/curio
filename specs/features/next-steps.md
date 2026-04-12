@@ -63,45 +63,6 @@ Why it matters:
 
 - the most complex product behavior is now in session persistence rather than in layout alone.
 
-### 3. Session Search, Filter, And Organization
-
-Priority: medium
-
-Goals:
-
-- keep the session drawer usable as saved sessions grow.
-
-Suggested work:
-
-- search by session name;
-- filter by source type;
-- sort by most recent, oldest, or name;
-- optional grouping by piece or study context later.
-
-Why it matters:
-
-- the current drawer works for a small number of sessions but will get noisy over time.
-
-### 4. Finish Localization Coverage
-
-Priority: medium
-
-Goals:
-
-- ensure all user-facing text goes through the translation system;
-- keep future languages easy to add.
-
-Suggested work:
-
-- review remaining hardcoded strings regularly;
-- document translation-key conventions;
-- add tests for language switching and translated flows;
-- consider lightweight guardrails in review or linting later.
-
-Why it matters:
-
-- localization is now part of the architecture, so new UI should follow the same rule from the start.
-
 ## Recommended Near-Term Features
 
 ### 1. Playback Speed Control
@@ -219,8 +180,7 @@ These are useful, but not as urgent as the items above.
 
 1. persistence feedback and safety improvements;
 2. automated coverage for session restore and backup flows;
-3. session search and filter support;
-4. localization cleanup and guardrails.
+3. stronger relink verification and recovery feedback.
 
 ### Product Value Next
 

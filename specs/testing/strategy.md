@@ -91,3 +91,9 @@ At the time of this decision, no MCP server is configured in the local environme
 - Prefer testing observable behavior over implementation details.
 - Do not overbuild the E2E layer early in the project.
 - Keep browser-specific media validation explicit in manual test documentation.
+
+## Localization Quality Guardrails
+
+- keep a lightweight automated check for obvious hardcoded user-facing text in `.tsx` files;
+- treat the automated check as a guardrail, not as a substitute for review;
+- verify translated flows through tests when text changes affect interaction or recovery paths.

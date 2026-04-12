@@ -35,8 +35,12 @@ export function PracticePage() {
           >
             <span className={styles.localeToggleTrack}>
               <span className={`${styles.localeToggleThumb} ${locale === 'pt-BR' ? styles.localeToggleThumbPortuguese : ''}`} />
-              <span className={`${styles.localeToggleOption} ${locale === 'en' ? styles.localeToggleOptionActive : ''}`}>EN</span>
-              <span className={`${styles.localeToggleOption} ${locale === 'pt-BR' ? styles.localeToggleOptionActive : ''}`}>PT</span>
+              <span className={`${styles.localeToggleOption} ${locale === 'en' ? styles.localeToggleOptionActive : ''}`}>
+                {t('language.shortEnglish')}
+              </span>
+              <span className={`${styles.localeToggleOption} ${locale === 'pt-BR' ? styles.localeToggleOptionActive : ''}`}>
+                {t('language.shortPortuguese')}
+              </span>
             </span>
           </button>
           <button

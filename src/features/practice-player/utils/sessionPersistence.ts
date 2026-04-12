@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { PracticeError } from './errors';
 import type {
   LoopSelection,
   MediaRelinkWarning,
@@ -85,6 +86,7 @@ interface ImportPracticeSessionsOptions {
   sessionIds?: string[];
   mode: 'replace' | 'append';
   collisionStrategy?: 'replace' | 'duplicate';
+  duplicateSuffix?: string;
 }
 
 class CurioPracticeDatabase extends Dexie {
@@ -188,12 +190,15 @@ export function listPersistedPracticeSessions(): PracticeSessionSummary[] {
   return sortSessionsDescending(readPersistedSessions()).map((session) => session.session);
 }
 
-export function createPracticeSessionSummary(source: PracticeMediaSource): PracticeSessionSummary {
+export function createPracticeSessionSummary(source: PracticeMediaSource, localeCode = 'en-US'): PracticeSessionSummary {
   const timestamp = new Date().toISOString();
 
   return {
     id: source.id,
-    name: timestamp.replace('T', ' ').slice(0, 16),
+    name: new Intl.DateTimeFormat(localeCode, {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(timestamp)),
     sourceTitle: source.title,
     sourceKind: source.kind,
     createdAt: timestamp,
@@ -333,7 +338,7 @@ export async function relinkPersistedPracticeSessionMedia(sessionId: string, fil
   const targetSession = sessions.find((session) => session.session.id === sessionId);
 
   if (!targetSession || targetSession.source.kind === 'youtube') {
-    throw new Error('This session does not require local media relinking.');
+    throw new PracticeError('SESSION_MEDIA_RELINK_NOT_REQUIRED');
   }
 
   const mediaId = targetSession.source.sourceRef.persistedMediaId ?? targetSession.source.id;
@@ -435,7 +440,7 @@ export async function importPersistedPracticeSessions(file: File) {
   const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
 
   if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
-    throw new Error('Unsupported backup file.');
+    throw new PracticeError('BACKUP_UNSUPPORTED');
   }
 
   await clearAllPersistedPracticeSessions();
@@ -486,7 +491,7 @@ export async function inspectPracticeSessionsBackup(file: File): Promise<Practic
   const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
 
   if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
-    throw new Error('Unsupported backup file.');
+    throw new PracticeError('BACKUP_UNSUPPORTED');
   }
 
   const existingSessionIds = new Set(readPersistedSessions().map((session) => session.session.id));
@@ -509,7 +514,7 @@ export async function importSelectedPracticeSessions(
   const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
 
   if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
-    throw new Error('Unsupported backup file.');
+    throw new PracticeError('BACKUP_UNSUPPORTED');
   }
 
   const selectedSessions =
@@ -528,13 +533,13 @@ export async function importSelectedPracticeSessions(
     const duplicatedId = crypto.randomUUID();
 
     return {
-      ...session,
-      session: {
-        ...session.session,
-        id: duplicatedId,
-        name: `${session.session.name} copy`,
-        updatedAt: new Date().toISOString(),
-      },
+        ...session,
+        session: {
+          ...session.session,
+          id: duplicatedId,
+          name: `${session.session.name} ${options.duplicateSuffix ?? 'copy'}`,
+          updatedAt: new Date().toISOString(),
+        },
       source: {
         ...session.source,
         id: duplicatedId,

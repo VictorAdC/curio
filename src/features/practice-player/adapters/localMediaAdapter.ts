@@ -1,4 +1,5 @@
 import type { PlaybackAdapter, PracticeMediaSource } from '../types/practicePlayer';
+import { PracticeError } from '../utils/errors';
 import { clampTime } from '../utils/time';
 
 interface LocalMediaAdapterOptions {
@@ -29,7 +30,7 @@ export class LocalMediaAdapter implements PlaybackAdapter {
     const objectUrl = source.sourceRef.objectUrl;
 
     if (!objectUrl) {
-      throw new Error('Missing local media URL');
+      throw new PracticeError('LOCAL_MEDIA_URL_MISSING');
     }
 
     this.clearLoop();

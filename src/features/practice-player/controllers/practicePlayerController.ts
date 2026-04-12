@@ -1,6 +1,7 @@
 import { LocalMediaAdapter } from '../adapters/localMediaAdapter';
 import { YouTubePlayerAdapter } from '../adapters/youtubePlayerAdapter';
 import type { PlaybackAdapter, PracticeMediaSource } from '../types/practicePlayer';
+import { PracticeError } from '../utils/errors';
 
 interface PracticePlayerControllerOptions {
   getMediaElement: (kind: PracticeMediaSource['kind']) => HTMLAudioElement | HTMLVideoElement | null;
@@ -32,7 +33,7 @@ export class PracticePlayerController {
       const mediaElement = this.options.getMediaElement(source.kind);
 
       if (!mediaElement) {
-        throw new Error('Media element is not ready');
+        throw new PracticeError('MEDIA_ELEMENT_NOT_READY');
       }
 
       this.adapter = new LocalMediaAdapter({

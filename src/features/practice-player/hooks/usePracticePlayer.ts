@@ -27,11 +27,12 @@ import {
   persistLocalMediaFile,
   restorePracticeSession,
 } from '../utils/sessionPersistence';
+import { getPracticeErrorCode } from '../utils/errors';
 import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
 export function usePracticePlayer() {
-  const { t } = useI18n();
+  const { t, localeCode } = useI18n();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controllerRef = useRef<PracticePlayerController | null>(null);
@@ -48,6 +49,24 @@ export function usePracticePlayer() {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
+    }
+  };
+
+  const getLocalizedErrorMessage = (error: unknown) => {
+    const code = getPracticeErrorCode(error);
+
+    switch (code) {
+      case 'LOCAL_MEDIA_URL_MISSING':
+      case 'MEDIA_ELEMENT_NOT_READY':
+        return t('practice.player.error.mediaLoad');
+      case 'YOUTUBE_VIDEO_ID_MISSING':
+        return t('practice.player.error.invalidYoutube');
+      case 'BACKUP_UNSUPPORTED':
+        return t('practice.sessionHistory.error.unsupportedBackup');
+      case 'SESSION_MEDIA_RELINK_NOT_REQUIRED':
+        return t('practice.player.error.relinkUnavailable');
+      default:
+        return t('practice.player.error.generic');
     }
   };
 
@@ -74,10 +93,14 @@ export function usePracticePlayer() {
       return restoredSession;
     }
 
-    await loadSourceIntoPlayer(restoredSession.source, {
-      fileForWaveform: restoredSession.source.sourceRef.file,
-      restoredCurrentTime: restoredSession.currentTime,
-    });
+    try {
+      await loadSourceIntoPlayer(restoredSession.source, {
+        fileForWaveform: restoredSession.source.sourceRef.file,
+        restoredCurrentTime: restoredSession.currentTime,
+      });
+    } catch {
+      return restoredSession;
+    }
 
     return restoredSession;
   };
@@ -95,7 +118,12 @@ export function usePracticePlayer() {
       });
     }
 
-    await controllerRef.current?.load(source);
+    try {
+      await controllerRef.current?.load(source);
+    } catch (error) {
+      store.setError(getLocalizedErrorMessage(error));
+      throw error;
+    }
 
     if (options?.fileForWaveform && source.kind === 'local-audio') {
       try {
@@ -238,7 +266,7 @@ export function usePracticePlayer() {
             fileLastModified: file.lastModified,
           },
         };
-        const session = createPracticeSessionSummary(source);
+        const session = createPracticeSessionSummary(source, localeCode);
 
         store.hydrateSession({
           source,
@@ -255,7 +283,9 @@ export function usePracticePlayer() {
         store.setError(null);
         setActiveSession(session);
         setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
-        await loadSourceIntoPlayer(source, { fileForWaveform: file });
+        try {
+          await loadSourceIntoPlayer(source, { fileForWaveform: file });
+        } catch {}
       },
       async loadYouTubeUrl(url: string) {
         const videoId = parseYouTubeVideoId(url);
@@ -271,14 +301,14 @@ export function usePracticePlayer() {
         const source: PracticeMediaSource = {
           id: nanoid(),
           kind: 'youtube',
-          title: 'YouTube Practice Source',
+          title: t('practice.player.youtubeSourceTitle'),
           durationSeconds: 0,
           sourceRef: {
             youtubeUrl: url,
             youtubeVideoId: videoId,
           },
         };
-        const session = createPracticeSessionSummary(source);
+        const session = createPracticeSessionSummary(source, localeCode);
 
         store.hydrateSession({
           source,
@@ -295,7 +325,9 @@ export function usePracticePlayer() {
         store.setError(null);
         setActiveSession(session);
         setSessionHistory((currentSessions) => [session, ...currentSessions.filter((item) => item.id !== session.id)]);
-        await loadSourceIntoPlayer(source);
+        try {
+          await loadSourceIntoPlayer(source);
+        } catch {}
       },
       async loadSession(sessionId: string) {
         await loadPersistedSession(sessionId);
@@ -311,7 +343,15 @@ export function usePracticePlayer() {
         return getPracticeSessionMediaRelinkWarning(sessionId, file);
       },
       async relinkSessionMedia(sessionId: string, file: File) {
-        const result = await relinkPersistedPracticeSessionMedia(sessionId, file);
+        const result = await relinkPersistedPracticeSessionMedia(sessionId, file).catch((error) => {
+          store.setError(getLocalizedErrorMessage(error));
+          return null;
+        });
+
+        if (!result) {
+          return;
+        }
+
         setSessionHistory(result.sessions);
 
         if (activeSession?.id === sessionId) {
@@ -371,15 +411,30 @@ export function usePracticePlayer() {
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
       },
       async prepareImportSessions(file: File) {
-        return inspectPracticeSessionsBackup(file);
+        try {
+          return await inspectPracticeSessionsBackup(file);
+        } catch (error) {
+          store.setError(getLocalizedErrorMessage(error));
+          throw error;
+        }
       },
       async importSessions(
         file: File,
         options?: { sessionIds?: string[]; mode: 'replace' | 'append'; collisionStrategy?: 'replace' | 'duplicate' },
       ) {
-        const result = options
-          ? await importSelectedPracticeSessions(file, options)
-          : await importPersistedPracticeSessions(file);
+        const result = await (options
+          ? importSelectedPracticeSessions(file, {
+              ...options,
+              duplicateSuffix: t('practice.sessionHistory.duplicateSuffix'),
+            })
+          : importPersistedPracticeSessions(file)).catch((error) => {
+            store.setError(getLocalizedErrorMessage(error));
+            return null;
+          });
+
+        if (!result) {
+          return;
+        }
         setSessionHistory(result.sessions);
         releaseObjectUrl();
 
@@ -431,7 +486,7 @@ export function usePracticePlayer() {
         store.setSessionNote(value);
       },
     }),
-    [activeSession, store, t],
+    [activeSession, localeCode, store, t],
   );
 
   const loopRange = useMemo(() => {
