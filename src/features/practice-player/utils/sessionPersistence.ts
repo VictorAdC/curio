@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   LoopSelection,
+  MediaRelinkWarning,
   PracticeMarker,
   PracticeMediaSource,
   PracticeSessionSummary,
@@ -288,6 +289,108 @@ export async function deletePersistedPracticeSession(sessionId: string) {
   return {
     sessions: remainingSessions.map((session) => session.session),
     nextActiveSessionId,
+  };
+}
+
+export function getPracticeSessionMediaRelinkWarning(sessionId: string, file: File): MediaRelinkWarning | null {
+  const sessions = readPersistedSessions();
+  const targetSession = sessions.find((session) => session.session.id === sessionId);
+
+  if (!targetSession || targetSession.source.kind === 'youtube') {
+    return null;
+  }
+
+  const expected = targetSession.source.sourceRef;
+  const mismatches: MediaRelinkWarning['mismatches'] = [];
+
+  if (expected.fileType && expected.fileType !== file.type) {
+    mismatches.push('type');
+  }
+
+  if (expected.fileSize && expected.fileSize !== file.size) {
+    mismatches.push('size');
+  }
+
+  if (expected.fileName && expected.fileName !== file.name) {
+    mismatches.push('name');
+  }
+
+  if (expected.fileLastModified && expected.fileLastModified !== file.lastModified) {
+    mismatches.push('lastModified');
+  }
+
+  if (mismatches.length === 0) {
+    return null;
+  }
+
+  const mismatchLabels = mismatches.map((mismatch) => {
+    switch (mismatch) {
+      case 'type':
+        return 'file type';
+      case 'size':
+        return 'file size';
+      case 'name':
+        return 'file name';
+      case 'lastModified':
+        return 'last modified date';
+    }
+  });
+
+  return {
+    mismatches,
+    message: `This file differs from the original session media (${mismatchLabels.join(', ')}). Use it anyway?`,
+  };
+}
+
+export async function relinkPersistedPracticeSessionMedia(sessionId: string, file: File) {
+  const sessions = readPersistedSessions();
+  const targetSession = sessions.find((session) => session.session.id === sessionId);
+
+  if (!targetSession || targetSession.source.kind === 'youtube') {
+    throw new Error('This session does not require local media relinking.');
+  }
+
+  const mediaId = targetSession.source.sourceRef.persistedMediaId ?? targetSession.source.id;
+
+  await db.mediaAssets.put({
+    id: mediaId,
+    file,
+    name: file.name,
+    type: file.type,
+    lastModified: file.lastModified,
+  });
+
+  const nextSessions = sortSessionsDescending(
+    sessions.map((session) =>
+      session.session.id === sessionId
+        ? {
+            ...session,
+            session: {
+              ...session.session,
+              requiresMediaRelink: false,
+              updatedAt: new Date().toISOString(),
+            },
+            source: {
+              ...session.source,
+              sourceRef: {
+                ...session.source.sourceRef,
+                persistedMediaId: mediaId,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                fileLastModified: file.lastModified,
+              },
+            },
+          }
+        : session,
+    ),
+  );
+
+  writePersistedSessions(nextSessions);
+
+  return {
+    sessions: nextSessions.map((session) => session.session),
+    activeSessionId: getActivePracticeSessionId(),
   };
 }
 

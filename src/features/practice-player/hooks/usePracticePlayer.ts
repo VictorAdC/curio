@@ -3,18 +3,25 @@ import { nanoid } from 'nanoid';
 import { PracticePlayerController } from '../controllers/practicePlayerController';
 import { useLoopPlayback } from './useLoopPlayback';
 import { usePracticeSessionStore } from '../store/practiceSessionStore';
-import type { PracticeMarker, PracticeMediaSource, PracticeSessionSummary } from '../types/practicePlayer';
+import type {
+  MediaRelinkWarning,
+  PracticeMarker,
+  PracticeMediaSource,
+  PracticeSessionSummary,
+} from '../types/practicePlayer';
 import {
   clearAllPersistedPracticeSessions,
   createPracticeSessionSummary,
   deletePersistedPracticeSession,
   exportPersistedPracticeSessions,
   getActivePracticeSessionId,
+  getPracticeSessionMediaRelinkWarning,
   inspectPracticeSessionsBackup,
   importSelectedPracticeSessions,
   importPersistedPracticeSessions,
   listPersistedPracticeSessions,
   persistPracticeSession,
+  relinkPersistedPracticeSessionMedia,
   renamePersistedPracticeSession,
   persistLocalMediaFile,
   restorePracticeSession,
@@ -297,6 +304,18 @@ export function usePracticePlayer() {
           currentSessions.map((session) => (session.id === sessionId ? { ...session, name } : session)),
         );
         setActiveSession((currentSession) => (currentSession?.id === sessionId ? { ...currentSession, name } : currentSession));
+      },
+      inspectRelinkSessionMedia(sessionId: string, file: File): MediaRelinkWarning | null {
+        return getPracticeSessionMediaRelinkWarning(sessionId, file);
+      },
+      async relinkSessionMedia(sessionId: string, file: File) {
+        const result = await relinkPersistedPracticeSessionMedia(sessionId, file);
+        setSessionHistory(result.sessions);
+
+        if (activeSession?.id === sessionId) {
+          releaseObjectUrl();
+          await loadPersistedSession(sessionId);
+        }
       },
       async deleteSession(sessionId: string) {
         const result = await deletePersistedPracticeSession(sessionId);

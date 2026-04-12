@@ -60,6 +60,13 @@ export function PracticePage() {
                     return;
                   }
 
+                  const warning = actions.inspectRelinkSessionMedia(view.activeSessionId, file);
+
+                  if (warning && !window.confirm(warning.message)) {
+                    event.currentTarget.value = '';
+                    return;
+                  }
+
                   void actions.relinkSessionMedia(view.activeSessionId, file);
                   event.currentTarget.value = '';
                 }}

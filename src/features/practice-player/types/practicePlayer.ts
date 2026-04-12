@@ -60,6 +60,11 @@ export interface PracticeSessionSummary {
   requiresMediaRelink?: boolean;
 }
 
+export interface MediaRelinkWarning {
+  message: string;
+  mismatches: Array<'name' | 'type' | 'size' | 'lastModified'>;
+}
+
 export interface PlaybackAdapter {
   load(source: PracticeMediaSource): Promise<void>;
   play(): Promise<void> | void;
