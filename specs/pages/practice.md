@@ -22,6 +22,7 @@ It allows a music student to load local media or a YouTube source, navigate prec
 
 - upload a local audio or video file;
 - load a YouTube media source from a URL;
+- reopen a previously saved local practice session;
 - play and pause media;
 - seek through the media by clicking or dragging on the timeline;
 - jump backward by `10` seconds;
@@ -31,7 +32,11 @@ It allows a music student to load local media or a YouTube source, navigate prec
 - assign one marker as loop start;
 - assign one marker as loop end;
 - clear loop assignment;
-- edit a session-wide practice note.
+- edit a session-wide practice note;
+- rename or delete a saved practice session;
+- export saved sessions as a backup copy;
+- import sessions from a backup copy;
+- relink missing local media after importing a light backup.
 
 ## Page Structure
 
@@ -42,16 +47,17 @@ The page must provide two entry paths:
 - local file upload for audio and video;
 - YouTube URL input with explicit load action.
 
-The media source input area should make the current source type clear after loading.
+The media source input area should stay visually simple, with the YouTube flow as the primary input and local file selection as a secondary action.
 
 ### 2. Now Practicing Header
 
 The page should show:
 
 - current media title;
-- source type;
 - current playback time;
 - total duration when available.
+
+Session-history access may live in a nearby utility action rather than inside the playback header itself.
 
 ### 3. Main Player Area
 
@@ -74,6 +80,8 @@ The timeline should show:
 - current playback position;
 - marker positions;
 - active loop start and end points when set.
+
+For local audio, the large waveform view may stay visually clean while marker positions are shown on a thinner secondary timeline below it.
 
 ### 5. Transport Controls
 
@@ -113,6 +121,19 @@ The page must include a general session note area separate from marker notes.
 
 This note is for broad practice observations that are not tied to a single timestamp.
 
+### 8. Session History
+
+The page must support reopening previously saved sessions, but session history should not compete visually with the main practice workspace.
+
+The preferred model is:
+
+- a dedicated utility action such as `Sessions`;
+- a drawer or overlay that contains saved sessions;
+- session selection by clicking the session card itself;
+- inline rename by editing the session name in place;
+- delete with confirmation;
+- backup and restore actions grouped at the end of the drawer.
+
 ## Looping Model
 
 - users may create multiple markers;
@@ -127,16 +148,25 @@ This note is for broad practice observations that are not tied to a single times
 
 The page should treat the current practice session as local-first state.
 
-V1 persistence should support local storage of:
+V1 persistence supports:
 
-- active media session metadata when practical;
-- markers for the current session;
+- saved session summaries and active-session tracking in `localStorage`;
+- persisted local media files in IndexedDB through Dexie;
+- markers for each saved session;
 - loop marker assignment;
 - session note content;
 - marker note content;
-- last known playback position if this behavior is enabled later.
+- current playback position;
+- waveform data for local audio sessions when available.
 
-The exact persistence storage may start in `localStorage`, with IndexedDB available later if the data model grows.
+Behavior rules:
+
+- reloading the app restores the last active session when possible;
+- choosing a new audio, video, or YouTube source creates a new session rather than mutating an older one;
+- saved sessions remain available in session history until deleted or cleared;
+- light backups export session data without embedded local media;
+- full backups export session data plus embedded local media;
+- importing a light backup may create sessions that require local-media relinking before playback can resume.
 
 ## Navigation Assumption
 
@@ -155,7 +185,9 @@ The page must handle the following cases clearly:
 - if only one loop marker is assigned, the markers are visible but loop playback remains inactive;
 - if loop start is at or after loop end, loop playback remains inactive;
 - transport controls must clamp seeks and jumps to valid time boundaries;
-- switching to a new media source must clear incompatible playback state and must not leave an invalid active loop.
+- switching to a new media source must create a fresh session and must not leave an invalid active loop;
+- importing a local-file session without embedded media must show a recoverable missing-media state;
+- relinking media should compare the uploaded file with stored metadata and warn if the file appears different from the original.
 
 ## Acceptance Scenarios
 
@@ -167,4 +199,9 @@ The page must handle the following cases clearly:
 - a user creates several markers and selects two of them as loop boundaries;
 - a user adds notes to individual markers;
 - a user writes a separate session note not tied to a marker;
-- loop playback only activates when both selected loop markers are valid.
+- loop playback only activates when both selected loop markers are valid;
+- a user reloads the app and returns to the most recent session;
+- a user opens the session drawer and switches to an older saved session;
+- a user exports a light backup and later reimports it;
+- a user re-uploads missing local media for an imported light-backup session;
+- a user is warned before relinking a file that does not match the expected local media metadata.

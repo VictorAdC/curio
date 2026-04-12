@@ -36,6 +36,7 @@ src/
         WaveformTimeline/
         MarkerList/
         MarkerEditor/
+        SessionHistory/
         SessionNotes/
       controllers/
         practicePlayerController.ts
@@ -51,6 +52,7 @@ src/
       types/
         practicePlayer.ts
       utils/
+        sessionPersistence.ts
         time.ts
         youtube.ts
         waveform.ts
@@ -71,6 +73,8 @@ Route-level page modules should:
 
 For the Practice page, the page module should arrange the source picker, player area, timeline, controls, marker area, and notes area without implementing the playback engine itself.
 
+Route-level pages may also own temporary page-specific presentation wrappers such as a session drawer shell, as long as the underlying session feature behavior stays inside the reusable feature module.
+
 ### Feature Modules
 
 Feature modules should own reusable product behavior.
@@ -82,6 +86,7 @@ The `practice-player` feature should contain:
 - marker behavior;
 - loop behavior;
 - session note behavior;
+- session history, backup, import, and relink behavior;
 - media-source-specific adapters;
 - reusable UI parts used by one or more pages.
 
@@ -94,6 +99,7 @@ Examples that should remain inside `practice-player`:
 - transport controls;
 - waveform timeline;
 - marker list;
+- session history;
 - session notes tied to playback.
 
 ## Practice Player Module Design
@@ -110,6 +116,7 @@ Reusable UI parts that receive data and callbacks through props:
 - `WaveformTimeline`
 - `MarkerList`
 - `MarkerEditor`
+- `SessionHistory`
 - `SessionNotes`
 
 These components should not own source-specific playback logic.
@@ -153,6 +160,8 @@ Expected hook responsibilities:
 
 Hooks should coordinate behavior, not become hidden stores.
 
+The main feature-facing hook should expose a stable page-level view model and explicit actions, so route components do not depend directly on internal Zustand mutators.
+
 ### Store
 
 State should live in a feature-local Zustand store.
@@ -170,6 +179,8 @@ The practice session store should own:
 - load and error state.
 
 This keeps playback state reusable across page layouts and prevents layout components from becoming state containers.
+
+Session-history persistence, backup import/export, and browser-storage side effects should remain in feature utilities and hooks, not in route components.
 
 ### Types
 
@@ -191,7 +202,10 @@ Expected utility areas:
 - time formatting and clamping;
 - YouTube URL parsing;
 - loop validation;
-- waveform normalization or transformation.
+- waveform normalization or transformation;
+- session serialization and persistence;
+- backup export and import helpers;
+- local-media relink validation.
 
 ## Design Rules
 
@@ -210,6 +224,7 @@ This organization makes the first Practice page easier to build while keeping fu
 - the same player controls;
 - the same marker and loop model;
 - the same session-note behavior;
+- the same session-history and recovery model;
 - the same local and YouTube playback adapters.
 
 It also reduces the chance that a future page will have to copy Practice-specific code just to reuse timeline and playback capabilities.

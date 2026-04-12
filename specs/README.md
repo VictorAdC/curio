@@ -28,8 +28,8 @@ Build a browser-based music learning support app that is simple to access, works
 ### State and Data
 
 - Zustand will be the default state manager.
-- Local persistence will use `localStorage` first.
-- If structured or larger client-side persistence becomes necessary, IndexedDB will be added through Dexie.
+- Local persistence uses `localStorage` for session metadata and active-session tracking.
+- IndexedDB is used through Dexie for persisted local media files and larger client-side assets.
 
 ### Audio and Media
 
@@ -62,8 +62,8 @@ The `specs/` folder should document:
 - No backend services.
 - No authentication.
 - No server-side database.
-- No page implementation yet.
-- No feature-specific UI until the core specs are organized.
+- No cross-device sync.
+- No server-managed media library.
 
 ## Expected Evolution
 

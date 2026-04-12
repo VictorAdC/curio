@@ -82,6 +82,11 @@ The timeline component must accept:
 - waveform data when available;
 - seek interaction callbacks.
 
+In the current Practice-page flow:
+
+- local audio uses a large waveform view plus a thinner secondary timeline for marker positions;
+- local video and YouTube use the thinner shared timeline as the primary marker surface.
+
 ## Reusable UI Building Blocks
 
 The playback system should be composed from reusable UI modules:
@@ -111,6 +116,15 @@ Suggested fields:
 - `sourceRef`
 
 `sourceRef` should contain the source-specific reference needed by the adapter, such as a file handle description or YouTube video id or URL.
+
+For persisted local sessions, `sourceRef` should also carry browser-storage references and media metadata needed for restore or relink flows, such as:
+
+- persisted media id;
+- file name;
+- file type;
+- file size;
+- file last modified timestamp;
+- a missing-media flag when a light backup was restored without embedded local media.
 
 ### `PracticeMarker`
 
@@ -150,6 +164,13 @@ Suggested fields:
 - session note;
 - waveform data when available.
 
+The session model should also support:
+
+- session identity and summary data;
+- active-session restore;
+- missing-media recovery for imported local-file sessions;
+- backup/export and import flows for one or more sessions.
+
 ## Loop Behavior
 
 Loop behavior must be shared across adapters.
@@ -172,7 +193,21 @@ Loop behavior must be shared across adapters.
 - true waveform rendering is required only for local audio;
 - YouTube uses an approximate timeline in v1;
 - the reusable model must prioritize a consistent user workflow over source-specific UI differences;
-- session state remains local-first and does not require backend synchronization.
+- session state remains local-first and does not require backend synchronization;
+- session metadata may live in `localStorage` while larger local media files live in IndexedDB through Dexie.
+
+## Persistence And Recovery Model
+
+The current playback stack supports saved practice sessions.
+
+- Session summaries and serialized session state are stored locally in `localStorage`.
+- Local audio and video files are persisted separately in IndexedDB through Dexie.
+- Reload restores the most recently active session when possible.
+- New source selection creates a new session instead of overwriting an older one.
+- Light backups include session data only.
+- Full backups include session data plus embedded local media.
+- Light-backup imports for local files must support later media relinking.
+- Media relinking should warn when the uploaded file diverges from stored metadata, but still allow explicit user confirmation.
 
 ## Component-Level Validation Targets
 

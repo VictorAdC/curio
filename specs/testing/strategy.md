@@ -44,7 +44,7 @@ Integration tests should cover:
 - React component behavior through user interaction;
 - Zustand store integration with UI;
 - `localStorage` persistence flows;
-- IndexedDB flows when Dexie is introduced;
+- IndexedDB flows through Dexie for persisted local media;
 - audio-related orchestration using mocked browser APIs;
 - YouTube integration boundaries using mocks or adapters.
 
@@ -56,6 +56,8 @@ Playwright should be used for a limited number of critical flows, such as:
 - navigation between major pages;
 - restoring local data after reload;
 - core study-session flows;
+- session export and import flows;
+- missing-media recovery after importing a light backup;
 - essential playback-related UI behavior.
 
 The E2E suite should stay small and focused on high-value scenarios.
@@ -68,6 +70,8 @@ Manual testing will still be required for:
 - autoplay restrictions;
 - YouTube iframe behavior in real browsers;
 - seek, loop, and playback edge cases;
+- large local-media persistence behavior and browser storage limits;
+- backup size differences between light and full copies;
 - mobile browser checks;
 - performance and responsiveness during audio interaction.
 
