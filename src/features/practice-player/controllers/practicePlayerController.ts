@@ -64,6 +64,14 @@ export class PracticePlayerController {
     this.adapter?.jumpBy(deltaSeconds);
   }
 
+  setPlaybackRate(rate: number) {
+    this.adapter?.setPlaybackRate(rate);
+  }
+
+  getPlaybackRate() {
+    return this.adapter?.getPlaybackRate() ?? 1;
+  }
+
   getDuration() {
     return this.adapter?.getDuration() ?? 0;
   }

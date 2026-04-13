@@ -8,7 +8,7 @@ import type {
 
 interface PracticeSessionActions {
   setSource: (source: PracticeMediaSource | null) => void;
-  setPlayback: (payload: { currentTime?: number; duration?: number; isPlaying?: boolean; isReady?: boolean }) => void;
+  setPlayback: (payload: { currentTime?: number; duration?: number; isPlaying?: boolean; isReady?: boolean; playbackRate?: number }) => void;
   setError: (error: string | null) => void;
   setWaveform: (waveform: TimelineWaveformDatum[]) => void;
   setSessionNote: (note: string) => void;
@@ -21,6 +21,7 @@ interface PracticeSessionActions {
     source: PracticeMediaSource;
     currentTime: number;
     duration: number;
+    playbackRate: number;
     markers: PracticeMarker[];
     loopSelection: LoopSelection;
     sessionNote: string;
@@ -41,6 +42,7 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
   isPlaying: false,
   currentTime: 0,
   duration: 0,
+  playbackRate: 1,
   markers: [],
   loopSelection: initialLoopSelection,
   sessionNote: '',
@@ -57,6 +59,7 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       duration: payload.duration ?? state.duration,
       isPlaying: payload.isPlaying ?? state.isPlaying,
       isReady: payload.isReady ?? state.isReady,
+      playbackRate: payload.playbackRate ?? state.playbackRate,
     })),
   setError: (error) => set({ error }),
   setWaveform: (waveform) => set({ waveform }),
@@ -130,6 +133,7 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       isPlaying: false,
       currentTime: payload.currentTime,
       duration: payload.duration,
+      playbackRate: payload.playbackRate,
       markers: payload.markers,
       loopSelection: payload.loopSelection,
       sessionNote: payload.sessionNote,
@@ -142,6 +146,7 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       isPlaying: false,
       currentTime: 0,
       duration: 0,
+      playbackRate: 1,
       markers: [],
       loopSelection: initialLoopSelection,
       sessionNote: '',

@@ -27,6 +27,8 @@ The reusable playback layer should expose a controller interface with the follow
 - `load(source)`
 - `play()`
 - `pause()`
+- `setPlaybackRate(rate)`
+- `getPlaybackRate()`
 - `seek(seconds)`
 - `jumpBy(deltaSeconds)`
 - `getDuration()`
@@ -48,6 +50,8 @@ The local media adapter is responsible for:
 - loading local video files;
 - reading metadata from HTML media elements;
 - controlling playback through native browser media APIs;
+- applying playback-rate changes to the currently active media element;
+- attempting pitch preservation for rate changes when browser media APIs support it;
 - exposing timing information;
 - providing waveform metadata when available for local audio workflows.
 
@@ -59,6 +63,7 @@ The YouTube adapter is responsible for:
 
 - loading a media source from a YouTube URL or video id;
 - controlling playback through the YouTube Iframe API;
+- applying playback-rate changes through the YouTube player API when supported;
 - exposing duration and current time from the embedded player;
 - supporting seek and jump behavior through the same shared controller contract.
 
@@ -93,6 +98,7 @@ The playback system should be composed from reusable UI modules:
 
 - media source picker;
 - transport controls;
+- playback speed controls;
 - timeline or seek bar;
 - waveform renderer for local audio timelines;
 - marker list;
@@ -157,6 +163,7 @@ Suggested fields:
 
 - active source;
 - playback status;
+- playback rate;
 - current time;
 - duration;
 - markers;
@@ -195,6 +202,7 @@ Loop behavior must be shared across adapters.
 - the reusable model must prioritize a consistent user workflow over source-specific UI differences;
 - session state remains local-first and does not require backend synchronization;
 - session metadata may live in `localStorage` while larger local media files live in IndexedDB through Dexie.
+- pitch preservation for local media is a browser-dependent best-effort capability rather than a guaranteed cross-browser contract.
 
 ## Persistence And Recovery Model
 

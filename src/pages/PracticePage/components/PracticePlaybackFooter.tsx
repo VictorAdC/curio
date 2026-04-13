@@ -10,8 +10,11 @@ interface PracticePlaybackFooterProps {
   loopStart: number | null;
   loopEnd: number | null;
   isPlaying: boolean;
+  playbackRate: number;
+  playbackRatePresets: readonly number[];
   onTogglePlayback: () => void;
   onJumpBy: (deltaSeconds: number) => void;
+  onSetPlaybackRate: (rate: number) => void;
   onSeek: (seconds: number) => void;
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
@@ -24,8 +27,11 @@ export function PracticePlaybackFooter({
   loopStart,
   loopEnd,
   isPlaying,
+  playbackRate,
+  playbackRatePresets,
   onTogglePlayback,
   onJumpBy,
+  onSetPlaybackRate,
   onSeek,
   onMarkerHover,
   onMarkerLeave,
@@ -35,9 +41,12 @@ export function PracticePlaybackFooter({
       <div className={styles.canvasTransport}>
         <TransportControls
           isPlaying={isPlaying}
+          playbackRate={playbackRate}
+          playbackRatePresets={playbackRatePresets}
           onTogglePlayback={onTogglePlayback}
           onJumpBackward={() => onJumpBy(-10)}
           onJumpForward={() => onJumpBy(10)}
+          onSetPlaybackRate={onSetPlaybackRate}
         />
       </div>
       <Timeline

@@ -28,6 +28,7 @@ interface PersistedSessionSnapshot {
   source: PersistedPracticeMediaSource;
   currentTime: number;
   duration: number;
+  playbackRate: number;
   markers: PracticeMarker[];
   loopSelection: LoopSelection;
   sessionNote: string;
@@ -55,6 +56,7 @@ interface RestoredPracticeSession {
   source: PracticeMediaSource;
   currentTime: number;
   duration: number;
+  playbackRate: number;
   markers: PracticeMarker[];
   loopSelection: LoopSelection;
   sessionNote: string;
@@ -284,6 +286,7 @@ export function persistPracticeSession(session: PracticeSessionSummary, state: P
     source: buildPersistedSource(state.source),
     currentTime: state.currentTime,
     duration: state.duration,
+    playbackRate: state.playbackRate,
     markers: state.markers,
     loopSelection: state.loopSelection,
     sessionNote: state.sessionNote,
@@ -715,6 +718,7 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
             youtubeVideoId: snapshot.source.sourceRef.youtubeVideoId,
           },
         },
+        playbackRate: snapshot.playbackRate ?? 1,
       };
     }
 
@@ -738,6 +742,7 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
             mediaMissing: true,
           },
         },
+        playbackRate: snapshot.playbackRate ?? 1,
       };
     }
 
@@ -786,6 +791,7 @@ export async function restorePracticeSession(sessionId?: string): Promise<Restor
           fileLastModified: storedMedia.lastModified,
         },
       },
+      playbackRate: snapshot.playbackRate ?? 1,
     };
   } catch {
     return null;

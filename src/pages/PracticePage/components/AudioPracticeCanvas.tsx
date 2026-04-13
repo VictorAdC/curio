@@ -13,11 +13,14 @@ interface AudioPracticeCanvasProps {
   loopEnd: number | null;
   waveform: TimelineWaveformDatum[];
   isPlaying: boolean;
+  playbackRate: number;
+  playbackRatePresets: readonly number[];
   hoveredMarker: PracticeMarker | null;
   onAddMarker: () => void;
   onClearLoop: () => void;
   onTogglePlayback: () => void;
   onJumpBy: (deltaSeconds: number) => void;
+  onSetPlaybackRate: (rate: number) => void;
   onSeek: (seconds: number) => void;
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
@@ -31,11 +34,14 @@ export function AudioPracticeCanvas({
   loopEnd,
   waveform,
   isPlaying,
+  playbackRate,
+  playbackRatePresets,
   hoveredMarker,
   onAddMarker,
   onClearLoop,
   onTogglePlayback,
   onJumpBy,
+  onSetPlaybackRate,
   onSeek,
   onMarkerHover,
   onMarkerLeave,
@@ -73,8 +79,11 @@ export function AudioPracticeCanvas({
         loopStart={loopStart}
         loopEnd={loopEnd}
         isPlaying={isPlaying}
+        playbackRate={playbackRate}
+        playbackRatePresets={playbackRatePresets}
         onTogglePlayback={onTogglePlayback}
         onJumpBy={onJumpBy}
+        onSetPlaybackRate={onSetPlaybackRate}
         onSeek={onSeek}
         onMarkerHover={onMarkerHover}
         onMarkerLeave={onMarkerLeave}

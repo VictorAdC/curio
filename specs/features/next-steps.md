@@ -21,21 +21,7 @@ The next steps should improve quality, reduce technical debt, and expand study v
 
 ## Recommended Near-Term Features
 
-### 1. Playback Speed Control
-
-Priority: high
-
-User value:
-
-- helps music students slow down difficult passages without losing context.
-
-Suggested scope:
-
-- speed presets;
-- speed reset;
-- preserve pitch when possible.
-
-### 2. Faster Loop Creation
+### 1. Faster Loop Creation
 
 Priority: high
 
@@ -50,7 +36,7 @@ Suggested scope:
 - clear loop quickly;
 - optional keyboard shortcuts.
 
-### 3. Keyboard Shortcuts
+### 2. Keyboard Shortcuts
 
 Priority: high
 
@@ -66,7 +52,7 @@ Suggested scope:
 - set loop start and end;
 - open sessions drawer.
 
-### 4. Marker Categories
+### 3. Marker Categories
 
 Priority: medium
 
@@ -80,7 +66,7 @@ Suggested scope:
 - filtering in the marker list;
 - clearer timeline representation later.
 
-### 5. Better YouTube Session Metadata
+### 4. Better YouTube Session Metadata
 
 Priority: medium
 
@@ -94,7 +80,7 @@ Suggested scope:
 - optional thumbnail or richer session summary;
 - improved source labeling in history.
 
-### 6. Session Tags Or Piece Grouping
+### 5. Session Tags Or Piece Grouping
 
 Priority: medium
 
@@ -108,7 +94,7 @@ Suggested scope:
 - grouping by piece name;
 - filtering in session history.
 
-### 7. Extract Audio From Local Video
+### 6. Extract Audio From Local Video
 
 Priority: medium
 
@@ -124,7 +110,7 @@ Suggested scope:
 - make the storage tradeoff clear before saving the session;
 - keep the original video workflow available when visual reference is important.
 
-### 8. Download Saved Local Media
+### 7. Download Saved Local Media
 
 Priority: medium
 
@@ -184,19 +170,17 @@ These are useful, but not as urgent as the items above.
 
 ### Product Value Next
 
-1. playback speed control;
-2. quick loop actions;
-3. keyboard shortcuts;
-4. marker categories;
-5. better YouTube metadata;
-6. optional audio extraction for local video uploads;
-7. saved media download for recovery and portability.
+1. quick loop actions;
+2. keyboard shortcuts;
+3. marker categories;
+4. better YouTube metadata;
+5. optional audio extraction for local video uploads;
+6. saved media download for recovery and portability.
 
 ## Spec Follow-Ups
 
 The following topics are good candidates for their own feature or architecture specs:
 
-- `playback-speed.md`
 - `keyboard-shortcuts.md`
 - `session-organization.md`
 - `marker-categories.md`

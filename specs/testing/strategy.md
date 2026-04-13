@@ -48,6 +48,7 @@ Integration tests should cover:
 - IndexedDB flows through Dexie for persisted local media;
 - storage-health UI behavior and persistence feedback messaging;
 - audio-related orchestration using mocked browser APIs;
+- playback-speed updates while media is already running;
 - YouTube integration boundaries using mocks or adapters.
 
 ## End-to-End Test Scope
@@ -83,6 +84,7 @@ Manual testing will still be required for:
 - autoplay restrictions;
 - YouTube iframe behavior in real browsers;
 - seek, loop, and playback edge cases;
+- playback-speed behavior and pitch preservation across browsers;
 - large local-media persistence behavior and browser storage limits;
 - backup size differences between light and full copies;
 - translated copy review for tone, truncation, and layout impact;

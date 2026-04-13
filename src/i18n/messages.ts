@@ -136,6 +136,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.transport.forward': '+10s',
     'practice.transport.play': 'Play',
     'practice.transport.pause': 'Pause',
+    'practice.transport.speed': 'Speed',
+    'practice.transport.speedValue': '{value}x',
 
     'practice.timeline.seekMediaAria': 'Seek through media timeline',
     'practice.timeline.seekWaveformAria': 'Seek through audio waveform',
@@ -315,6 +317,8 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.transport.forward': '+10s',
     'practice.transport.play': 'Tocar',
     'practice.transport.pause': 'Pausar',
+    'practice.transport.speed': 'Velocidade',
+    'practice.transport.speedValue': '{value}x',
 
     'practice.timeline.seekMediaAria': 'Buscar na linha do tempo da mídia',
     'practice.timeline.seekWaveformAria': 'Buscar na forma de onda do áudio',

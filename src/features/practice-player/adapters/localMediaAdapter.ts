@@ -55,6 +55,19 @@ export class LocalMediaAdapter implements PlaybackAdapter {
     this.seek(this.getCurrentTime() + deltaSeconds);
   }
 
+  setPlaybackRate(rate: number) {
+    this.options.mediaElement.defaultPlaybackRate = rate;
+    this.options.mediaElement.playbackRate = rate;
+
+    if ('preservesPitch' in this.options.mediaElement) {
+      (this.options.mediaElement as HTMLMediaElement & { preservesPitch?: boolean }).preservesPitch = true;
+    }
+  }
+
+  getPlaybackRate() {
+    return this.options.mediaElement.playbackRate || 1;
+  }
+
   getDuration() {
     return Number.isFinite(this.options.mediaElement.duration) ? this.options.mediaElement.duration : 0;
   }

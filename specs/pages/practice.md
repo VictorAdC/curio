@@ -95,6 +95,14 @@ The page must expose:
 - play and pause;
 - `-10s` jump;
 - `+10s` jump.
+- playback speed presets.
+
+Playback speed behavior:
+
+- the page should offer preset playback speeds suitable for practice;
+- the selected playback speed should apply to the active source immediately, even while playback is already running;
+- local audio and local video should attempt to preserve pitch when the browser supports it;
+- YouTube playback speed should use the YouTube player capabilities and may behave according to YouTube platform support.
 
 Additional transport controls may be added later, but these are the minimum required controls in v1.
 
@@ -163,6 +171,7 @@ V1 persistence supports:
 - session note content;
 - marker note content;
 - current playback position;
+- current playback speed;
 - waveform data for local audio sessions when available.
 
 Behavior rules:
@@ -215,6 +224,7 @@ The page must handle the following cases clearly:
 - missing-media recovery text and relink warnings must respect the selected language.
 - import, export, relink, delete, and clear-all flows must report clearer success or failure feedback.
 - the session drawer should expose browser-storage health when the platform can estimate it, and should fall back to an explanatory note when it cannot.
+- playback speed changes should update immediately for the active player rather than waiting for replay or reload.
 
 ## Acceptance Scenarios
 
@@ -223,6 +233,7 @@ The page must handle the following cases clearly:
 - a user loads a YouTube URL and uses a seekable timeline without true waveform rendering;
 - a user clicks the timeline to seek to a new timestamp;
 - a user uses `-10s` and `+10s` to move through the media;
+- a user changes playback speed while media is already playing and hears the new speed immediately;
 - a user creates several markers and selects two of them as loop boundaries;
 - a user adds notes to individual markers;
 - a user writes a separate session note not tied to a marker;

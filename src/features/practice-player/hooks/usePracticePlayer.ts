@@ -34,6 +34,8 @@ import { getPracticeErrorCode } from '../utils/errors';
 import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
+const PLAYBACK_RATE_PRESETS = [0.5, 0.75, 1, 1.25, 1.5] as const;
+
 export function usePracticePlayer() {
   const { t, localeCode } = useI18n();
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -147,6 +149,8 @@ export function usePracticePlayer() {
     if (options?.restoredCurrentTime !== undefined) {
       pendingRestoreSeekRef.current = options.restoredCurrentTime;
     }
+
+    controllerRef.current?.setPlaybackRate(store.playbackRate);
   };
 
   useEffect(() => {
@@ -220,6 +224,7 @@ export function usePracticePlayer() {
   }, [
     store.currentTime,
     store.duration,
+    store.playbackRate,
     store.loopSelection,
     store.markers,
     store.sessionNote,
@@ -236,6 +241,14 @@ export function usePracticePlayer() {
     controllerRef.current?.seek(pendingRestoreSeekRef.current);
     pendingRestoreSeekRef.current = null;
   }, [store.isReady]);
+
+  useEffect(() => {
+    if (!store.source) {
+      return;
+    }
+
+    controllerRef.current?.setPlaybackRate(store.playbackRate);
+  }, [store.playbackRate, store.source]);
 
   const actions = useMemo(
     () => ({
@@ -284,6 +297,7 @@ export function usePracticePlayer() {
           source,
           currentTime: 0,
           duration: 0,
+          playbackRate: 1,
           markers: [],
           loopSelection: {
             startMarkerId: null,
@@ -327,6 +341,7 @@ export function usePracticePlayer() {
           source,
           currentTime: 0,
           duration: 0,
+          playbackRate: 1,
           markers: [],
           loopSelection: {
             startMarkerId: null,
@@ -538,6 +553,10 @@ export function usePracticePlayer() {
       jumpBy(deltaSeconds: number) {
         controllerRef.current?.jumpBy(deltaSeconds);
       },
+      setPlaybackRate(rate: number) {
+        controllerRef.current?.setPlaybackRate(rate);
+        store.setPlayback({ playbackRate: rate });
+      },
       addMarker() {
         store.addMarker({
           id: nanoid(),
@@ -596,6 +615,8 @@ export function usePracticePlayer() {
       isPlaying: store.isPlaying,
       currentTime: store.currentTime,
       duration: store.duration,
+      playbackRate: store.playbackRate,
+      playbackRatePresets: PLAYBACK_RATE_PRESETS,
       markers: store.markers,
       markerCount: store.markers.length,
       loopRange,

@@ -127,11 +127,14 @@ export function PracticePage() {
             loopStart={view.loopRange.start}
             loopEnd={view.loopRange.end}
             isPlaying={view.isPlaying}
+            playbackRate={view.playbackRate}
+            playbackRatePresets={view.playbackRatePresets}
             hoveredMarker={hoveredMarker}
             onAddMarker={actions.addMarker}
             onClearLoop={actions.clearLoop}
             onTogglePlayback={actions.togglePlayback}
             onJumpBy={actions.jumpBy}
+            onSetPlaybackRate={actions.setPlaybackRate}
             onSeek={actions.seek}
             onMarkerHover={setHoveredMarker}
             onMarkerLeave={() => setHoveredMarker(null)}
@@ -148,11 +151,14 @@ export function PracticePage() {
             loopEnd={view.loopRange.end}
             waveform={view.waveform}
             isPlaying={view.isPlaying}
+            playbackRate={view.playbackRate}
+            playbackRatePresets={view.playbackRatePresets}
             hoveredMarker={hoveredMarker}
             onAddMarker={actions.addMarker}
             onClearLoop={actions.clearLoop}
             onTogglePlayback={actions.togglePlayback}
             onJumpBy={actions.jumpBy}
+            onSetPlaybackRate={actions.setPlaybackRate}
             onSeek={actions.seek}
             onMarkerHover={setHoveredMarker}
             onMarkerLeave={() => setHoveredMarker(null)}
@@ -162,9 +168,12 @@ export function PracticePage() {
         {!view.showMediaDisplay && !view.showAudioCanvas ? (
           <TransportControls
             isPlaying={view.isPlaying}
+            playbackRate={view.playbackRate}
+            playbackRatePresets={view.playbackRatePresets}
             onTogglePlayback={actions.togglePlayback}
             onJumpBackward={() => actions.jumpBy(-10)}
             onJumpForward={() => actions.jumpBy(10)}
+            onSetPlaybackRate={actions.setPlaybackRate}
           />
         ) : null}
 

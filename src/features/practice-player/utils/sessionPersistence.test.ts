@@ -35,6 +35,7 @@ function createSessionState(source: PracticeMediaSource): PracticeSessionState {
     isPlaying: false,
     currentTime: 8.2,
     duration: 32,
+    playbackRate: 1,
     markers: [
       {
         id: 'marker-1',

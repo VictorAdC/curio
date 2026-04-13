@@ -104,6 +104,14 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
     this.seek(this.getCurrentTime() + deltaSeconds);
   }
 
+  setPlaybackRate(rate: number) {
+    this.player?.setPlaybackRate(rate);
+  }
+
+  getPlaybackRate() {
+    return this.player?.getPlaybackRate() ?? 1;
+  }
+
   getDuration() {
     return this.player?.getDuration() ?? 0;
   }

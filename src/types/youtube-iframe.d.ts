@@ -4,6 +4,8 @@ declare global {
     pauseVideo(): void;
     playVideo(): void;
     seekTo(seconds: number, allowSeekAhead?: boolean): void;
+    setPlaybackRate(rate: number): void;
+    getPlaybackRate(): number;
     getCurrentTime(): number;
     getDuration(): number;
     cueVideoById(videoId: string): void;

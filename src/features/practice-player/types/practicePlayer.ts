@@ -42,6 +42,7 @@ export interface PracticeSessionState {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  playbackRate: number;
   markers: PracticeMarker[];
   loopSelection: LoopSelection;
   sessionNote: string;
@@ -89,6 +90,8 @@ export interface PlaybackAdapter {
   pause(): void;
   seek(seconds: number): void;
   jumpBy(deltaSeconds: number): void;
+  setPlaybackRate(rate: number): void;
+  getPlaybackRate(): number;
   getDuration(): number;
   getCurrentTime(): number;
   setLoop(startSeconds: number, endSeconds: number | null): void;
