@@ -175,6 +175,12 @@
   flex-wrap: wrap;
 }
 
+.playerHeaderAside {
+  display: grid;
+  justify-items: end;
+  gap: 0.85rem;
+}
+
 .timeBlock {
   text-align: right;
 }
@@ -499,6 +505,11 @@
 
   .audioWaveStage {
     padding-top: 0;
+  }
+
+  .playerHeaderAside {
+    width: 100%;
+    justify-items: stretch;
   }
 
   .audioControlsRow {

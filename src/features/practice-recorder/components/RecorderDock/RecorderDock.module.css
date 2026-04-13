@@ -1,0 +1,259 @@
+.root {
+  position: relative;
+  display: grid;
+  justify-items: end;
+  gap: 0.75rem;
+  z-index: 3;
+}
+
+.toggle {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggleRecording {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 5;
+  width: min(340px, calc(100vw - 2.5rem));
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid rgba(17, 34, 61, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.16);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.header strong,
+.header p {
+  margin: 0;
+}
+
+.header p {
+  margin-top: 0.25rem;
+  color: #5f6f85;
+}
+
+.close {
+  border: 0;
+  background: transparent;
+  color: #5f6f85;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modes {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span {
+  color: #465871;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(18, 58, 125, 0.12);
+  border-radius: 14px;
+  padding: 0.7rem 0.85rem;
+  background: #f8fbff;
+  color: #123a7d;
+  font: inherit;
+}
+
+.refreshInputs {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #123a7d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode {
+  min-width: 0;
+  border: 1px solid rgba(18, 58, 125, 0.12);
+  border-radius: 16px;
+  padding: 0.75rem 0.85rem;
+  background: #f4f7ff;
+  color: #123a7d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modeActive {
+  background: linear-gradient(135deg, #2563eb, #0f4cc8);
+  color: white;
+  border-color: transparent;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  color: #465871;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.statusDot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: #9ca3af;
+}
+
+.statusDotRecording {
+  background: #dc2626;
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.16);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.primary,
+.secondary {
+  border: 0;
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary {
+  background: linear-gradient(135deg, #2563eb, #0f4cc8);
+  color: white;
+}
+
+.secondary {
+  background: rgba(15, 40, 82, 0.08);
+  color: #123a7d;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.previewCard {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border-radius: 18px;
+  background: #f6f9ff;
+  color: #1d3557;
+}
+
+.previewCard strong,
+.previewCard p {
+  margin: 0;
+}
+
+.previewCard p {
+  color: #5f6f85;
+}
+
+.preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+  border-radius: 16px;
+  background: #0e1a2f;
+  object-fit: cover;
+}
+
+.audioPreview {
+  width: 100%;
+}
+
+.audioLiveRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 700;
+  color: #1d3557;
+}
+
+.audioPulse {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.35);
+}
+
+.audioPulseActive {
+  background: #dc2626;
+  box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.12);
+}
+
+.error {
+  padding: 0.75rem 0.85rem;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .root {
+    justify-items: stretch;
+  }
+
+  .toggle {
+    width: 100%;
+  }
+
+  .panel {
+    position: static;
+    width: 100%;
+  }
+
+  .modes {
+    grid-template-columns: 1fr;
+  }
+}

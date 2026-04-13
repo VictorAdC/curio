@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { RecorderDock } from '../../features/practice-recorder/components/RecorderDock/RecorderDock';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
 import { SessionHistory } from '../../features/practice-player/components/SessionHistory/SessionHistory';
@@ -114,7 +115,12 @@ export function PracticePage() {
       ) : null}
 
       <section className={styles.playerShell}>
-        <PracticePlayerHeader title={view.title} currentTime={view.currentTime} duration={view.duration} />
+        <PracticePlayerHeader
+          title={view.title}
+          currentTime={view.currentTime}
+          duration={view.duration}
+          utility={<RecorderDock hasActiveSource={!!view.source} />}
+        />
 
         <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
 
