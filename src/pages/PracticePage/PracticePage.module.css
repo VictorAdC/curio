@@ -399,7 +399,7 @@
 .lowerGrid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 

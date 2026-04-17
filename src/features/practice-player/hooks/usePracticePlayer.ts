@@ -10,6 +10,7 @@ import type {
   PracticeMediaSource,
   PracticePersistenceFeedback,
   PracticeSessionSummary,
+  PracticeSystemTag,
   PracticeStorageHealth,
 } from '../types/practicePlayer';
 import {
@@ -31,6 +32,7 @@ import {
   restorePracticeSession,
 } from '../utils/sessionPersistence';
 import { getPracticeErrorCode } from '../utils/errors';
+import { getValidLoopRange } from '../utils/markerTags';
 import { parseYouTubeVideoId } from '../utils/youtube';
 import { buildWaveformFromFile } from '../utils/waveform';
 
@@ -178,8 +180,6 @@ export function usePracticePlayer() {
   useLoopPlayback(
     controllerRef.current,
     store.markers,
-    store.loopSelection.startMarkerId,
-    store.loopSelection.endMarkerId,
   );
 
   useEffect(() => {
@@ -225,7 +225,6 @@ export function usePracticePlayer() {
     store.currentTime,
     store.duration,
     store.playbackRate,
-    store.loopSelection,
     store.markers,
     store.sessionNote,
     store.source,
@@ -299,10 +298,6 @@ export function usePracticePlayer() {
           duration: 0,
           playbackRate: 1,
           markers: [],
-          loopSelection: {
-            startMarkerId: null,
-            endMarkerId: null,
-          },
           sessionNote: '',
           waveform: [],
         });
@@ -343,10 +338,6 @@ export function usePracticePlayer() {
           duration: 0,
           playbackRate: 1,
           markers: [],
-          loopSelection: {
-            startMarkerId: null,
-            endMarkerId: null,
-          },
           sessionNote: '',
           waveform: [],
         });
@@ -557,31 +548,31 @@ export function usePracticePlayer() {
         controllerRef.current?.setPlaybackRate(rate);
         store.setPlayback({ playbackRate: rate });
       },
-      addMarker(role: PracticeMarker['loopRole'] = 'none') {
+      addMarker() {
         const marker: PracticeMarker = {
           id: nanoid(),
           timestampSeconds: store.currentTime,
           title: `${t('practice.markerSpotlight.label')} ${store.markers.length + 1}`,
           note: '',
-          loopRole: role,
+          systemTags: [],
+          userTags: [],
         };
 
         store.addMarker(marker);
-
-        if (role !== 'none') {
-          store.assignLoopRole(marker.id, role);
-        }
       },
       clearLoop() {
         store.clearLoop();
       },
-      assignLoopRole(markerId: string, role: PracticeMarker['loopRole']) {
-        store.assignLoopRole(markerId, role);
+      toggleSystemTag(markerId: string, tag: PracticeSystemTag) {
+        store.toggleSystemTag(markerId, tag);
+      },
+      convertSystemTagToUserTag(markerId: string, tag: PracticeSystemTag) {
+        store.convertSystemTagToUserTag(markerId, tag);
       },
       removeMarker(markerId: string) {
         store.removeMarker(markerId);
       },
-      updateMarker(markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note'>>) {
+      updateMarker(markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note' | 'userTags'>>) {
         store.updateMarker(markerId, updates);
       },
       setSessionNote(value: string) {
@@ -594,22 +585,7 @@ export function usePracticePlayer() {
     [activeSession, localeCode, store, t],
   );
 
-  const loopRange = useMemo(() => {
-    const start = store.markers.find((marker) => marker.id === store.loopSelection.startMarkerId);
-    const end = store.markers.find((marker) => marker.id === store.loopSelection.endMarkerId);
-
-    if (!start || !end || start.timestampSeconds >= end.timestampSeconds) {
-      return {
-        start: null,
-        end: null,
-      };
-    }
-
-    return {
-      start: start.timestampSeconds,
-      end: end.timestampSeconds,
-    };
-  }, [store.loopSelection.endMarkerId, store.loopSelection.startMarkerId, store.markers]);
+  const loopRange = useMemo(() => getValidLoopRange(store.markers), [store.markers]);
 
   const sourceKind = store.source?.kind ?? null;
 
@@ -625,6 +601,7 @@ export function usePracticePlayer() {
       playbackRatePresets: PLAYBACK_RATE_PRESETS,
       markers: store.markers,
       markerCount: store.markers.length,
+      specialMarkerCount: store.markers.filter((marker) => marker.systemTags.length > 0).length,
       loopRange,
       sessionNote: store.sessionNote,
       error: store.error,

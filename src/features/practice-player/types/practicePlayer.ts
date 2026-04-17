@@ -1,4 +1,5 @@
 export type PracticeMediaKind = 'local-audio' | 'local-video' | 'youtube';
+export type PracticeSystemTag = 'loop-start' | 'loop-end' | 'media-start' | 'media-end';
 
 export interface PracticeMediaSource {
   id: string;
@@ -24,12 +25,8 @@ export interface PracticeMarker {
   timestampSeconds: number;
   title: string;
   note: string;
-  loopRole: 'none' | 'start' | 'end';
-}
-
-export interface LoopSelection {
-  startMarkerId: string | null;
-  endMarkerId: string | null;
+  systemTags: PracticeSystemTag[];
+  userTags: string[];
 }
 
 export interface TimelineWaveformDatum {
@@ -44,7 +41,6 @@ export interface PracticeSessionState {
   duration: number;
   playbackRate: number;
   markers: PracticeMarker[];
-  loopSelection: LoopSelection;
   sessionNote: string;
   waveform: TimelineWaveformDatum[];
   error: string | null;

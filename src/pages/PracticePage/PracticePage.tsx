@@ -22,6 +22,7 @@ export function PracticePage() {
   const { locale, setLocale, t } = useI18n();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
+  const [isMarkerDrawerOpen, setIsMarkerDrawerOpen] = useState(false);
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ export function PracticePage() {
 
       if (event.key.toLowerCase() === 's') {
         event.preventDefault();
+        setIsMarkerDrawerOpen(false);
         setIsSessionDrawerOpen((current) => !current);
         return;
       }
@@ -133,7 +135,20 @@ export function PracticePage() {
           <button
             className={styles.sessionDrawerButton}
             type="button"
-            onClick={() => setIsSessionDrawerOpen(true)}
+            onClick={() => {
+              setIsSessionDrawerOpen(false);
+              setIsMarkerDrawerOpen(true);
+            }}
+          >
+            {t('practice.markers.button')}
+          </button>
+          <button
+            className={styles.sessionDrawerButton}
+            type="button"
+            onClick={() => {
+              setIsMarkerDrawerOpen(false);
+              setIsSessionDrawerOpen(true);
+            }}
           >
             {t('practice.sessions.button')}
           </button>
@@ -284,17 +299,41 @@ export function PracticePage() {
       </section>
 
       <section className={styles.lowerGrid}>
-        <MarkerList
-          markers={view.markers}
-          onSeekToMarker={actions.seek}
-          onAssignLoopRole={actions.assignLoopRole}
-          onDeleteMarker={actions.removeMarker}
-          onUpdateMarker={actions.updateMarker}
-          onAddMarker={actions.addMarker}
-          onClearLoop={actions.clearLoop}
-        />
         <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
       </section>
+
+      {isMarkerDrawerOpen ? (
+        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label={t('practice.markers.dialogLabel')}>
+          <button
+            className={styles.sessionDrawerBackdrop}
+            type="button"
+            aria-label={t('practice.markers.closeAria')}
+            onClick={() => setIsMarkerDrawerOpen(false)}
+          />
+          <aside className={styles.sessionDrawer}>
+            <div className={styles.sessionDrawerHeader}>
+              <span className={styles.eyebrow}>{t('practice.markers.savedEyebrow')}</span>
+              <button
+                className={styles.sessionDrawerClose}
+                type="button"
+                onClick={() => setIsMarkerDrawerOpen(false)}
+              >
+                {t('practice.markers.close')}
+              </button>
+            </div>
+            <MarkerList
+              markers={view.markers}
+              onSeekToMarker={actions.seek}
+              onToggleSystemTag={actions.toggleSystemTag}
+              onConvertSystemTagToUserTag={actions.convertSystemTagToUserTag}
+              onDeleteMarker={actions.removeMarker}
+              onUpdateMarker={actions.updateMarker}
+              onAddMarker={actions.addMarker}
+              onClearLoop={actions.clearLoop}
+            />
+          </aside>
+        </div>
+      ) : null}
 
       {isSessionDrawerOpen ? (
         <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label={t('practice.sessions.dialogLabel')}>

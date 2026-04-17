@@ -4,7 +4,8 @@
 }
 
 .title,
-.note {
+.note,
+.tags {
   width: 100%;
   padding: 0.7rem 0.85rem;
   border: 1px solid rgba(49, 88, 154, 0.16);
@@ -14,4 +15,66 @@
 
 .note {
   resize: vertical;
+}
+
+.tagsRoot {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.tagList {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(49, 88, 154, 0.08);
+  color: #31589a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tagRemove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.suggestions {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.suggestionsLabel {
+  color: #5f6f85;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.suggestionList {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.suggestion {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.6rem;
+  background: #edf3ff;
+  color: #123a7d;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
 }
