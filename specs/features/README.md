@@ -16,6 +16,7 @@ Planning and roadmap-style feature guidance may also live here when it is meant 
 Current planning document:
 
 - [next-steps.md](./next-steps.md)
+- [marker-system.md](./marker-system.md)
 
 Each feature spec should describe:
 
