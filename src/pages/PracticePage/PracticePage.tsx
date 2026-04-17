@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RecorderDock } from '../../features/practice-recorder/components/RecorderDock/RecorderDock';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
@@ -6,6 +6,7 @@ import { SessionHistory } from '../../features/practice-player/components/Sessio
 import { SessionNotes } from '../../features/practice-player/components/SessionNotes/SessionNotes';
 import { TransportControls } from '../../features/practice-player/components/TransportControls/TransportControls';
 import { usePracticePlayer } from '../../features/practice-player/hooks/usePracticePlayer';
+import { usePracticeRecorder } from '../../features/practice-recorder/hooks/usePracticeRecorder';
 import type { PracticeMarker } from '../../features/practice-player/types/practicePlayer';
 import { useI18n } from '../../i18n/I18nProvider';
 import { AudioPracticeCanvas } from './components/AudioPracticeCanvas';
@@ -17,10 +18,95 @@ import styles from './PracticePage.module.css';
 
 export function PracticePage() {
   const { view, actions } = usePracticePlayer();
+  const recorder = usePracticeRecorder();
   const { locale, setLocale, t } = useI18n();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const isTypingTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+
+      const tagName = target.tagName.toLowerCase();
+
+      return (
+        target.isContentEditable ||
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        tagName === 'select' ||
+        tagName === 'option'
+      );
+    };
+
+    const recorderMessages = {
+      unsupported: t('practice.recorder.error.unsupported'),
+      permissionDenied: t('practice.recorder.error.permission'),
+      generic: t('practice.recorder.error.generic'),
+      audioInputLabel: t('practice.recorder.audioInput'),
+      videoInputLabel: t('practice.recorder.videoInput'),
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) {
+        return;
+      }
+
+      if (event.key === ' ') {
+        event.preventDefault();
+        actions.togglePlayback();
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        actions.jumpBy(-10);
+        return;
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        actions.jumpBy(10);
+        return;
+      }
+
+      if (event.key.toLowerCase() === 'm') {
+        event.preventDefault();
+        actions.addMarker();
+        return;
+      }
+
+      if (event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        setIsSessionDrawerOpen((current) => !current);
+        return;
+      }
+
+      if (event.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        recorder.actions.setOpen(true);
+
+        if (recorder.view.isRecording) {
+          recorder.actions.stopRecording();
+          return;
+        }
+
+        if (!view.source) {
+          return;
+        }
+
+        void recorder.actions.startRecording(recorderMessages);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [actions, recorder.actions, recorder.view.isRecording, t, view.source]);
 
   return (
     <main className={styles.page}>
@@ -119,7 +205,7 @@ export function PracticePage() {
           title={view.title}
           currentTime={view.currentTime}
           duration={view.duration}
-          utility={<RecorderDock hasActiveSource={!!view.source} />}
+          utility={<RecorderDock hasActiveSource={!!view.source} recorder={recorder} />}
         />
 
         <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
@@ -184,6 +270,17 @@ export function PracticePage() {
         ) : null}
 
         <PracticeSummary isReady={view.isReady} markerCount={view.markerCount} isLoopActive={view.isLoopActive} />
+      </section>
+
+      <section className={styles.shortcutPanel} aria-label={t('practice.shortcuts.title')}>
+        <strong>{t('practice.shortcuts.title')}</strong>
+        <div className={styles.shortcutGrid}>
+          <span className={styles.shortcutItem}><kbd>Space</kbd>{t('practice.shortcuts.playPause')}</span>
+          <span className={styles.shortcutItem}><kbd>←</kbd><kbd>→</kbd>{t('practice.shortcuts.seek')}</span>
+          <span className={styles.shortcutItem}><kbd>M</kbd>{t('practice.shortcuts.addMarker')}</span>
+          <span className={styles.shortcutItem}><kbd>S</kbd>{t('practice.shortcuts.sessions')}</span>
+          <span className={styles.shortcutItem}><kbd>R</kbd>{t('practice.shortcuts.record')}</span>
+        </div>
       </section>
 
       <section className={styles.lowerGrid}>
@@ -251,6 +348,7 @@ export function PracticePage() {
           </aside>
         </div>
       ) : null}
+
     </main>
   );
 }

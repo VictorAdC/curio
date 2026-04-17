@@ -142,6 +142,7 @@ These are useful, but not as urgent as the items above.
 - review how markers are currently created, displayed, and edited across the player, timeline, and marker list;
 - identify friction in loop assignment, marker discovery, note editing, and timeline representation;
 - evaluate improvements such as richer marker states, grouping, categories, inline quick actions, or better visual prominence on the timeline;
+- explore a dedicated marker menu or contextual action surface so loop assignment and marker actions are more discoverable than hidden shortcuts;
 - produce concrete UX recommendations before expanding marker functionality further.
 
 ### Practice Templates

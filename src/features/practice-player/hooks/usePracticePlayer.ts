@@ -557,14 +557,20 @@ export function usePracticePlayer() {
         controllerRef.current?.setPlaybackRate(rate);
         store.setPlayback({ playbackRate: rate });
       },
-      addMarker() {
-        store.addMarker({
+      addMarker(role: PracticeMarker['loopRole'] = 'none') {
+        const marker: PracticeMarker = {
           id: nanoid(),
           timestampSeconds: store.currentTime,
           title: `${t('practice.markerSpotlight.label')} ${store.markers.length + 1}`,
           note: '',
-          loopRole: 'none',
-        });
+          loopRole: role,
+        };
+
+        store.addMarker(marker);
+
+        if (role !== 'none') {
+          store.assignLoopRole(marker.id, role);
+        }
       },
       clearLoop() {
         store.clearLoop();

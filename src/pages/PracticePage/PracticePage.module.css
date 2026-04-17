@@ -403,6 +403,46 @@
   align-items: start;
 }
 
+.shortcutPanel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(17, 34, 61, 0.08);
+}
+
+.shortcutPanel strong {
+  color: #123a7d;
+}
+
+.shortcutGrid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.shortcutItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  color: #54657b;
+  font-weight: 600;
+}
+
+.shortcutItem kbd {
+  min-width: 2rem;
+  padding: 0.22rem 0.45rem;
+  border-radius: 10px;
+  background: #f3f7ff;
+  border: 1px solid rgba(17, 34, 61, 0.08);
+  color: #123a7d;
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+}
+
 .sessionDrawerShell {
   position: fixed;
   inset: 0;

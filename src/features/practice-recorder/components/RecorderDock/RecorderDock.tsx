@@ -1,16 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { useI18n } from '../../../../i18n/I18nProvider';
 import { formatTime } from '../../../practice-player/utils/time';
-import { usePracticeRecorder } from '../../hooks/usePracticeRecorder';
+import type { usePracticeRecorder } from '../../hooks/usePracticeRecorder';
 import styles from './RecorderDock.module.css';
 
 interface RecorderDockProps {
   hasActiveSource: boolean;
+  recorder: ReturnType<typeof usePracticeRecorder>;
 }
 
-export function RecorderDock({ hasActiveSource }: RecorderDockProps) {
+export function RecorderDock({ hasActiveSource, recorder }: RecorderDockProps) {
   const { t } = useI18n();
-  const { view, actions } = usePracticeRecorder();
+  const { view, actions } = recorder;
   const liveVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
