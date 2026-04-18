@@ -4,8 +4,7 @@
 }
 
 .title,
-.note,
-.tags {
+.note {
   width: 100%;
   padding: 0.7rem 0.85rem;
   border: 1px solid rgba(49, 88, 154, 0.16);
@@ -22,22 +21,29 @@
   gap: 0.6rem;
 }
 
-.tagList {
+.tokenInput {
   display: flex;
-  gap: 0.45rem;
   flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(49, 88, 154, 0.16);
+  border-radius: 12px;
+  background: #fbfdff;
+  min-height: 2.8rem;
 }
 
 .tagChip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.55rem;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 999px;
   background: rgba(49, 88, 154, 0.08);
   color: #31589a;
   font-size: 0.85rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .tagRemove {
@@ -48,6 +54,18 @@
   font-weight: 800;
   cursor: pointer;
   line-height: 1;
+  padding: 0;
+}
+
+.tags {
+  border: 0;
+  background: transparent;
+  padding: 0.2rem 0.1rem;
+  min-width: 100px;
+  flex: 1;
+  outline: none;
+  font: inherit;
+  color: inherit;
 }
 
 .suggestions {

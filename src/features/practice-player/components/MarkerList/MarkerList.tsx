@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { formatTime } from '../../utils/time';
 import type { PracticeMarker, PracticeSystemTag } from '../../types/practicePlayer';
 import { MarkerEditor } from '../MarkerEditor/MarkerEditor';
@@ -10,7 +11,6 @@ interface MarkerListProps {
   markers: PracticeMarker[];
   onSeekToMarker: (seconds: number) => void;
   onToggleSystemTag: (markerId: string, tag: PracticeSystemTag) => void;
-  onConvertSystemTagToUserTag: (markerId: string, tag: PracticeSystemTag) => void;
   onDeleteMarker: (markerId: string) => void;
   onUpdateMarker: (markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note' | 'userTags'>>) => void;
   onAddMarker: () => void;
@@ -19,17 +19,48 @@ interface MarkerListProps {
 
 const specialTags: PracticeSystemTag[] = ['loop-start', 'loop-end', 'media-start', 'media-end'];
 
+const systemTagIcons: Record<string, string> = {
+  'loop-start': '↩',
+  'loop-end': '↪',
+  'media-start': '⏮',
+  'media-end': '⏭',
+};
+
 export function MarkerList({
   markers,
   onSeekToMarker,
   onToggleSystemTag,
-  onConvertSystemTagToUserTag,
   onDeleteMarker,
   onUpdateMarker,
   onAddMarker,
   onClearLoop,
 }: MarkerListProps) {
   const { t } = useI18n();
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [tooltip, setTooltip] = useState<{ text: string; bottom: number; left: number } | null>(null);
+
+  const showTooltip = (text: string, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltip({
+      text,
+      bottom: window.innerHeight - rect.top + 8,
+      left: rect.left + rect.width / 2,
+    });
+  };
+
+  const hideTooltip = () => setTooltip(null);
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const counts = useMemo(
     () => ({
@@ -75,48 +106,99 @@ export function MarkerList({
 
       <div className={styles.list}>
         {markers.length === 0 ? <p className={styles.empty}>{t('practice.markerList.empty')}</p> : null}
-        {markers.map((marker) => (
-          <article key={marker.id} className={styles.card}>
-            <div className={styles.cardHeader}>
-              <button className={styles.seekButton} type="button" onClick={() => onSeekToMarker(marker.timestampSeconds)}>
-                {formatTime(marker.timestampSeconds)}
-              </button>
-              <button className={styles.removeButton} type="button" onClick={() => onDeleteMarker(marker.id)}>
-                {t('practice.markerList.remove')}
-              </button>
-            </div>
+        {markers.map((marker) => {
+          const isExpanded = expandedIds.has(marker.id);
 
-            <div className={styles.specialTags}>
-              {specialTags.map((tag) => {
-                const isActive = marker.systemTags.includes(tag);
+          return (
+            <article key={marker.id} className={styles.card}>
+              <div className={styles.cardHeader}>
+                <button
+                  className={styles.seekButton}
+                  type="button"
+                  onClick={() => onSeekToMarker(marker.timestampSeconds)}
+                >
+                  {formatTime(marker.timestampSeconds)}
+                </button>
+                <button
+                  className={styles.expandButton}
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => toggleExpanded(marker.id)}
+                >
+                  {t(isExpanded ? 'practice.markerList.collapse' : 'practice.markerList.expand')}
+                </button>
+              </div>
 
-                return (
-                  <div key={tag} className={styles.specialTagCard}>
+              {!isExpanded ? (
+                <div className={styles.cardSummary}>
+                  {marker.title ? (
+                    <span className={styles.cardTitle}>{marker.title}</span>
+                  ) : null}
+                  {marker.userTags.length > 0 ? (
+                    <div className={styles.cardTagPreview}>
+                      {marker.userTags.map((tag) => (
+                        <span key={tag} className={styles.userTag}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <>
+                  <MarkerEditor
+                    marker={marker}
+                    suggestedTags={suggestedTags}
+                    onChange={onUpdateMarker}
+                    systemTagsSlot={
+                      <div className={styles.specialTags}>
+                        {specialTags.map((tag) => {
+                          const isActive = marker.systemTags.includes(tag);
+                          return (
+                            <button
+                              key={tag}
+                              className={`${styles.tagToggle} ${isActive ? styles.tagToggleActive : ''}`}
+                              type="button"
+                              aria-label={t(`practice.markerList.systemTag.${tag}`)}
+                              aria-pressed={isActive}
+                              onMouseEnter={(e) => showTooltip(t(`practice.markerList.systemTag.${tag}`), e)}
+                              onMouseLeave={hideTooltip}
+                              onClick={() => onToggleSystemTag(marker.id, tag)}
+                            >
+                              {systemTagIcons[tag]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    }
+                  />
+
+                  <div className={styles.cardFooter}>
                     <button
-                      className={`${styles.tagToggle} ${isActive ? styles.tagToggleActive : ''}`}
+                      className={styles.removeButton}
                       type="button"
-                      onClick={() => onToggleSystemTag(marker.id, tag)}
+                      onClick={() => onDeleteMarker(marker.id)}
                     >
-                      {t(`practice.markerList.systemTag.${tag}`)}
+                      {t('practice.markerList.remove')}
                     </button>
-                    {isActive ? (
-                      <button
-                        className={styles.convertButton}
-                        type="button"
-                        onClick={() => onConvertSystemTagToUserTag(marker.id, tag)}
-                      >
-                        {t('practice.markerList.convertToTag')}
-                      </button>
-                    ) : null}
                   </div>
-                );
-              })}
-            </div>
-
-            <MarkerEditor marker={marker} suggestedTags={suggestedTags} onChange={onUpdateMarker} />
-          </article>
-        ))}
+                </>
+              )}
+            </article>
+          );
+        })}
       </div>
+
+      {tooltip ? createPortal(
+        <div
+          className={styles.floatingTooltip}
+          style={{ bottom: tooltip.bottom, left: tooltip.left }}
+          aria-hidden
+        >
+          {tooltip.text}
+        </div>,
+        document.body,
+      ) : null}
     </section>
   );
 }

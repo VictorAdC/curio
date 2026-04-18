@@ -325,7 +325,6 @@ export function PracticePage() {
               markers={view.markers}
               onSeekToMarker={actions.seek}
               onToggleSystemTag={actions.toggleSystemTag}
-              onConvertSystemTagToUserTag={actions.convertSystemTagToUserTag}
               onDeleteMarker={actions.removeMarker}
               onUpdateMarker={actions.updateMarker}
               onAddMarker={actions.addMarker}

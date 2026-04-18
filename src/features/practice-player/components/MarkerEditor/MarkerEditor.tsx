@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { PracticeMarker } from '../../types/practicePlayer';
 import { useI18n } from '../../../../i18n/I18nProvider';
 import styles from './MarkerEditor.module.css';
@@ -6,10 +6,11 @@ import styles from './MarkerEditor.module.css';
 interface MarkerEditorProps {
   marker: PracticeMarker;
   suggestedTags: string[];
+  systemTagsSlot?: React.ReactNode;
   onChange: (markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note' | 'userTags'>>) => void;
 }
 
-export function MarkerEditor({ marker, suggestedTags, onChange }: MarkerEditorProps) {
+export function MarkerEditor({ marker, suggestedTags, systemTagsSlot, onChange }: MarkerEditorProps) {
   const { t } = useI18n();
   const [tagDraft, setTagDraft] = useState('');
 
@@ -60,8 +61,9 @@ export function MarkerEditor({ marker, suggestedTags, onChange }: MarkerEditorPr
         value={marker.note}
         onChange={(event) => onChange(marker.id, { note: event.target.value })}
       />
+      {systemTagsSlot}
       <div className={styles.tagsRoot}>
-        <div className={styles.tagList}>
+        <div className={styles.tokenInput}>
           {marker.userTags.map((tag) => (
             <span key={tag} className={styles.tagChip}>
               {tag}
@@ -75,19 +77,19 @@ export function MarkerEditor({ marker, suggestedTags, onChange }: MarkerEditorPr
               </button>
             </span>
           ))}
+          <input
+            className={styles.tags}
+            value={tagDraft}
+            placeholder={marker.userTags.length === 0 ? t('practice.markerEditor.tagsPlaceholder') : ''}
+            onChange={(event) => setTagDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                addTag(tagDraft);
+              }
+            }}
+          />
         </div>
-        <input
-          className={styles.tags}
-          value={tagDraft}
-          placeholder={t('practice.markerEditor.tagsPlaceholder')}
-          onChange={(event) => setTagDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              addTag(tagDraft);
-            }
-          }}
-        />
         {filteredSuggestions.length > 0 ? (
           <div className={styles.suggestions}>
             <span className={styles.suggestionsLabel}>{t('practice.markerEditor.suggestions')}</span>
