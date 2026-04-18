@@ -1,26 +1,24 @@
 import { useEffect } from 'react';
 import type { PracticeMarker } from '../types/practicePlayer';
 import { PracticePlayerController } from '../controllers/practicePlayerController';
+import { getValidLoopRange } from '../utils/markerTags';
 
 export function useLoopPlayback(
   controller: PracticePlayerController | null,
   markers: PracticeMarker[],
-  startMarkerId: string | null,
-  endMarkerId: string | null,
 ) {
   useEffect(() => {
     if (!controller) {
       return;
     }
 
-    const startMarker = markers.find((marker) => marker.id === startMarkerId);
-    const endMarker = markers.find((marker) => marker.id === endMarkerId);
+    const loopRange = getValidLoopRange(markers);
 
-    if (!startMarker || !endMarker || startMarker.timestampSeconds >= endMarker.timestampSeconds) {
+    if (loopRange.start === null || loopRange.end === null) {
       controller.clearLoop();
       return;
     }
 
-    controller.setLoop(startMarker.timestampSeconds, endMarker.timestampSeconds);
-  }, [controller, endMarkerId, markers, startMarkerId]);
+    controller.setLoop(loopRange.start, loopRange.end);
+  }, [controller, markers]);
 }

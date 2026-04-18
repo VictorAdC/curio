@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import type {
-  LoopSelection,
   PracticeMarker,
   PracticeMediaSource,
+  PracticeSystemTag,
   TimelineWaveformDatum,
 } from '../types/practicePlayer';
+import { convertSystemTagToUserTag, toggleSystemTag } from '../utils/markerTags';
 
 interface PracticeSessionActions {
   setSource: (source: PracticeMediaSource | null) => void;
@@ -13,9 +14,10 @@ interface PracticeSessionActions {
   setWaveform: (waveform: TimelineWaveformDatum[]) => void;
   setSessionNote: (note: string) => void;
   addMarker: (marker: PracticeMarker) => void;
-  updateMarker: (markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note'>>) => void;
+  updateMarker: (markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note' | 'userTags'>>) => void;
   removeMarker: (markerId: string) => void;
-  assignLoopRole: (markerId: string, role: PracticeMarker['loopRole']) => void;
+  toggleSystemTag: (markerId: string, tag: PracticeSystemTag) => void;
+  convertSystemTagToUserTag: (markerId: string, tag: PracticeSystemTag) => void;
   clearLoop: () => void;
   hydrateSession: (payload: {
     source: PracticeMediaSource;
@@ -23,7 +25,6 @@ interface PracticeSessionActions {
     duration: number;
     playbackRate: number;
     markers: PracticeMarker[];
-    loopSelection: LoopSelection;
     sessionNote: string;
     waveform: TimelineWaveformDatum[];
   }) => void;
@@ -32,11 +33,6 @@ interface PracticeSessionActions {
 
 type PracticeSessionStore = import('../types/practicePlayer').PracticeSessionState & PracticeSessionActions;
 
-const initialLoopSelection: LoopSelection = {
-  startMarkerId: null,
-  endMarkerId: null,
-};
-
 export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
   source: null,
   isPlaying: false,
@@ -44,7 +40,6 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
   duration: 0,
   playbackRate: 1,
   markers: [],
-  loopSelection: initialLoopSelection,
   sessionNote: '',
   waveform: [],
   error: null,
@@ -73,59 +68,25 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       markers: state.markers.map((marker) => (marker.id === markerId ? { ...marker, ...updates } : marker)),
     })),
   removeMarker: (markerId) =>
+    set((state) => ({
+      markers: state.markers.filter((marker) => marker.id !== markerId),
+    })),
+  toggleSystemTag: (markerId, tag) =>
     set((state) => {
-      const removedMarker = state.markers.find((marker) => marker.id === markerId);
-      const nextLoopSelection = { ...state.loopSelection };
-
-      if (removedMarker?.loopRole === 'start') {
-        nextLoopSelection.startMarkerId = null;
-      }
-
-      if (removedMarker?.loopRole === 'end') {
-        nextLoopSelection.endMarkerId = null;
-      }
-
       return {
-        markers: state.markers.filter((marker) => marker.id !== markerId),
-        loopSelection: nextLoopSelection,
+        markers: toggleSystemTag(state.markers, markerId, tag),
       };
     }),
-  assignLoopRole: (markerId, role) =>
-    set((state) => {
-      const markers = state.markers.map((marker) => {
-        if (marker.id === markerId) {
-          return { ...marker, loopRole: role } as PracticeMarker;
-        }
-
-        if (role !== 'none' && marker.loopRole === role) {
-          return { ...marker, loopRole: 'none' } as PracticeMarker;
-        }
-
-        return marker;
-      });
-
-      return {
-        markers,
-        loopSelection: {
-          startMarkerId:
-            role === 'start'
-              ? markerId
-              : role === 'none' && state.loopSelection.startMarkerId === markerId
-                ? null
-                : state.loopSelection.startMarkerId,
-          endMarkerId:
-            role === 'end'
-              ? markerId
-              : role === 'none' && state.loopSelection.endMarkerId === markerId
-                ? null
-                : state.loopSelection.endMarkerId,
-        },
-      };
-    }),
+  convertSystemTagToUserTag: (markerId, tag) =>
+    set((state) => ({
+      markers: convertSystemTagToUserTag(state.markers, markerId, tag),
+    })),
   clearLoop: () =>
     set((state) => ({
-      loopSelection: initialLoopSelection,
-      markers: state.markers.map((marker) => ({ ...marker, loopRole: 'none' })),
+      markers: state.markers.map((marker) => ({
+        ...marker,
+        systemTags: marker.systemTags.filter((tag) => tag !== 'loop-start' && tag !== 'loop-end'),
+      })),
     })),
   hydrateSession: (payload) =>
     set({
@@ -135,7 +96,6 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       duration: payload.duration,
       playbackRate: payload.playbackRate,
       markers: payload.markers,
-      loopSelection: payload.loopSelection,
       sessionNote: payload.sessionNote,
       waveform: payload.waveform,
       error: null,
@@ -148,7 +108,6 @@ export const usePracticeSessionStore = create<PracticeSessionStore>((set) => ({
       duration: 0,
       playbackRate: 1,
       markers: [],
-      loopSelection: initialLoopSelection,
       sessionNote: '',
       waveform: [],
       error: null,

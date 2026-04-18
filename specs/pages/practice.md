@@ -30,9 +30,7 @@ It allows a music student to load local media or a YouTube source, navigate prec
 - jump forward by `10` seconds;
 - create multiple markers at timestamps;
 - edit marker title and note;
-- assign one marker as loop start;
-- assign one marker as loop end;
-- clear loop assignment;
+- assign or remove special marker tags;
 - edit a session-wide practice note;
 - rename or delete a saved practice session;
 - export saved sessions as a backup copy;
@@ -106,9 +104,13 @@ Playback speed behavior:
 
 Additional transport controls may be added later, but these are the minimum required controls in v1.
 
-### 6. Marker List
+### 6. Marker Workspace
 
-The page must show a marker list for the current session.
+The page must show a dedicated marker management section for the current session.
+
+Markers should not be managed only as a strip directly below the active audio or video area.
+
+The player surface may still show marker positions, but marker editing and tag management should live in a separate workspace area.
 
 Each marker stores:
 
@@ -116,16 +118,17 @@ Each marker stores:
 - `timestampSeconds`;
 - `title`;
 - optional `note`;
-- `loopRole` with values `none`, `start`, or `end`.
+- `systemTags`;
+- `userTags`.
 
-The list should allow:
+The workspace should allow:
 
 - viewing markers in timestamp order;
 - seeking to a marker;
 - editing marker title;
 - editing marker note;
-- assigning loop start;
-- assigning loop end;
+- assigning and removing system tags;
+- filtering markers later by type or tag;
 - removing a marker.
 
 ### 7. Session Notes Area
@@ -148,15 +151,31 @@ The preferred model is:
 - backup and restore actions grouped at the end of the drawer.
 - a storage-health area in the drawer that summarizes saved-session counts, local-media footprint, missing-media counts, and browser-storage caveats.
 
-## Looping Model
+## Marker And Tag Model
 
 - users may create multiple markers;
-- exactly two markers can be assigned as active loop markers at a time;
-- one marker may be assigned as loop start;
-- one marker may be assigned as loop end;
-- loop playback becomes active only when both markers exist and the start timestamp is before the end timestamp;
-- marker records remain valid even when they are not assigned to the active loop;
-- if either loop marker is removed, loop playback must be disabled until a valid pair exists again.
+- a marker is a time-anchored record;
+- tags classify the marker;
+- a marker may remain a normal note marker while also carrying one or more system tags.
+
+System tags in the current model are:
+
+- `loop-start`
+- `loop-end`
+- `media-start`
+- `media-end`
+
+Behavior rules:
+
+- `loop-start` and `loop-end` are a related pair;
+- `media-start` and `media-end` are a related pair;
+- assigning a new `loop-start` after the current `loop-end` must remove the current `loop-end`;
+- assigning a new `loop-end` before the current `loop-start` must remove the current `loop-start`;
+- assigning a new `media-start` after the current `media-end` must remove the current `media-end`;
+- assigning a new `media-end` before the current `media-start` must remove the current `media-start`;
+- removing a system tag must keep the marker itself as a normal marker;
+- system tags do not require a note;
+- loop playback becomes active only when both `loop-start` and `loop-end` exist in a valid forward range.
 
 ## State And Persistence
 
@@ -167,7 +186,7 @@ V1 persistence supports:
 - saved session summaries and active-session tracking in `localStorage`;
 - persisted local media files in IndexedDB through Dexie;
 - markers for each saved session;
-- loop marker assignment;
+- marker system tags and user tags;
 - session note content;
 - marker note content;
 - current playback position;
@@ -215,8 +234,9 @@ The page must handle the following cases clearly:
 - invalid YouTube URLs are rejected with a clear input error;
 - media load failures show a recoverable error state;
 - timeline seeking is disabled or deferred until metadata is ready;
-- if only one loop marker is assigned, the markers are visible but loop playback remains inactive;
+- if only one loop tag exists, the markers are visible but loop playback remains inactive;
 - if loop start is at or after loop end, loop playback remains inactive;
+- assigning a conflicting loop or media special tag must automatically clear the invalid paired tag;
 - transport controls must clamp seeks and jumps to valid time boundaries;
 - switching to a new media source must create a fresh session and must not leave an invalid active loop;
 - importing a local-file session without embedded media must show a recoverable missing-media state;
@@ -234,10 +254,11 @@ The page must handle the following cases clearly:
 - a user clicks the timeline to seek to a new timestamp;
 - a user uses `-10s` and `+10s` to move through the media;
 - a user changes playback speed while media is already playing and hears the new speed immediately;
-- a user creates several markers and selects two of them as loop boundaries;
+- a user creates several markers and assigns special tags for loop and media boundaries;
 - a user adds notes to individual markers;
 - a user writes a separate session note not tied to a marker;
 - loop playback only activates when both selected loop markers are valid;
+- a user can remove a special tag and keep the marker as a normal marker;
 - a user reloads the app and returns to the most recent session;
 - a user opens the session drawer and switches to an older saved session;
 - a user exports a light backup and later reimports it;

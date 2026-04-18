@@ -142,7 +142,17 @@ Suggested fields:
 - `timestampSeconds`
 - `title`
 - `note`
-- `loopRole`: `none | start | end`
+- `systemTags`
+- `userTags`
+
+Initial `systemTags` should support:
+
+- `loop-start`
+- `loop-end`
+- `media-start`
+- `media-end`
+
+Validation should be tag-driven rather than marker-type-driven.
 
 ### `LoopSelection`
 
@@ -153,7 +163,7 @@ Suggested fields:
 - `startMarkerId | null`
 - `endMarkerId | null`
 
-Loop validity must be derived from the marker timestamps, not only from ids being present.
+Loop validity must be derived from the timestamps of markers carrying the relevant system tags, not only from ids being present.
 
 ### `PracticeSessionState`
 
@@ -183,6 +193,9 @@ The session model should also support:
 Loop behavior must be shared across adapters.
 
 - loop becomes active only when both loop points exist and define a valid forward range;
+- assigning a new `loop-start` after the active `loop-end` must clear the old `loop-end`;
+- assigning a new `loop-end` before the active `loop-start` must clear the old `loop-start`;
+- media-range tags should follow the same paired validation behavior as loop tags;
 - loop state is independent from layout;
 - markers remain valid even when loop is inactive;
 - switching media must clear or recalculate loop state so invalid loop ranges are never preserved.
@@ -191,9 +204,11 @@ Loop behavior must be shared across adapters.
 
 - playback state must not be owned by page layout components;
 - marker state must not be coupled to a single page presentation;
+- marker management should live in a dedicated workspace area rather than only beneath the player canvas;
 - transport controls must call the shared controller only;
 - timeline components must work with either waveform or generic progress data;
-- marker and note modules must work regardless of whether the source is local or YouTube.
+- marker and note modules must work regardless of whether the source is local or YouTube;
+- system-tag assignment should be implemented as marker metadata, not as a separate marker object type.
 
 ## V1 Constraints
 

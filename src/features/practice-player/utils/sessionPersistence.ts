@@ -1,19 +1,22 @@
 import Dexie, { type Table } from 'dexie';
 import { PracticeError } from './errors';
 import type {
-  LoopSelection,
   MediaRelinkWarning,
   PracticeMarker,
   PracticeMediaSource,
   PracticeStorageHealth,
   PracticeSessionSummary,
   PracticeSessionState,
+  PracticeSystemTag,
   TimelineWaveformDatum,
 } from '../types/practicePlayer';
+import { SYSTEM_TAGS } from './markerTags';
 
 const SESSIONS_STORAGE_KEY = 'curio.practice-sessions.v1';
 const ACTIVE_SESSION_ID_STORAGE_KEY = 'curio.practice-active-session.v1';
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
+
+type LegacyLoopRole = 'none' | 'start' | 'end';
 
 interface StoredMediaAsset {
   id: string;
@@ -30,9 +33,22 @@ interface PersistedSessionSnapshot {
   duration: number;
   playbackRate: number;
   markers: PracticeMarker[];
-  loopSelection: LoopSelection;
   sessionNote: string;
   waveform: TimelineWaveformDatum[];
+}
+
+interface LegacyPersistedSessionSnapshot extends Omit<PersistedSessionSnapshot, 'markers'> {
+  markers: Array<
+    Omit<PracticeMarker, 'systemTags' | 'userTags'> & {
+      loopRole?: LegacyLoopRole;
+      systemTags?: PracticeSystemTag[];
+      userTags?: string[];
+    }
+  >;
+  loopSelection?: {
+    startMarkerId: string | null;
+    endMarkerId: string | null;
+  };
 }
 
 interface PersistedPracticeMediaSource {
@@ -58,7 +74,6 @@ interface RestoredPracticeSession {
   duration: number;
   playbackRate: number;
   markers: PracticeMarker[];
-  loopSelection: LoopSelection;
   sessionNote: string;
   waveform: TimelineWaveformDatum[];
 }
@@ -75,6 +90,61 @@ interface PracticeSessionsBackup {
     lastModified: number;
     dataUrl: string;
   }>;
+}
+
+function normalizeSystemTags(value: unknown): PracticeSystemTag[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((tag): tag is PracticeSystemTag => SYSTEM_TAGS.includes(tag as PracticeSystemTag));
+}
+
+function normalizeUserTags(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((tag): tag is string => typeof tag === 'string')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function mapLegacyLoopRoleToSystemTags(loopRole?: LegacyLoopRole): PracticeSystemTag[] {
+  if (loopRole === 'start') {
+    return ['loop-start'];
+  }
+
+  if (loopRole === 'end') {
+    return ['loop-end'];
+  }
+
+  return [];
+}
+
+function normalizeMarker(marker: LegacyPersistedSessionSnapshot['markers'][number]): PracticeMarker {
+  return {
+    id: marker.id,
+    timestampSeconds: marker.timestampSeconds,
+    title: marker.title,
+    note: marker.note ?? '',
+    systemTags: normalizeSystemTags(marker.systemTags).length > 0 ? normalizeSystemTags(marker.systemTags) : mapLegacyLoopRoleToSystemTags(marker.loopRole),
+    userTags: normalizeUserTags(marker.userTags),
+  };
+}
+
+function normalizePersistedSession(session: LegacyPersistedSessionSnapshot): PersistedSessionSnapshot {
+  return {
+    session: session.session,
+    source: session.source,
+    currentTime: session.currentTime,
+    duration: session.duration,
+    playbackRate: session.playbackRate ?? 1,
+    markers: Array.isArray(session.markers) ? session.markers.map(normalizeMarker) : [],
+    sessionNote: session.sessionNote ?? '',
+    waveform: Array.isArray(session.waveform) ? session.waveform : [],
+  };
 }
 
 export interface PracticeSessionsBackupPreview {
@@ -113,7 +183,14 @@ function readPersistedSessions(): PersistedSessionSnapshot[] {
   }
 
   try {
-    return JSON.parse(rawSessions) as PersistedSessionSnapshot[];
+    const parsedSessions = JSON.parse(rawSessions) as LegacyPersistedSessionSnapshot[];
+
+    if (!Array.isArray(parsedSessions)) {
+      window.localStorage.removeItem(SESSIONS_STORAGE_KEY);
+      return [];
+    }
+
+    return parsedSessions.map(normalizePersistedSession);
   } catch {
     window.localStorage.removeItem(SESSIONS_STORAGE_KEY);
     return [];
@@ -288,7 +365,6 @@ export function persistPracticeSession(session: PracticeSessionSummary, state: P
     duration: state.duration,
     playbackRate: state.playbackRate,
     markers: state.markers,
-    loopSelection: state.loopSelection,
     sessionNote: state.sessionNote,
     waveform: state.waveform,
   };
@@ -509,11 +585,13 @@ export async function exportPersistedPracticeSessions(includeMediaAssets: boolea
 }
 
 export async function importPersistedPracticeSessions(file: File) {
-  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup & { sessions: LegacyPersistedSessionSnapshot[] };
 
-  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+  if ((backup.version !== 1 && backup.version !== BACKUP_VERSION) || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
     throw new PracticeError('BACKUP_UNSUPPORTED');
   }
+
+  const normalizedSessions = backup.sessions.map(normalizePersistedSession);
 
   await clearAllPersistedPracticeSessions();
 
@@ -530,7 +608,7 @@ export async function importPersistedPracticeSessions(file: File) {
   );
 
   const importedSessions = sortSessionsDescending(
-    backup.sessions.map((session) => {
+    normalizedSessions.map((session) => {
       if (session.source.kind === 'youtube') {
         return session;
       }
@@ -560,20 +638,22 @@ export async function importPersistedPracticeSessions(file: File) {
 }
 
 export async function inspectPracticeSessionsBackup(file: File): Promise<PracticeSessionsBackupPreview> {
-  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup & { sessions: LegacyPersistedSessionSnapshot[] };
 
-  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+  if ((backup.version !== 1 && backup.version !== BACKUP_VERSION) || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
     throw new PracticeError('BACKUP_UNSUPPORTED');
   }
+
+  const normalizedSessions = backup.sessions.map(normalizePersistedSession);
 
   const existingSessionIds = new Set(readPersistedSessions().map((session) => session.session.id));
 
   return {
     file,
-    sessions: backup.sessions.map((session) => session.session),
+    sessions: normalizedSessions.map((session) => session.session),
     activeSessionId: backup.activeSessionId,
     includesMediaAssets: backup.mediaAssets.length > 0,
-    collidingSessionIds: backup.sessions
+    collidingSessionIds: normalizedSessions
       .map((session) => session.session.id)
       .filter((sessionId) => existingSessionIds.has(sessionId)),
   };
@@ -583,16 +663,17 @@ export async function importSelectedPracticeSessions(
   file: File,
   options: ImportPracticeSessionsOptions,
 ) {
-  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup;
+  const backup = JSON.parse(await file.text()) as PracticeSessionsBackup & { sessions: LegacyPersistedSessionSnapshot[] };
 
-  if (backup.version !== BACKUP_VERSION || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
+  if ((backup.version !== 1 && backup.version !== BACKUP_VERSION) || !Array.isArray(backup.sessions) || !Array.isArray(backup.mediaAssets)) {
     throw new PracticeError('BACKUP_UNSUPPORTED');
   }
 
+  const normalizedBackupSessions = backup.sessions.map(normalizePersistedSession);
   const selectedSessions =
     options.sessionIds && options.sessionIds.length > 0
-      ? backup.sessions.filter((session) => options.sessionIds?.includes(session.session.id))
-      : backup.sessions;
+      ? normalizedBackupSessions.filter((session) => options.sessionIds?.includes(session.session.id))
+      : normalizedBackupSessions;
   const existingSessionsById = new Map(readPersistedSessions().map((session) => [session.session.id, session] as const));
 
   const normalizedSessions = selectedSessions.map((session) => {
