@@ -124,7 +124,7 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.markerSpotlight.emptyNote':
       'Add a note to this marker to keep contextual practice guidance here.',
 
-    'practice.media.youtubePlaceholder': 'Paste YouTube URL or Search...',
+    'practice.media.youtubePlaceholder': 'Paste YouTube URL...',
     'practice.media.load': 'Load Track',
     'practice.media.or': 'or',
     'practice.media.localFile': 'load a local audio or video file',
