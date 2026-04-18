@@ -2,6 +2,13 @@ import type { PracticeMarker, PracticeSystemTag } from '../types/practicePlayer'
 
 export const SYSTEM_TAGS = ['loop-start', 'loop-end', 'media-start', 'media-end'] as const satisfies PracticeSystemTag[];
 
+const OPPOSITE_SYSTEM_TAG: Record<PracticeSystemTag, PracticeSystemTag> = {
+  'loop-start': 'loop-end',
+  'loop-end': 'loop-start',
+  'media-start': 'media-end',
+  'media-end': 'media-start',
+};
+
 export function hasSystemTag(marker: PracticeMarker, tag: PracticeSystemTag) {
   return marker.systemTags.includes(tag);
 }
@@ -49,7 +56,8 @@ export function toggleSystemTag(markers: PracticeMarker[], markerId: string, tag
 
   return markers.map((marker) => {
     if (marker.id === markerId) {
-      return addSystemTag(marker, tag);
+      const withoutOppositeTag = stripSystemTag(marker, OPPOSITE_SYSTEM_TAG[tag]);
+      return addSystemTag(withoutOppositeTag, tag);
     }
 
     return hasSystemTag(marker, tag) ? stripSystemTag(marker, tag) : marker;

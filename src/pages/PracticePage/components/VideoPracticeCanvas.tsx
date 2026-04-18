@@ -2,7 +2,6 @@ import type { RecordingMode } from '../../../features/practice-recorder/hooks/us
 import type {
   PracticeMarker,
   PracticeMediaKind,
-  TimelineWaveformDatum,
 } from '../../../features/practice-player/types/practicePlayer';
 import { MarkerSpotlight } from './MarkerSpotlight';
 import { PracticePlaybackFooter } from './PracticePlaybackFooter';
@@ -13,7 +12,6 @@ interface VideoPracticeCanvasProps {
   sourceKind: PracticeMediaKind | null;
   currentTime: number;
   duration: number;
-  waveform: TimelineWaveformDatum[];
   markers: PracticeMarker[];
   loopStart: number | null;
   loopEnd: number | null;
@@ -41,7 +39,6 @@ export function VideoPracticeCanvas({
   sourceKind,
   currentTime,
   duration,
-  waveform,
   markers,
   loopStart,
   loopEnd,
@@ -62,8 +59,6 @@ export function VideoPracticeCanvas({
   recorderMode,
   setVideoElement,
 }: VideoPracticeCanvasProps) {
-  const progress = duration > 0 ? currentTime / duration : 0;
-
   return (
     <div className={styles.root}>
       <div className={styles.playerArea}>
@@ -75,31 +70,6 @@ export function VideoPracticeCanvas({
         />
         <div className={sourceKind === 'youtube' ? styles.youtubeFrame : styles.hiddenMedia} id="youtube-player-root" />
 
-        {waveform.length > 0 ? (
-          <div className={styles.waveformOverlay} aria-hidden="true">
-            <div className={styles.waveformBars}>
-              {waveform.map((sample, index) => (
-                <span
-                  key={`${sample.timestampSeconds}-${index}`}
-                  className={styles.waveformBar}
-                  style={{
-                    height: `${Math.max(sample.amplitude * 100, 18)}%`,
-                    opacity: sample.timestampSeconds <= currentTime ? 0.92 : 0.44,
-                  }}
-                />
-              ))}
-            </div>
-            <div
-              className={styles.waveformProgress}
-              style={{ width: `${progress * 100}%` }}
-            />
-            <div
-              className={styles.waveformPlayhead}
-              style={{ left: `${progress * 100}%` }}
-            />
-          </div>
-        ) : null}
-
         <RecPill onClick={onSwitchToRecord} mode={recorderMode} />
 
         <MarkerSpotlight marker={hoveredMarker} />
@@ -108,7 +78,6 @@ export function VideoPracticeCanvas({
       <PracticePlaybackFooter
         currentTime={currentTime}
         duration={duration}
-        waveform={waveform}
         markers={markers}
         loopStart={loopStart}
         loopEnd={loopEnd}
