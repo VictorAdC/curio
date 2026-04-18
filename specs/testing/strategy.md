@@ -73,6 +73,11 @@ The current repository now includes automated coverage for critical local-first 
 - Vitest integration tests for restore-after-reload at the persistence layer;
 - Vitest integration tests for full-backup export and import round-trips;
 - Vitest integration tests for light-backup import and missing-media relink recovery at the persistence layer;
+- Vitest unit tests for loop/media special-tag exclusivity on markers;
+- Vitest unit tests for media timestamp formatting (`MM:SS` vs `HH:MM:SS`);
+- Vitest component tests for practice footer timecode rendering;
+- Vitest practice-page rendering coverage that confirms the marker workspace appears in the practice view;
+- Vitest unit tests for GitHub Pages base-path derivation from the repository name;
 - Playwright coverage for restoring a saved local session after reload;
 - Playwright coverage for a full-backup export, clear, import, and restore round-trip through the real UI.
 
@@ -89,6 +94,7 @@ Manual testing will still be required for:
 - backup size differences between light and full copies;
 - translated copy review for tone, truncation, and layout impact;
 - mobile browser checks;
+- CSS-only responsive layout confirmation such as sidebar-to-stacked marker-workspace transitions on mobile;
 - performance and responsiveness during audio interaction.
 
 ## Playwright MCP Decision

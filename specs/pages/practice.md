@@ -26,8 +26,8 @@ It allows a music student to load local media or a YouTube source, navigate prec
 - reopen a previously saved local practice session;
 - play and pause media;
 - seek through the media by clicking or dragging on the timeline;
-- jump backward by `10` seconds;
-- jump forward by `10` seconds;
+- jump backward by `5` seconds;
+- jump forward by `5` seconds;
 - create multiple markers at timestamps;
 - edit marker title and note;
 - assign or remove special marker tags;
@@ -75,7 +75,7 @@ The page must render the loaded media when a visual player is appropriate.
 The page must provide a primary seek surface for navigation.
 
 - local audio should display a waveform timeline;
-- local video may reuse the same timeline model, with waveform shown only if waveform data is available;
+- local video should use a compact progress bar rather than an overlaid waveform;
 - YouTube should use an approximate seekable timeline in v1, not a true waveform.
 
 The timeline should show:
@@ -86,13 +86,18 @@ The timeline should show:
 
 For local audio, the large waveform view may stay visually clean while marker positions are shown on a thinner secondary timeline below it.
 
+The compact player footer should show a visible media timestamp in `current / total` form:
+
+- `MM:SS` when total duration is under one hour;
+- `HH:MM:SS` when total duration is one hour or more.
+
 ### 5. Transport Controls
 
 The page must expose:
 
 - play and pause;
-- `-10s` jump;
-- `+10s` jump.
+- `-5s` jump;
+- `+5s` jump;
 - playback speed presets.
 
 Playback speed behavior:
@@ -133,6 +138,8 @@ The workspace should allow:
 
 Clicking a marker dot on the interactive timeline or a loop boundary display card (showing the set boundary time) opens the marker workspace with that marker expanded in edit mode.
 
+On mobile layouts, the marker workspace must remain visible in the normal page flow below the player rather than disappearing into a desktop-only sidebar treatment.
+
 ### 7. Session Notes Area
 
 The page must include a general session note area separate from marker notes.
@@ -172,6 +179,7 @@ Behavior rules:
 - `loop-start` and `loop-end` are a related pair;
 - `media-start` and `media-end` are a related pair;
 - only one marker may hold each system tag at a time; assigning a tag to a new marker removes it from any marker that previously held it;
+- a single marker may not hold both sides of the same pair at once; assigning `loop-start` removes `loop-end` from that same marker, and assigning `media-end` removes `media-start` from that same marker, with the inverse also applying;
 - when the resulting start/end pair is invalid (start ≥ end), the effective range becomes inactive — the tags are not automatically removed;
 - single boundary tags are displayed on the timeline and boundary cards even without the paired tag;
 - removing a system tag must keep the marker itself as a normal marker;
@@ -237,6 +245,7 @@ The page must handle the following cases clearly:
 - timeline seeking is disabled or deferred until metadata is ready;
 - if only one loop tag exists, the markers are visible but loop playback remains inactive;
 - if loop start is at or after loop end, loop playback remains inactive;
+- if a user assigns the start and end of the same pair to one marker, the previous opposite tag on that marker is removed automatically;
 - when loop or media boundary tags produce a conflicting range (start ≥ end), loop playback becomes inactive; no tags are automatically removed;
 - transport controls must clamp seeks and jumps to valid time boundaries;
 - switching to a new media source must create a fresh session and must not leave an invalid active loop;
@@ -250,12 +259,13 @@ The page must handle the following cases clearly:
 ## Acceptance Scenarios
 
 - a user uploads a local audio file and sees waveform-based timeline navigation;
-- a user uploads a local video file and uses the same transport and marker workflow;
+- a user uploads a local video file and uses the same transport and marker workflow with a compact progress bar and visible marker ticks;
 - a user loads a YouTube URL and uses a seekable timeline without true waveform rendering;
 - a user clicks the timeline to seek to a new timestamp;
-- a user uses `-10s` and `+10s` to move through the media;
+- a user uses `-5s` and `+5s` to move through the media;
 - a user changes playback speed while media is already playing and hears the new speed immediately;
 - a user creates several markers and assigns special tags for loop and media boundaries;
+- a user can see the marker workspace on mobile layouts below the player;
 - a user adds notes to individual markers;
 - a user writes a separate session note not tied to a marker;
 - loop playback only activates when both selected loop markers are valid;

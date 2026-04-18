@@ -17,3 +17,8 @@ For Curio, this should stay lightweight at first, but it is still useful to spec
 - `environment.md`
 - `ci.md`
 - `dependencies.md`
+
+## Current Coverage
+
+- GitHub Pages deployment for the static frontend should be documented here.
+- GitHub Actions-based build and deploy flows belong in this folder rather than in page or feature specs.

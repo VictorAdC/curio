@@ -93,6 +93,7 @@ Rules:
 
 - only one marker may hold `loop-start` at a time;
 - only one marker may hold `loop-end` at a time;
+- the same marker may not hold both `loop-start` and `loop-end` at once;
 - both may exist independently; the timeline and boundary cards display any single boundary that is set;
 - loop playback only becomes active when both exist and the start timestamp is strictly before the end timestamp;
 - when the resulting start/end pair is invalid (start ≥ end), the effective loop range becomes inactive — the tags are not removed.
@@ -105,6 +106,7 @@ Rules:
 
 - only one marker may hold `media-start` at a time;
 - only one marker may hold `media-end` at a time;
+- the same marker may not hold both `media-start` and `media-end` at once;
 - when the resulting start/end pair is invalid (start ≥ end), the effective range becomes inactive — the tags are not removed.
 
 ## Conversion Rules
@@ -208,7 +210,8 @@ The marker system should behave predictably when tags conflict.
 
 Required behavior:
 
-- conflicting pair assignment is resolved automatically by removing the now-invalid paired tag;
+- conflicting pair assignment is resolved automatically by removing the opposite tag from the same marker before the new tag is applied;
+- assigning a start or end tag to a new marker still removes that same tag from any other marker that previously held it;
 - system-tag removal must not delete the marker;
 - invalid loop or media ranges must never remain active after assignment changes.
 

@@ -58,6 +58,8 @@ The `specs/` folder should document:
 - `testing/`: testing strategy and quality requirements.
 - `decisions/`: short decision records for important choices.
 
+Current infrastructure documentation should include the GitHub Pages deployment path for the static app, including repository-name-based routing and GitHub Actions automation.
+
 ## Non-Goals For Now
 
 - No backend services.
