@@ -2,6 +2,7 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .canvasArea {
@@ -13,4 +14,5 @@
 
 .waveStage {
   width: 100%;
+  min-height: 160px;
 }

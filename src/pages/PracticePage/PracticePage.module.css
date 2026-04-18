@@ -14,8 +14,8 @@
 
 @media (min-width: 960px) {
   .practiceLayout {
-    grid-template-columns: minmax(0, 1fr) 360px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: stretch;
   }
 }
 
@@ -23,10 +23,13 @@
   display: grid;
   gap: 0;
   min-width: 0;
+  align-content: start;
 }
 
 .markersColumn {
   min-width: 0;
+  display: grid;
+  align-items: stretch;
 }
 
 .historyPanel,
