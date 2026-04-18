@@ -16,6 +16,8 @@ interface MarkerListProps {
   onUpdateMarker: (markerId: string, updates: Partial<Pick<PracticeMarker, 'title' | 'note' | 'userTags'>>) => void;
   onAddMarker: () => void;
   onClearLoop: () => void;
+  onExportLight?: (sessionIds?: string[]) => void;
+  onExport?: (sessionIds?: string[]) => void;
 }
 
 const specialTags: PracticeSystemTag[] = ['loop-start', 'loop-end', 'media-start', 'media-end'];
@@ -36,10 +38,13 @@ export function MarkerList({
   onUpdateMarker,
   onAddMarker,
   onClearLoop,
+  onExportLight,
+  onExport,
 }: MarkerListProps) {
   const { t } = useI18n();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [tooltip, setTooltip] = useState<{ text: string; bottom: number; left: number } | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const showTooltip = (text: string, event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -94,13 +99,10 @@ export function MarkerList({
   return (
     <section className={styles.root}>
       <div className={styles.header}>
-        <div>
+        <span className={styles.eyebrow}>{t('practice.markers.eyebrow')}</span>
+        <div className={styles.headerTop}>
           <h3>{t('practice.markerList.title')}</h3>
-          <p>{t('practice.markerList.description')}</p>
-          <div className={styles.summaryRow}>
-            <span>{t('practice.markerList.summary.total', { count: counts.total })}</span>
-            <span>{t('practice.markerList.summary.special', { count: counts.special })}</span>
-          </div>
+          <span className={styles.itemCount}>{counts.total} {counts.total === 1 ? 'item' : 'items'}</span>
         </div>
         <div className={styles.headerActions}>
           <button className={styles.addButton} type="button" onClick={onAddMarker}>
@@ -196,6 +198,32 @@ export function MarkerList({
           );
         })}
       </div>
+
+      {(onExportLight || onExport) ? (
+        <div className={styles.exportArea}>
+          {exportOpen ? (
+            <div className={styles.exportOptions}>
+              {onExportLight ? (
+                <button className={styles.exportOption} type="button" onClick={() => { onExportLight(); setExportOpen(false); }}>
+                  {t('practice.sessionHistory.lightCopy')}
+                </button>
+              ) : null}
+              {onExport ? (
+                <button className={styles.exportOption} type="button" onClick={() => { onExport(); setExportOpen(false); }}>
+                  {t('practice.sessionHistory.fullCopy')}
+                </button>
+              ) : null}
+              <button className={styles.exportCancel} type="button" onClick={() => setExportOpen(false)}>
+                {t('practice.sessionHistory.modalClose')}
+              </button>
+            </div>
+          ) : (
+            <button className={styles.exportButton} type="button" onClick={() => setExportOpen(true)}>
+              {t('practice.markers.exportSession')}
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {tooltip ? createPortal(
         <div

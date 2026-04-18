@@ -2,7 +2,7 @@ import type { PracticeMarker, PracticeMediaKind } from '../../../features/practi
 import { PracticeControlCards } from './PracticeControlCards';
 import { MarkerSpotlight } from './MarkerSpotlight';
 import { PracticePlaybackFooter } from './PracticePlaybackFooter';
-import styles from '../PracticePage.module.css';
+import styles from './VideoPracticeCanvas.module.css';
 
 interface VideoPracticeCanvasProps {
   sourceKind: PracticeMediaKind | null;
@@ -54,7 +54,7 @@ export function VideoPracticeCanvas({
   setVideoElement,
 }: VideoPracticeCanvasProps) {
   return (
-    <div className={styles.videoCanvas}>
+    <div className={styles.root}>
       <div className={styles.playerArea}>
         <video
           ref={setVideoElement}

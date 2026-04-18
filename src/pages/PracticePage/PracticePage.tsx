@@ -10,24 +10,24 @@ import { usePracticeRecorder } from '../../features/practice-recorder/hooks/useP
 import type { PracticeMarker } from '../../features/practice-player/types/practicePlayer';
 import { useI18n } from '../../i18n/I18nProvider';
 import { AudioPracticeCanvas } from './components/AudioPracticeCanvas';
-import { PracticeHeader } from './components/PracticeHeader';
-import { PracticePlayerHeader } from './components/PracticePlayerHeader';
-import { PracticeSummary } from './components/PracticeSummary';
+import { BottomNav } from './components/BottomNav';
+import { TopNav } from './components/TopNav';
 import { VideoPracticeCanvas } from './components/VideoPracticeCanvas';
 import styles from './PracticePage.module.css';
+
+type ActiveTab = 'practice' | 'record' | 'history';
 
 export function PracticePage() {
   const { view, actions } = usePracticePlayer();
   const recorder = usePracticeRecorder();
-  const { locale, setLocale, t } = useI18n();
+  const { t } = useI18n();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
-  const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
-  const [isMarkerDrawerOpen, setIsMarkerDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
   const [focusMarkerId, setFocusMarkerId] = useState<string | null>(null);
 
   const openMarkerById = (id: string) => {
     setFocusMarkerId(id);
-    setIsMarkerDrawerOpen(true);
+    setActiveTab('practice');
   };
 
   const handleLoopStartClick = () => {
@@ -41,23 +41,14 @@ export function PracticePage() {
     const effective = ends.reduce<typeof ends[0] | null>((best, m) => (!best || m.timestampSeconds < best.timestampSeconds ? m : best), null);
     if (effective) openMarkerById(effective.id);
   };
+
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const isTypingTarget = (target: EventTarget | null) => {
-      if (!(target instanceof HTMLElement)) {
-        return false;
-      }
-
+      if (!(target instanceof HTMLElement)) return false;
       const tagName = target.tagName.toLowerCase();
-
-      return (
-        target.isContentEditable ||
-        tagName === 'input' ||
-        tagName === 'textarea' ||
-        tagName === 'select' ||
-        tagName === 'option'
-      );
+      return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select' || tagName === 'option';
     };
 
     const recorderMessages = {
@@ -69,109 +60,36 @@ export function PracticePage() {
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) {
-        return;
-      }
+      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return;
 
-      if (event.key === ' ') {
-        event.preventDefault();
-        actions.togglePlayback();
-        return;
-      }
-
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        actions.jumpBy(-10);
-        return;
-      }
-
-      if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        actions.jumpBy(10);
-        return;
-      }
-
-      if (event.key.toLowerCase() === 'm') {
-        event.preventDefault();
-        actions.addMarker();
-        return;
-      }
-
-      if (event.key.toLowerCase() === 's') {
-        event.preventDefault();
-        setIsMarkerDrawerOpen(false);
-        setIsSessionDrawerOpen((current) => !current);
-        return;
-      }
-
+      if (event.key === ' ') { event.preventDefault(); actions.togglePlayback(); return; }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); actions.jumpBy(-5); return; }
+      if (event.key === 'ArrowRight') { event.preventDefault(); actions.jumpBy(5); return; }
+      if (event.key.toLowerCase() === 'm') { event.preventDefault(); actions.addMarker(); return; }
+      if (event.key.toLowerCase() === 'l') { event.preventDefault(); actions.clearLoop(); return; }
       if (event.key.toLowerCase() === 'r') {
         event.preventDefault();
         recorder.actions.setOpen(true);
-
-        if (recorder.view.isRecording) {
-          recorder.actions.stopRecording();
-          return;
-        }
-
-        if (!view.source) {
-          return;
-        }
-
+        if (recorder.view.isRecording) { recorder.actions.stopRecording(); return; }
+        if (!view.source) return;
         void recorder.actions.startRecording(recorderMessages);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [actions, recorder.actions, recorder.view.isRecording, t, view.source]);
+
+  const handleTabChange = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    if (tab === 'record') {
+      recorder.actions.setOpen(true);
+    }
+  };
 
   return (
     <main className={styles.page}>
-      <div className={styles.heroRow}>
-        <PracticeHeader />
-        <div className={styles.utilityRow}>
-          <button
-            className={styles.localeToggle}
-            type="button"
-            onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
-            aria-label={t('language.label')}
-            title={t('language.label')}
-          >
-            <span className={styles.localeToggleTrack}>
-              <span className={`${styles.localeToggleThumb} ${locale === 'pt-BR' ? styles.localeToggleThumbPortuguese : ''}`} />
-              <span className={`${styles.localeToggleOption} ${locale === 'en' ? styles.localeToggleOptionActive : ''}`}>
-                {t('language.shortEnglish')}
-              </span>
-              <span className={`${styles.localeToggleOption} ${locale === 'pt-BR' ? styles.localeToggleOptionActive : ''}`}>
-                {t('language.shortPortuguese')}
-              </span>
-            </span>
-          </button>
-          <button
-            className={styles.sessionDrawerButton}
-            type="button"
-            onClick={() => {
-              setIsSessionDrawerOpen(false);
-              setIsMarkerDrawerOpen(true);
-            }}
-          >
-            {t('practice.markers.button')}
-          </button>
-          <button
-            className={styles.sessionDrawerButton}
-            type="button"
-            onClick={() => {
-              setIsMarkerDrawerOpen(false);
-              setIsSessionDrawerOpen(true);
-            }}
-          >
-            {t('practice.sessions.button')}
-          </button>
-        </div>
-      </div>
+      <TopNav />
 
       <MediaSourcePicker onLocalFileSelected={actions.loadLocalFile} onYouTubeLoad={actions.loadYouTubeUrl} />
 
@@ -189,11 +107,7 @@ export function PracticePage() {
           <span>{view.error}</span>
           {view.source?.sourceRef.mediaMissing && view.activeSessionId ? (
             <>
-              <button
-                className={styles.errorAction}
-                type="button"
-                onClick={() => relinkInputRef.current?.click()}
-              >
+              <button className={styles.errorAction} type="button" onClick={() => relinkInputRef.current?.click()}>
                 {t('practice.player.hiddenMediaRelink')}
               </button>
               <input
@@ -203,27 +117,12 @@ export function PracticePage() {
                 accept="audio/*,video/*"
                 onChange={(event) => {
                   const file = event.target.files?.[0];
-
-                  if (!file || !view.activeSessionId) {
-                    return;
-                  }
-
+                  if (!file || !view.activeSessionId) return;
                   const warning = actions.inspectRelinkSessionMedia(view.activeSessionId, file);
-
-                  if (
-                    warning &&
-                    !window.confirm(
-                      t('practice.player.error.relinkWarning', {
-                        details: warning.mismatches
-                          .map((mismatch) => t(`practice.player.error.relinkDetail.${mismatch}`))
-                          .join(', '),
-                      }),
-                    )
-                  ) {
+                  if (warning && !window.confirm(t('practice.player.error.relinkWarning', { details: warning.mismatches.map((mismatch) => t(`practice.player.error.relinkDetail.${mismatch}`)).join(', ') }))) {
                     event.currentTarget.value = '';
                     return;
                   }
-
                   void actions.relinkSessionMedia(view.activeSessionId, file);
                   event.currentTarget.value = '';
                 }}
@@ -233,118 +132,104 @@ export function PracticePage() {
         </div>
       ) : null}
 
-      <section className={styles.playerShell}>
-        <PracticePlayerHeader
-          title={view.title}
-          currentTime={view.currentTime}
-          duration={view.duration}
-          utility={<RecorderDock hasActiveSource={!!view.source} recorder={recorder} />}
-        />
-
-        <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
-
-        {view.showMediaDisplay ? (
-          <VideoPracticeCanvas
-            sourceKind={view.sourceKind}
-            currentTime={view.currentTime}
-            duration={view.duration}
-            markers={view.markers}
-            loopStart={view.loopRange.start}
-            loopEnd={view.loopRange.end}
-            isPlaying={view.isPlaying}
-            playbackRate={view.playbackRate}
-            playbackRatePresets={view.playbackRatePresets}
-            hoveredMarker={hoveredMarker}
-            onAddMarker={actions.addMarker}
-            onClearLoop={actions.clearLoop}
-            onLoopStartClick={handleLoopStartClick}
-            onLoopEndClick={handleLoopEndClick}
-            onTogglePlayback={actions.togglePlayback}
-            onJumpBy={actions.jumpBy}
-            onSetPlaybackRate={actions.setPlaybackRate}
-            onSeek={actions.seek}
-            onMarkerHover={setHoveredMarker}
-            onMarkerLeave={() => setHoveredMarker(null)}
-            onMarkerClick={(marker) => { setFocusMarkerId(marker.id); setIsMarkerDrawerOpen(true); }}
-            setVideoElement={actions.setVideoElement}
+      {activeTab === 'history' ? (
+        <div className={styles.historyPanel}>
+          <SessionHistory
+            sessions={view.sessionHistory}
+            activeSessionId={view.activeSessionId}
+            storageHealth={view.storageHealth}
+            persistenceFeedback={view.persistenceFeedback}
+            onDismissFeedback={actions.dismissPersistenceFeedback}
+            onLoadSession={(sessionId) => { void actions.loadSession(sessionId); setActiveTab('practice'); }}
+            onRenameSession={actions.renameSession}
+            onDeleteSession={(sessionId) => { void actions.deleteSession(sessionId); }}
+            onClearAll={() => { void actions.clearAllSessions(); }}
+            onExportLight={(sessionIds) => { void actions.exportLightSessions(sessionIds); }}
+            onExport={(sessionIds) => { void actions.exportSessions(sessionIds); }}
+            onPrepareImport={(file) => actions.prepareImportSessions(file)}
+            onImport={(file, options) => { void actions.importSessions(file, options); }}
           />
-        ) : null}
-
-        {view.showAudioCanvas ? (
-          <AudioPracticeCanvas
-            currentTime={view.currentTime}
-            duration={view.duration}
-            markers={view.markers}
-            loopStart={view.loopRange.start}
-            loopEnd={view.loopRange.end}
-            waveform={view.waveform}
-            isPlaying={view.isPlaying}
-            playbackRate={view.playbackRate}
-            playbackRatePresets={view.playbackRatePresets}
-            hoveredMarker={hoveredMarker}
-            onAddMarker={actions.addMarker}
-            onClearLoop={actions.clearLoop}
-            onLoopStartClick={handleLoopStartClick}
-            onLoopEndClick={handleLoopEndClick}
-            onTogglePlayback={actions.togglePlayback}
-            onJumpBy={actions.jumpBy}
-            onSetPlaybackRate={actions.setPlaybackRate}
-            onSeek={actions.seek}
-            onMarkerHover={setHoveredMarker}
-            onMarkerLeave={() => setHoveredMarker(null)}
-            onMarkerClick={(marker) => { setFocusMarkerId(marker.id); setIsMarkerDrawerOpen(true); }}
-          />
-        ) : null}
-
-        {!view.showMediaDisplay && !view.showAudioCanvas ? (
-          <TransportControls
-            isPlaying={view.isPlaying}
-            playbackRate={view.playbackRate}
-            playbackRatePresets={view.playbackRatePresets}
-            onTogglePlayback={actions.togglePlayback}
-            onJumpBackward={() => actions.jumpBy(-10)}
-            onJumpForward={() => actions.jumpBy(10)}
-            onSetPlaybackRate={actions.setPlaybackRate}
-          />
-        ) : null}
-
-        <PracticeSummary isReady={view.isReady} markerCount={view.markerCount} isLoopActive={view.isLoopActive} />
-      </section>
-
-      <section className={styles.shortcutPanel} aria-label={t('practice.shortcuts.title')}>
-        <strong>{t('practice.shortcuts.title')}</strong>
-        <div className={styles.shortcutGrid}>
-          <span className={styles.shortcutItem}><kbd>Space</kbd>{t('practice.shortcuts.playPause')}</span>
-          <span className={styles.shortcutItem}><kbd>←</kbd><kbd>→</kbd>{t('practice.shortcuts.seek')}</span>
-          <span className={styles.shortcutItem}><kbd>M</kbd>{t('practice.shortcuts.addMarker')}</span>
-          <span className={styles.shortcutItem}><kbd>S</kbd>{t('practice.shortcuts.sessions')}</span>
-          <span className={styles.shortcutItem}><kbd>R</kbd>{t('practice.shortcuts.record')}</span>
         </div>
-      </section>
+      ) : null}
 
-      <section className={styles.lowerGrid}>
-        <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
-      </section>
+      {activeTab === 'record' ? (
+        <div className={styles.recordPanel}>
+          <RecorderDock hasActiveSource={!!view.source} recorder={recorder} />
+        </div>
+      ) : null}
 
-      {isMarkerDrawerOpen ? (
-        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label={t('practice.markers.dialogLabel')}>
-          <button
-            className={styles.sessionDrawerBackdrop}
-            type="button"
-            aria-label={t('practice.markers.closeAria')}
-            onClick={() => setIsMarkerDrawerOpen(false)}
-          />
-          <aside className={styles.sessionDrawer}>
-            <div className={styles.sessionDrawerHeader}>
-              <span className={styles.eyebrow}>{t('practice.markers.savedEyebrow')}</span>
-              <button
-                className={styles.sessionDrawerClose}
-                type="button"
-                onClick={() => setIsMarkerDrawerOpen(false)}
-              >
-                {t('practice.markers.close')}
-              </button>
-            </div>
+      {activeTab === 'practice' ? (
+        <div className={styles.practiceLayout}>
+          <div className={styles.playerColumn}>
+            <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
+
+            {view.showMediaDisplay ? (
+              <VideoPracticeCanvas
+                sourceKind={view.sourceKind}
+                currentTime={view.currentTime}
+                duration={view.duration}
+                markers={view.markers}
+                loopStart={view.loopRange.start}
+                loopEnd={view.loopRange.end}
+                isPlaying={view.isPlaying}
+                playbackRate={view.playbackRate}
+                playbackRatePresets={view.playbackRatePresets}
+                hoveredMarker={hoveredMarker}
+                onAddMarker={actions.addMarker}
+                onClearLoop={actions.clearLoop}
+                onLoopStartClick={handleLoopStartClick}
+                onLoopEndClick={handleLoopEndClick}
+                onTogglePlayback={actions.togglePlayback}
+                onJumpBy={actions.jumpBy}
+                onSetPlaybackRate={actions.setPlaybackRate}
+                onSeek={actions.seek}
+                onMarkerHover={setHoveredMarker}
+                onMarkerLeave={() => setHoveredMarker(null)}
+                onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
+                setVideoElement={actions.setVideoElement}
+              />
+            ) : null}
+
+            {view.showAudioCanvas ? (
+              <AudioPracticeCanvas
+                currentTime={view.currentTime}
+                duration={view.duration}
+                markers={view.markers}
+                loopStart={view.loopRange.start}
+                loopEnd={view.loopRange.end}
+                waveform={view.waveform}
+                isPlaying={view.isPlaying}
+                playbackRate={view.playbackRate}
+                playbackRatePresets={view.playbackRatePresets}
+                hoveredMarker={hoveredMarker}
+                onAddMarker={actions.addMarker}
+                onClearLoop={actions.clearLoop}
+                onLoopStartClick={handleLoopStartClick}
+                onLoopEndClick={handleLoopEndClick}
+                onTogglePlayback={actions.togglePlayback}
+                onJumpBy={actions.jumpBy}
+                onSetPlaybackRate={actions.setPlaybackRate}
+                onSeek={actions.seek}
+                onMarkerHover={setHoveredMarker}
+                onMarkerLeave={() => setHoveredMarker(null)}
+                onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
+              />
+            ) : null}
+
+            {!view.showMediaDisplay && !view.showAudioCanvas ? (
+              <TransportControls
+                isPlaying={view.isPlaying}
+                playbackRate={view.playbackRate}
+                playbackRatePresets={view.playbackRatePresets}
+                onTogglePlayback={actions.togglePlayback}
+                onJumpBackward={() => actions.jumpBy(-5)}
+                onJumpForward={() => actions.jumpBy(5)}
+                onSetPlaybackRate={actions.setPlaybackRate}
+              />
+            ) : null}
+          </div>
+
+          <aside className={styles.markersColumn}>
             <MarkerList
               markers={view.markers}
               focusMarkerId={focusMarkerId}
@@ -354,64 +239,28 @@ export function PracticePage() {
               onUpdateMarker={actions.updateMarker}
               onAddMarker={actions.addMarker}
               onClearLoop={actions.clearLoop}
+              onExportLight={(sessionIds) => { void actions.exportLightSessions(sessionIds); }}
+              onExport={(sessionIds) => { void actions.exportSessions(sessionIds); }}
             />
           </aside>
         </div>
       ) : null}
 
-      {isSessionDrawerOpen ? (
-        <div className={styles.sessionDrawerShell} role="dialog" aria-modal="true" aria-label={t('practice.sessions.dialogLabel')}>
-          <button
-            className={styles.sessionDrawerBackdrop}
-            type="button"
-            aria-label={t('practice.sessions.closeAria')}
-            onClick={() => setIsSessionDrawerOpen(false)}
-          />
-          <aside className={styles.sessionDrawer}>
-            <div className={styles.sessionDrawerHeader}>
-              <span className={styles.eyebrow}>{t('practice.sessions.savedEyebrow')}</span>
-              <button
-                className={styles.sessionDrawerClose}
-                type="button"
-                onClick={() => setIsSessionDrawerOpen(false)}
-              >
-                {t('practice.sessions.close')}
-              </button>
-            </div>
-            <SessionHistory
-              sessions={view.sessionHistory}
-              activeSessionId={view.activeSessionId}
-              storageHealth={view.storageHealth}
-              persistenceFeedback={view.persistenceFeedback}
-              onDismissFeedback={actions.dismissPersistenceFeedback}
-              onLoadSession={(sessionId) => {
-                void actions.loadSession(sessionId);
-                setIsSessionDrawerOpen(false);
-              }}
-              onRenameSession={actions.renameSession}
-              onDeleteSession={(sessionId) => {
-                void actions.deleteSession(sessionId);
-              }}
-              onClearAll={() => {
-                void actions.clearAllSessions();
-                setIsSessionDrawerOpen(false);
-              }}
-              onExportLight={(sessionIds) => {
-                void actions.exportLightSessions(sessionIds);
-              }}
-              onExport={(sessionIds) => {
-                void actions.exportSessions(sessionIds);
-              }}
-              onPrepareImport={(file) => actions.prepareImportSessions(file)}
-              onImport={(file, options) => {
-                void actions.importSessions(file, options);
-                setIsSessionDrawerOpen(false);
-              }}
-            />
-          </aside>
-        </div>
-      ) : null}
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
+      <div className={styles.lowerGrid}>
+        <SessionNotes value={view.sessionNote} onChange={actions.setSessionNote} />
+        <section className={styles.shortcutPanel} aria-label={t('practice.shortcuts.title')}>
+          <strong>{t('practice.shortcuts.title')}</strong>
+          <div className={styles.shortcutGrid}>
+            <span className={styles.shortcutItem}><kbd>Space</kbd>{t('practice.shortcuts.playPause')}</span>
+            <span className={styles.shortcutItem}><kbd>←</kbd><kbd>→</kbd>{t('practice.shortcuts.seek')}</span>
+            <span className={styles.shortcutItem}><kbd>M</kbd>{t('practice.shortcuts.addMarker')}</span>
+            <span className={styles.shortcutItem}><kbd>L</kbd>{t('practice.shortcuts.loopToggle')}</span>
+            <span className={styles.shortcutItem}><kbd>R</kbd>{t('practice.shortcuts.record')}</span>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

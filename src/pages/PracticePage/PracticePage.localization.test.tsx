@@ -18,13 +18,13 @@ describe('PracticePage localization', () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Practice page' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Paste a YouTube link')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Paste YouTube URL or Search...')).toBeInTheDocument();
+    expect(screen.getByText('Open Local File')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Language' }));
+    await user.click(screen.getByRole('button', { name: 'PT' }));
 
-    expect(await screen.findByRole('heading', { name: 'Página de prática' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Cole um link do YouTube')).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText('Cole a URL do YouTube...')).toBeInTheDocument();
+    expect(screen.getByText('Abrir arquivo local')).toBeInTheDocument();
   });
 
   it('persists the selected locale locally across remounts', async () => {
@@ -36,7 +36,7 @@ describe('PracticePage localization', () => {
       </I18nProvider>,
     );
 
-    await user.click(screen.getByRole('button', { name: 'Language' }));
+    await user.click(screen.getByRole('button', { name: 'PT' }));
     expect(window.localStorage.getItem('curio.locale.v1')).toBe('pt-BR');
 
     unmount();
@@ -47,6 +47,6 @@ describe('PracticePage localization', () => {
       </I18nProvider>,
     );
 
-    expect(screen.getAllByRole('heading', { name: 'Página de prática' }).length).toBeGreaterThan(0);
+    expect(screen.getByPlaceholderText('Cole a URL do YouTube...')).toBeInTheDocument();
   });
 });

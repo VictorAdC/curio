@@ -1,0 +1,12 @@
+.root {
+  display: grid;
+  gap: 0;
+  background: var(--surface);
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.timelineShell {
+  padding: 0.75rem 1rem 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+}

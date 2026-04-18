@@ -1,12 +1,20 @@
 :root {
   font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
-  color: #102033;
-  background:
-    radial-gradient(circle at top, rgba(36, 99, 235, 0.12), transparent 32%),
-    linear-gradient(180deg, #f6f8fc 0%, #eef2f8 100%);
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface-2: #242424;
+  --surface-3: #2E2E2E;
+  --accent: #F97316;
+  --accent-hover: #EA6C0A;
+  --text: #FFFFFF;
+  --text-muted: #888888;
+  --text-dim: #555555;
+  --border: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  background: var(--bg);
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,6 +34,7 @@ body,
 
 body {
   min-height: 100vh;
+  background: var(--bg);
 }
 
 button,

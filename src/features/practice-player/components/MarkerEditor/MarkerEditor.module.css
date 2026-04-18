@@ -1,15 +1,22 @@
 .root {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .title,
 .note {
   width: 100%;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(49, 88, 154, 0.16);
-  border-radius: 12px;
-  background: #fbfdff;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--text);
+  outline: none;
+}
+
+.title:focus,
+.note:focus {
+  border-color: var(--accent);
 }
 
 .note {
@@ -18,32 +25,39 @@
 
 .tagsRoot {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .tokenInput {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.35rem;
   align-items: center;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid rgba(49, 88, 154, 0.16);
-  border-radius: 12px;
-  background: #fbfdff;
-  min-height: 2.8rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-3);
+  min-height: 2.5rem;
+  cursor: text;
+}
+
+.tokenInput:focus-within {
+  border-color: var(--accent);
 }
 
 .tagChip {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.5rem;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
   border-radius: 999px;
-  background: rgba(49, 88, 154, 0.08);
-  color: #31589a;
-  font-size: 0.85rem;
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--accent);
+  font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .tagRemove {
@@ -55,44 +69,63 @@
   cursor: pointer;
   line-height: 1;
   padding: 0;
+  opacity: 0.7;
+}
+
+.tagRemove:hover {
+  opacity: 1;
 }
 
 .tags {
   border: 0;
   background: transparent;
-  padding: 0.2rem 0.1rem;
-  min-width: 100px;
+  padding: 0.15rem 0.1rem;
+  min-width: 80px;
   flex: 1;
   outline: none;
   font: inherit;
-  color: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.tags::placeholder {
+  color: var(--text-dim);
 }
 
 .suggestions {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .suggestionsLabel {
-  color: #5f6f85;
-  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .suggestionList {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
 }
 
 .suggestion {
   border: 0;
   border-radius: 999px;
-  padding: 0.4rem 0.6rem;
-  background: #edf3ff;
-  color: #123a7d;
+  padding: 0.3rem 0.55rem;
+  background: var(--surface-3);
+  color: var(--text-muted);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.suggestion:hover {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--accent);
 }

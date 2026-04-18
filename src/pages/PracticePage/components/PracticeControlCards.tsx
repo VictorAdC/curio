@@ -1,6 +1,6 @@
 import { formatTime } from '../../../features/practice-player/utils/time';
 import { useI18n } from '../../../i18n/I18nProvider';
-import styles from '../PracticePage.module.css';
+import styles from './PracticeControlCards.module.css';
 
 interface PracticeControlCardsProps {
   layout: 'stacked' | 'inline';
@@ -27,41 +27,37 @@ export function PracticeControlCards({
 
   if (layout === 'inline') {
     return (
-      <div className={styles.audioControlsRow}>
-        <div className={styles.audioActionsRow}>
-          <button className={styles.overlayAction} type="button" onClick={onAddMarker}>
-            {t('practice.controls.addMarker')}
-          </button>
-          <button className={styles.overlayGhost} type="button" onClick={onClearLoop}>
-            {t('practice.controls.clearLoop')}
-          </button>
-        </div>
-        <div className={styles.audioLoopInfoRow}>
-          <button
-            className={`${styles.overlayMeta} ${onLoopStartClick && loopStart !== null ? styles.overlayMetaClickable : ''}`}
-            type="button"
-            onClick={onLoopStartClick}
-            disabled={loopStart === null}
-          >
-            <span>{t('practice.controls.loopStart')}</span>
-            <strong>{loopStartLabel}</strong>
-          </button>
-          <button
-            className={`${styles.overlayMeta} ${onLoopEndClick && loopEnd !== null ? styles.overlayMetaClickable : ''}`}
-            type="button"
-            onClick={onLoopEndClick}
-            disabled={loopEnd === null}
-          >
-            <span>{t('practice.controls.loopEnd')}</span>
-            <strong>{loopEndLabel}</strong>
-          </button>
-        </div>
+      <div className={styles.inlineRow}>
+        <button className={styles.inlineAction} type="button" onClick={onAddMarker}>
+          {t('practice.controls.addMarker')}
+        </button>
+        <button className={styles.inlineGhost} type="button" onClick={onClearLoop}>
+          {t('practice.controls.clearLoop')}
+        </button>
+        <button
+          className={`${styles.inlineMeta} ${onLoopStartClick && loopStart !== null ? styles.inlineMetaClickable : ''}`}
+          type="button"
+          onClick={onLoopStartClick}
+          disabled={loopStart === null}
+        >
+          <span>{t('practice.controls.loopStart')}</span>
+          <strong>{loopStartLabel}</strong>
+        </button>
+        <button
+          className={`${styles.inlineMeta} ${onLoopEndClick && loopEnd !== null ? styles.inlineMetaClickable : ''}`}
+          type="button"
+          onClick={onLoopEndClick}
+          disabled={loopEnd === null}
+        >
+          <span>{t('practice.controls.loopEnd')}</span>
+          <strong>{loopEndLabel}</strong>
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={styles.overlayRail}>
+    <div className={styles.stackedRail}>
       <button className={styles.overlayAction} type="button" onClick={onAddMarker}>
         {t('practice.controls.addMarker')}
       </button>

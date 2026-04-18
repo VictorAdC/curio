@@ -1,0 +1,16 @@
+.root {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.canvasArea {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  background: #0a0a0a;
+}
+
+.waveStage {
+  width: 100%;
+}

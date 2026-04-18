@@ -3,7 +3,7 @@ import { Timeline } from '../../../features/practice-player/components/Timeline/
 import { MarkerSpotlight } from './MarkerSpotlight';
 import { PracticeControlCards } from './PracticeControlCards';
 import { PracticePlaybackFooter } from './PracticePlaybackFooter';
-import styles from '../PracticePage.module.css';
+import styles from './AudioPracticeCanvas.module.css';
 
 interface AudioPracticeCanvasProps {
   currentTime: number;
@@ -53,8 +53,8 @@ export function AudioPracticeCanvas({
   onMarkerClick,
 }: AudioPracticeCanvasProps) {
   return (
-    <div className={styles.videoCanvas}>
-      <div className={`${styles.playerArea} ${styles.audioCanvasArea}`}>
+    <div className={styles.root}>
+      <div className={styles.canvasArea}>
         <PracticeControlCards
           layout="inline"
           loopStart={loopStart}
@@ -64,7 +64,7 @@ export function AudioPracticeCanvas({
           onLoopStartClick={onLoopStartClick}
           onLoopEndClick={onLoopEndClick}
         />
-        <div className={styles.audioWaveStage}>
+        <div className={styles.waveStage}>
           <Timeline
             currentTime={currentTime}
             duration={duration}

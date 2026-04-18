@@ -1,0 +1,161 @@
+/* Stacked layout (desktop/video overlay) */
+.stackedRail {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: grid;
+  gap: 0.5rem;
+  width: min(200px, calc(100% - 2rem));
+}
+
+.overlayAction {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.overlayAction:hover {
+  background: var(--accent-hover);
+}
+
+.overlayGhost {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255,255,255,0.7);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.overlayGhost:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.overlayMeta {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  border: 0;
+  text-align: left;
+  cursor: default;
+}
+
+.overlayMeta:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.overlayMetaClickable {
+  cursor: pointer;
+}
+
+.overlayMetaClickable:hover {
+  background: rgba(249, 115, 22, 0.3);
+}
+
+.overlayMeta span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+.overlayMeta strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inline layout (audio canvas / mobile) */
+.inlineRow {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.inlineAction {
+  border: 0;
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.inlineAction:hover {
+  background: var(--accent-hover);
+}
+
+.inlineGhost {
+  border: 0;
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.inlineGhost:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.inlineMeta {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 0;
+  text-align: left;
+  cursor: default;
+}
+
+.inlineMeta:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.inlineMetaClickable {
+  cursor: pointer;
+}
+
+.inlineMetaClickable:hover {
+  background: rgba(249, 115, 22, 0.18);
+}
+
+.inlineMeta span {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.inlineMeta strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}

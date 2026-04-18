@@ -1,10 +1,10 @@
 .root {
   display: grid;
-  gap: 1rem;
-  padding: 1.25rem;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
   align-self: start;
   min-width: 0;
 }
@@ -16,23 +16,37 @@
   align-items: baseline;
 }
 
-.header h3,
-.header span {
+.header h3 {
   margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .header span {
-  color: #5f6f85;
-  font-size: 0.92rem;
+  color: var(--text-dim);
+  font-size: 0.78rem;
 }
 
 .textarea {
   width: 100%;
-  min-height: 220px;
-  max-height: 320px;
-  padding: 1rem;
-  border: 1px solid rgba(49, 88, 154, 0.16);
-  border-radius: 16px;
-  background: #fbfdff;
+  min-height: 160px;
+  max-height: 280px;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
   resize: vertical;
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--text-dim);
+}
+
+.textarea:focus {
+  border-color: var(--accent);
 }

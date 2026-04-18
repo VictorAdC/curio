@@ -163,6 +163,22 @@ These are useful, but not as urgent as the items above.
 
 - a more complete archive-management workflow if saved sessions become a major product surface.
 
+## Pending Navigation Tabs
+
+The bottom navigation bar introduced in the dark-theme refactor includes a HISTORY tab (wired) and a RECORD tab (wired). Two additional tabs are in the design but not yet implemented:
+
+### Library Tab
+
+A future panel for browsing and organizing saved sessions by piece name, user tag, or instrument. Would allow grouping sessions across different source files under a single piece or study topic.
+
+### Settings Tab
+
+App-level preferences panel. Candidates include: language selection, storage management shortcuts, keyboard shortcut customization, and playback defaults.
+
+Both tabs should be specced before implementation to agree on scope and navigation behavior.
+
+---
+
 ## Suggested Implementation Order
 
 ### Quality First
