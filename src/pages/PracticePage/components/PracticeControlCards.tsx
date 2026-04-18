@@ -8,6 +8,8 @@ interface PracticeControlCardsProps {
   loopEnd: number | null;
   onAddMarker: () => void;
   onClearLoop: () => void;
+  onLoopStartClick?: () => void;
+  onLoopEndClick?: () => void;
 }
 
 export function PracticeControlCards({
@@ -16,6 +18,8 @@ export function PracticeControlCards({
   loopEnd,
   onAddMarker,
   onClearLoop,
+  onLoopStartClick,
+  onLoopEndClick,
 }: PracticeControlCardsProps) {
   const { t } = useI18n();
   const loopStartLabel = loopStart !== null ? formatTime(loopStart) : '--:--';
@@ -33,14 +37,24 @@ export function PracticeControlCards({
           </button>
         </div>
         <div className={styles.audioLoopInfoRow}>
-          <div className={styles.overlayMeta}>
+          <button
+            className={`${styles.overlayMeta} ${onLoopStartClick && loopStart !== null ? styles.overlayMetaClickable : ''}`}
+            type="button"
+            onClick={onLoopStartClick}
+            disabled={loopStart === null}
+          >
             <span>{t('practice.controls.loopStart')}</span>
             <strong>{loopStartLabel}</strong>
-          </div>
-          <div className={styles.overlayMeta}>
+          </button>
+          <button
+            className={`${styles.overlayMeta} ${onLoopEndClick && loopEnd !== null ? styles.overlayMetaClickable : ''}`}
+            type="button"
+            onClick={onLoopEndClick}
+            disabled={loopEnd === null}
+          >
             <span>{t('practice.controls.loopEnd')}</span>
             <strong>{loopEndLabel}</strong>
-          </div>
+          </button>
         </div>
       </div>
     );
@@ -54,14 +68,24 @@ export function PracticeControlCards({
       <button className={styles.overlayGhost} type="button" onClick={onClearLoop}>
         {t('practice.controls.clearLoop')}
       </button>
-      <div className={styles.overlayMeta}>
+      <button
+        className={`${styles.overlayMeta} ${onLoopStartClick && loopStart !== null ? styles.overlayMetaClickable : ''}`}
+        type="button"
+        onClick={onLoopStartClick}
+        disabled={loopStart === null}
+      >
         <span>{t('practice.controls.loopStart')}</span>
         <strong>{loopStartLabel}</strong>
-      </div>
-      <div className={styles.overlayMeta}>
+      </button>
+      <button
+        className={`${styles.overlayMeta} ${onLoopEndClick && loopEnd !== null ? styles.overlayMetaClickable : ''}`}
+        type="button"
+        onClick={onLoopEndClick}
+        disabled={loopEnd === null}
+      >
         <span>{t('practice.controls.loopEnd')}</span>
         <strong>{loopEndLabel}</strong>
-      </div>
+      </button>
     </div>
   );
 }

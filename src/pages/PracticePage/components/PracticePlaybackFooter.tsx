@@ -18,6 +18,7 @@ interface PracticePlaybackFooterProps {
   onSeek: (seconds: number) => void;
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
+  onMarkerClick?: (marker: PracticeMarker) => void;
 }
 
 export function PracticePlaybackFooter({
@@ -35,6 +36,7 @@ export function PracticePlaybackFooter({
   onSeek,
   onMarkerHover,
   onMarkerLeave,
+  onMarkerClick,
 }: PracticePlaybackFooterProps) {
   return (
     <div className={styles.canvasFooter}>
@@ -60,6 +62,7 @@ export function PracticePlaybackFooter({
         variant="compact"
         onMarkerHover={onMarkerHover}
         onMarkerLeave={onMarkerLeave}
+        onMarkerClick={onMarkerClick}
       />
     </div>
   );

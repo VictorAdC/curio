@@ -47,53 +47,13 @@ export function toggleSystemTag(markers: PracticeMarker[], markerId: string, tag
     return markers.map((marker) => (marker.id === markerId ? stripSystemTag(marker, tag) : marker));
   }
 
-  const nextMarkers = markers.map((marker) => {
+  return markers.map((marker) => {
     if (marker.id === markerId) {
       return addSystemTag(marker, tag);
     }
 
     return hasSystemTag(marker, tag) ? stripSystemTag(marker, tag) : marker;
   });
-
-  const nextTarget = nextMarkers.find((marker) => marker.id === markerId);
-
-  if (!nextTarget) {
-    return nextMarkers;
-  }
-
-  if (tag === 'loop-start') {
-    const currentEnd = getTaggedMarker(nextMarkers, 'loop-end');
-
-    if (currentEnd && nextTarget.timestampSeconds >= currentEnd.timestampSeconds) {
-      return nextMarkers.map((marker) => stripSystemTag(marker, 'loop-end'));
-    }
-  }
-
-  if (tag === 'loop-end') {
-    const currentStart = getTaggedMarker(nextMarkers, 'loop-start');
-
-    if (currentStart && currentStart.timestampSeconds >= nextTarget.timestampSeconds) {
-      return nextMarkers.map((marker) => stripSystemTag(marker, 'loop-start'));
-    }
-  }
-
-  if (tag === 'media-start') {
-    const currentEnd = getTaggedMarker(nextMarkers, 'media-end');
-
-    if (currentEnd && nextTarget.timestampSeconds >= currentEnd.timestampSeconds) {
-      return nextMarkers.map((marker) => stripSystemTag(marker, 'media-end'));
-    }
-  }
-
-  if (tag === 'media-end') {
-    const currentStart = getTaggedMarker(nextMarkers, 'media-start');
-
-    if (currentStart && currentStart.timestampSeconds >= nextTarget.timestampSeconds) {
-      return nextMarkers.map((marker) => stripSystemTag(marker, 'media-start'));
-    }
-  }
-
-  return nextMarkers;
 }
 
 export function convertSystemTagToUserTag(
@@ -117,18 +77,30 @@ export function convertSystemTagToUserTag(
 }
 
 export function getValidLoopRange(markers: PracticeMarker[]) {
-  const start = getTaggedMarker(markers, 'loop-start');
-  const end = getTaggedMarker(markers, 'loop-end');
+  const loopStart = getTaggedMarker(markers, 'loop-start');
+  const loopEnd = getTaggedMarker(markers, 'loop-end');
+  const mediaStart = getTaggedMarker(markers, 'media-start');
+  const mediaEnd = getTaggedMarker(markers, 'media-end');
 
-  if (!start || !end || start.timestampSeconds >= end.timestampSeconds) {
-    return {
-      start: null,
-      end: null,
-    };
+  const starts: number[] = [];
+  const ends: number[] = [];
+
+  // All system tags constrain independently
+  if (loopStart !== null) starts.push(loopStart.timestampSeconds);
+  if (loopEnd !== null) ends.push(loopEnd.timestampSeconds);
+  if (mediaStart !== null) starts.push(mediaStart.timestampSeconds);
+  if (mediaEnd !== null) ends.push(mediaEnd.timestampSeconds);
+
+  if (starts.length === 0 && ends.length === 0) {
+    return { start: null, end: null };
   }
 
-  return {
-    start: start.timestampSeconds,
-    end: end.timestampSeconds,
-  };
+  const effectiveStart = starts.length > 0 ? Math.max(...starts) : null;
+  const effectiveEnd = ends.length > 0 ? Math.min(...ends) : null;
+
+  if (effectiveStart !== null && effectiveEnd !== null && effectiveStart >= effectiveEnd) {
+    return { start: null, end: null };
+  }
+
+  return { start: effectiveStart, end: effectiveEnd };
 }

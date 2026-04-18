@@ -9,6 +9,7 @@ declare global {
     getCurrentTime(): number;
     getDuration(): number;
     cueVideoById(videoId: string): void;
+    getPlayerState(): number;
   }
 
   interface YouTubePlayerEvent {

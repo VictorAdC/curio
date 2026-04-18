@@ -14,7 +14,7 @@ export function useLoopPlayback(
 
     const loopRange = getValidLoopRange(markers);
 
-    if (loopRange.start === null || loopRange.end === null) {
+    if (loopRange.start === null && loopRange.end === null) {
       controller.clearLoop();
       return;
     }

@@ -80,7 +80,7 @@ export class PracticePlayerController {
     return this.adapter?.getCurrentTime() ?? 0;
   }
 
-  setLoop(startSeconds: number, endSeconds: number | null) {
+  setLoop(startSeconds: number | null, endSeconds: number | null) {
     this.adapter?.setLoop(startSeconds, endSeconds);
   }
 

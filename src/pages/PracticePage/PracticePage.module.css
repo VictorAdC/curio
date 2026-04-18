@@ -319,6 +319,23 @@
   background: rgba(7, 15, 28, 0.54);
   color: #edf3ff;
   backdrop-filter: blur(18px);
+  border: 0;
+  text-align: left;
+  cursor: default;
+}
+
+.overlayMeta:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.overlayMetaClickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.overlayMetaClickable:hover {
+  background: rgba(37, 99, 235, 0.35);
 }
 
 .overlayMeta span,

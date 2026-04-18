@@ -17,12 +17,15 @@ interface VideoPracticeCanvasProps {
   hoveredMarker: PracticeMarker | null;
   onAddMarker: () => void;
   onClearLoop: () => void;
+  onLoopStartClick?: () => void;
+  onLoopEndClick?: () => void;
   onTogglePlayback: () => void;
   onJumpBy: (deltaSeconds: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onSeek: (seconds: number) => void;
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
+  onMarkerClick?: (marker: PracticeMarker) => void;
   setVideoElement: (element: HTMLVideoElement | null) => void;
 }
 
@@ -39,12 +42,15 @@ export function VideoPracticeCanvas({
   hoveredMarker,
   onAddMarker,
   onClearLoop,
+  onLoopStartClick,
+  onLoopEndClick,
   onTogglePlayback,
   onJumpBy,
   onSetPlaybackRate,
   onSeek,
   onMarkerHover,
   onMarkerLeave,
+  onMarkerClick,
   setVideoElement,
 }: VideoPracticeCanvasProps) {
   return (
@@ -63,6 +69,8 @@ export function VideoPracticeCanvas({
           loopEnd={loopEnd}
           onAddMarker={onAddMarker}
           onClearLoop={onClearLoop}
+          onLoopStartClick={onLoopStartClick}
+          onLoopEndClick={onLoopEndClick}
         />
         <MarkerSpotlight marker={hoveredMarker} />
       </div>
@@ -82,6 +90,7 @@ export function VideoPracticeCanvas({
         onSeek={onSeek}
         onMarkerHover={onMarkerHover}
         onMarkerLeave={onMarkerLeave}
+        onMarkerClick={onMarkerClick}
       />
     </div>
   );

@@ -23,6 +23,24 @@ export function PracticePage() {
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [isSessionDrawerOpen, setIsSessionDrawerOpen] = useState(false);
   const [isMarkerDrawerOpen, setIsMarkerDrawerOpen] = useState(false);
+  const [focusMarkerId, setFocusMarkerId] = useState<string | null>(null);
+
+  const openMarkerById = (id: string) => {
+    setFocusMarkerId(id);
+    setIsMarkerDrawerOpen(true);
+  };
+
+  const handleLoopStartClick = () => {
+    const starts = view.markers.filter((m) => m.systemTags.includes('loop-start') || m.systemTags.includes('media-start'));
+    const effective = starts.reduce<typeof starts[0] | null>((best, m) => (!best || m.timestampSeconds > best.timestampSeconds ? m : best), null);
+    if (effective) openMarkerById(effective.id);
+  };
+
+  const handleLoopEndClick = () => {
+    const ends = view.markers.filter((m) => m.systemTags.includes('loop-end') || m.systemTags.includes('media-end'));
+    const effective = ends.reduce<typeof ends[0] | null>((best, m) => (!best || m.timestampSeconds < best.timestampSeconds ? m : best), null);
+    if (effective) openMarkerById(effective.id);
+  };
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -239,12 +257,15 @@ export function PracticePage() {
             hoveredMarker={hoveredMarker}
             onAddMarker={actions.addMarker}
             onClearLoop={actions.clearLoop}
+            onLoopStartClick={handleLoopStartClick}
+            onLoopEndClick={handleLoopEndClick}
             onTogglePlayback={actions.togglePlayback}
             onJumpBy={actions.jumpBy}
             onSetPlaybackRate={actions.setPlaybackRate}
             onSeek={actions.seek}
             onMarkerHover={setHoveredMarker}
             onMarkerLeave={() => setHoveredMarker(null)}
+            onMarkerClick={(marker) => { setFocusMarkerId(marker.id); setIsMarkerDrawerOpen(true); }}
             setVideoElement={actions.setVideoElement}
           />
         ) : null}
@@ -263,12 +284,15 @@ export function PracticePage() {
             hoveredMarker={hoveredMarker}
             onAddMarker={actions.addMarker}
             onClearLoop={actions.clearLoop}
+            onLoopStartClick={handleLoopStartClick}
+            onLoopEndClick={handleLoopEndClick}
             onTogglePlayback={actions.togglePlayback}
             onJumpBy={actions.jumpBy}
             onSetPlaybackRate={actions.setPlaybackRate}
             onSeek={actions.seek}
             onMarkerHover={setHoveredMarker}
             onMarkerLeave={() => setHoveredMarker(null)}
+            onMarkerClick={(marker) => { setFocusMarkerId(marker.id); setIsMarkerDrawerOpen(true); }}
           />
         ) : null}
 
@@ -323,6 +347,7 @@ export function PracticePage() {
             </div>
             <MarkerList
               markers={view.markers}
+              focusMarkerId={focusMarkerId}
               onSeekToMarker={actions.seek}
               onToggleSystemTag={actions.toggleSystemTag}
               onDeleteMarker={actions.removeMarker}

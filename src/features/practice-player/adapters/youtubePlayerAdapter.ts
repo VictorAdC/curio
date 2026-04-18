@@ -120,7 +120,7 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
     return this.player?.getCurrentTime() ?? 0;
   }
 
-  setLoop(startSeconds: number, endSeconds: number | null) {
+  setLoop(startSeconds: number | null, endSeconds: number | null) {
     this.loopStart = startSeconds;
     this.loopEnd = endSeconds;
   }
@@ -148,9 +148,10 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
 
     const tick = () => {
       const currentTime = this.getCurrentTime();
+      const isPlaying = this.player?.getPlayerState() === 1;
 
-      if (this.loopStart !== null && this.loopEnd !== null && currentTime >= this.loopEnd) {
-        this.seek(this.loopStart);
+      if (isPlaying && this.loopEnd !== null && currentTime >= this.loopEnd) {
+        this.seek(this.loopStart ?? 0);
       } else {
         this.options.onTimeUpdate(currentTime);
         this.options.onDurationChange(this.getDuration());

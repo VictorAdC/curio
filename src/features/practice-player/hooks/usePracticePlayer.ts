@@ -535,6 +535,13 @@ export function usePracticePlayer() {
         if (store.isPlaying) {
           controllerRef.current?.pause();
         } else {
+          const { markers, currentTime } = usePracticeSessionStore.getState();
+          const loopRange = getValidLoopRange(markers);
+          if (loopRange.end !== null && currentTime >= loopRange.end) {
+            controllerRef.current?.seek(loopRange.start ?? 0);
+          } else if (loopRange.start !== null && currentTime < loopRange.start) {
+            controllerRef.current?.seek(loopRange.start);
+          }
           void controllerRef.current?.play();
         }
       },
@@ -613,7 +620,7 @@ export function usePracticePlayer() {
       persistenceFeedback,
       showAudioCanvas: sourceKind === 'local-audio',
       showMediaDisplay: sourceKind === 'local-video' || sourceKind === 'youtube',
-      isLoopActive: loopRange.start !== null && loopRange.end !== null,
+      isLoopActive: loopRange.start !== null || loopRange.end !== null,
     }),
     [activeSession, loopRange, persistenceFeedback, sessionHistory, sourceKind, storageHealth, store, t],
   );

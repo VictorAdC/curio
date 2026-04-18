@@ -90,7 +90,7 @@ export interface PlaybackAdapter {
   getPlaybackRate(): number;
   getDuration(): number;
   getCurrentTime(): number;
-  setLoop(startSeconds: number, endSeconds: number | null): void;
+  setLoop(startSeconds: number | null, endSeconds: number | null): void;
   clearLoop(): void;
   destroy(): void;
 }

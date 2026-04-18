@@ -75,12 +75,12 @@ export function WaveformTimeline({
       }}
       aria-label={t('practice.timeline.seekWaveformAria')}
     >
-      {loopStart !== null && loopEnd !== null && duration > 0 ? (
+      {(loopStart !== null || loopEnd !== null) && duration > 0 ? (
         <div
           className={styles.loopRange}
           style={{
-            left: `${(loopStart / duration) * 100}%`,
-            width: `${((loopEnd - loopStart) / duration) * 100}%`,
+            left: `${((loopStart ?? 0) / duration) * 100}%`,
+            width: `${(((loopEnd ?? duration) - (loopStart ?? 0)) / duration) * 100}%`,
           }}
         />
       ) : null}

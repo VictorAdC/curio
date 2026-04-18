@@ -76,7 +76,7 @@ export class LocalMediaAdapter implements PlaybackAdapter {
     return this.options.mediaElement.currentTime;
   }
 
-  setLoop(startSeconds: number, endSeconds: number | null) {
+  setLoop(startSeconds: number | null, endSeconds: number | null) {
     this.loopStart = startSeconds;
     this.loopEnd = endSeconds;
   }
@@ -97,9 +97,10 @@ export class LocalMediaAdapter implements PlaybackAdapter {
   private handleTimeUpdate() {
     const currentTime = this.options.mediaElement.currentTime;
 
-    if (this.loopStart !== null && this.loopEnd !== null && currentTime >= this.loopEnd) {
-      this.options.mediaElement.currentTime = this.loopStart;
-      this.options.onTimeUpdate(this.loopStart);
+    if (!this.options.mediaElement.paused && this.loopEnd !== null && currentTime >= this.loopEnd) {
+      const snapTo = this.loopStart ?? 0;
+      this.options.mediaElement.currentTime = snapTo;
+      this.options.onTimeUpdate(snapTo);
       return;
     }
 

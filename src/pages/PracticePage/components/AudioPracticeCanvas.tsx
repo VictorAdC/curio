@@ -18,12 +18,15 @@ interface AudioPracticeCanvasProps {
   hoveredMarker: PracticeMarker | null;
   onAddMarker: () => void;
   onClearLoop: () => void;
+  onLoopStartClick?: () => void;
+  onLoopEndClick?: () => void;
   onTogglePlayback: () => void;
   onJumpBy: (deltaSeconds: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onSeek: (seconds: number) => void;
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
+  onMarkerClick?: (marker: PracticeMarker) => void;
 }
 
 export function AudioPracticeCanvas({
@@ -39,12 +42,15 @@ export function AudioPracticeCanvas({
   hoveredMarker,
   onAddMarker,
   onClearLoop,
+  onLoopStartClick,
+  onLoopEndClick,
   onTogglePlayback,
   onJumpBy,
   onSetPlaybackRate,
   onSeek,
   onMarkerHover,
   onMarkerLeave,
+  onMarkerClick,
 }: AudioPracticeCanvasProps) {
   return (
     <div className={styles.videoCanvas}>
@@ -55,6 +61,8 @@ export function AudioPracticeCanvas({
           loopEnd={loopEnd}
           onAddMarker={onAddMarker}
           onClearLoop={onClearLoop}
+          onLoopStartClick={onLoopStartClick}
+          onLoopEndClick={onLoopEndClick}
         />
         <div className={styles.audioWaveStage}>
           <Timeline
@@ -67,6 +75,7 @@ export function AudioPracticeCanvas({
             onSeek={onSeek}
             onMarkerHover={onMarkerHover}
             onMarkerLeave={onMarkerLeave}
+            onMarkerClick={onMarkerClick}
           />
         </div>
         <MarkerSpotlight marker={hoveredMarker} />
@@ -87,6 +96,7 @@ export function AudioPracticeCanvas({
         onSeek={onSeek}
         onMarkerHover={onMarkerHover}
         onMarkerLeave={onMarkerLeave}
+        onMarkerClick={onMarkerClick}
       />
     </div>
   );

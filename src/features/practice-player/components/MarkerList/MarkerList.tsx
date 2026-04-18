@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatTime } from '../../utils/time';
 import type { PracticeMarker, PracticeSystemTag } from '../../types/practicePlayer';
@@ -9,6 +9,7 @@ import styles from './MarkerList.module.css';
 
 interface MarkerListProps {
   markers: PracticeMarker[];
+  focusMarkerId?: string | null;
   onSeekToMarker: (seconds: number) => void;
   onToggleSystemTag: (markerId: string, tag: PracticeSystemTag) => void;
   onDeleteMarker: (markerId: string) => void;
@@ -28,6 +29,7 @@ const systemTagIcons: Record<string, string> = {
 
 export function MarkerList({
   markers,
+  focusMarkerId,
   onSeekToMarker,
   onToggleSystemTag,
   onDeleteMarker,
@@ -49,6 +51,12 @@ export function MarkerList({
   };
 
   const hideTooltip = () => setTooltip(null);
+
+  useEffect(() => {
+    if (focusMarkerId) {
+      setExpandedIds((prev) => new Set([...prev, focusMarkerId]));
+    }
+  }, [focusMarkerId]);
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) => {

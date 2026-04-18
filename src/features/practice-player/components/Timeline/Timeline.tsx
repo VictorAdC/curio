@@ -16,6 +16,7 @@ interface TimelineProps {
   variant?: 'default' | 'compact';
   onMarkerHover?: (marker: PracticeMarker) => void;
   onMarkerLeave?: () => void;
+  onMarkerClick?: (marker: PracticeMarker) => void;
 }
 
 export function Timeline({
@@ -29,6 +30,7 @@ export function Timeline({
   variant = 'default',
   onMarkerHover,
   onMarkerLeave,
+  onMarkerClick,
 }: TimelineProps) {
   const isDraggingRef = useRef(false);
   const isCompact = variant === 'compact';
@@ -91,12 +93,12 @@ export function Timeline({
         aria-label={t('practice.timeline.seekMediaAria')}
       >
         <div className={styles.genericProgress} style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
-        {loopStart !== null && loopEnd !== null && duration > 0 ? (
+        {(loopStart !== null || loopEnd !== null) && duration > 0 ? (
           <div
             className={styles.loopRange}
             style={{
-              left: `${(loopStart / duration) * 100}%`,
-              width: `${((loopEnd - loopStart) / duration) * 100}%`,
+              left: `${((loopStart ?? 0) / duration) * 100}%`,
+              width: `${(((loopEnd ?? duration) - (loopStart ?? 0)) / duration) * 100}%`,
             }}
           />
         ) : null}
@@ -107,6 +109,7 @@ export function Timeline({
             style={{ left: `${duration > 0 ? (marker.timestampSeconds / duration) * 100 : 0}%` }}
             onMouseEnter={() => onMarkerHover?.(marker)}
             onMouseLeave={() => onMarkerLeave?.()}
+            onClick={(e) => { e.stopPropagation(); onMarkerClick?.(marker); }}
           />
         ))}
         <div
