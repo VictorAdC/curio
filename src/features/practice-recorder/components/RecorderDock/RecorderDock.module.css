@@ -6,6 +6,11 @@
   z-index: 3;
 }
 
+.rootInline {
+  position: static;
+  justify-items: stretch;
+}
+
 .toggle {
   border: 0;
   border-radius: 999px;
@@ -52,6 +57,17 @@
   overflow: hidden;
 }
 
+.panelInline {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -74,17 +90,23 @@
   border: 0;
   background: var(--surface-2);
   color: var(--text-muted);
-  border-radius: 999px;
-  padding: 0.3rem 0.6rem;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .close:hover {
   color: var(--text);
+  background: var(--surface-3);
+}
+
+.close .material-symbols-outlined {
+  font-size: 1.1rem;
 }
 
 .modes {
@@ -285,6 +307,172 @@
 .sourceRequired {
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+.previewCard {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.previewCard strong {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.previewCard p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.preview {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  background: #000;
+}
+
+.audioPreview {
+  width: 100%;
+}
+
+.audioLiveRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.audioPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+
+.audioPulseActive {
+  background: #f87171;
+  animation: blink 1.1s ease infinite;
+}
+
+.mode {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.5rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mode:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.modeActive {
+  border-color: rgba(249, 115, 22, 0.4);
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--accent);
+}
+
+.select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--surface-2);
+  outline: none;
+}
+
+.select:focus {
+  border-color: var(--accent);
+}
+
+.refreshInputs {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+.refreshInputs:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+
+.statusDotRecording {
+  background: #f87171;
+  animation: blink 1.1s ease infinite;
+}
+
+.primary {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+}
+
+.primary:hover {
+  background: var(--accent-hover);
+}
+
+.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+}
+
+.secondary:hover {
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .liveAudioNote {

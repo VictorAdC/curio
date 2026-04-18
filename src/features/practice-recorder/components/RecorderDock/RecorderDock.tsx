@@ -7,9 +7,11 @@ import styles from './RecorderDock.module.css';
 interface RecorderDockProps {
   hasActiveSource: boolean;
   recorder: ReturnType<typeof usePracticeRecorder>;
+  inline?: boolean;
+  onClose?: () => void;
 }
 
-export function RecorderDock({ hasActiveSource, recorder }: RecorderDockProps) {
+export function RecorderDock({ hasActiveSource, recorder, inline, onClose }: RecorderDockProps) {
   const { t } = useI18n();
   const { view, actions } = recorder;
   const liveVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -40,26 +42,32 @@ export function RecorderDock({ hasActiveSource, recorder }: RecorderDockProps) {
     });
   }, [t, view.isOpen]);
 
-  return (
-    <div className={styles.root}>
-      <button
-        className={`${styles.toggle} ${view.isRecording ? styles.toggleRecording : ''}`}
-        type="button"
-        onClick={() => actions.setOpen(!view.isOpen)}
-      >
-        {view.isRecording ? t('practice.recorder.recordingButton') : t('practice.recorder.toggle')}
-      </button>
+  const panelOpen = inline ? true : view.isOpen;
 
-      {view.isOpen ? (
-        <div className={styles.panel}>
+  return (
+    <div className={`${styles.root} ${inline ? styles.rootInline : ''}`}>
+      {!inline && (
+        <button
+          className={`${styles.toggle} ${view.isRecording ? styles.toggleRecording : ''}`}
+          type="button"
+          onClick={() => actions.setOpen(!view.isOpen)}
+        >
+          {view.isRecording ? t('practice.recorder.recordingButton') : t('practice.recorder.toggle')}
+        </button>
+      )}
+
+      {panelOpen ? (
+        <div className={`${styles.panel} ${inline ? styles.panelInline : ''}`}>
           <div className={styles.header}>
             <div>
               <strong>{t('practice.recorder.title')}</strong>
               <p>{t('practice.recorder.description')}</p>
             </div>
-            <button className={styles.close} type="button" onClick={() => actions.setOpen(false)}>
-              {t('practice.recorder.close')}
-            </button>
+            {onClose && (
+              <button className={styles.close} type="button" onClick={onClose} aria-label="Close">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            )}
           </div>
 
           <div className={styles.modes}>

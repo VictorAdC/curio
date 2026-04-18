@@ -23,6 +23,7 @@ export function PracticePage() {
   const { t } = useI18n();
   const [hoveredMarker, setHoveredMarker] = useState<PracticeMarker | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
+  const [recorderOpen, setRecorderOpen] = useState(false);
   const [focusMarkerId, setFocusMarkerId] = useState<string | null>(null);
 
   const openMarkerById = (id: string) => {
@@ -60,9 +61,20 @@ export function PracticePage() {
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
 
-      if (event.key === ' ') { event.preventDefault(); actions.togglePlayback(); return; }
+      // Space triggers playback unless the user is actively typing text
+      if (event.key === ' ') {
+        const el = event.target instanceof HTMLElement ? event.target : null;
+        const tag = el?.tagName.toLowerCase() ?? '';
+        const isTextEntry = el?.isContentEditable ||
+          (tag === 'input' && !['button', 'checkbox', 'radio', 'submit', 'reset', 'file', 'image'].includes((el as HTMLInputElement).type)) ||
+          tag === 'textarea';
+        if (!isTextEntry) { event.preventDefault(); actions.togglePlayback(); }
+        return;
+      }
+
+      if (isTypingTarget(event.target)) return;
       if (event.key === 'ArrowLeft') { event.preventDefault(); actions.jumpBy(-5); return; }
       if (event.key === 'ArrowRight') { event.preventDefault(); actions.jumpBy(5); return; }
       if (event.key.toLowerCase() === 'm') { event.preventDefault(); actions.addMarker(); return; }
@@ -152,16 +164,16 @@ export function PracticePage() {
         </div>
       ) : null}
 
-      {activeTab === 'record' ? (
-        <div className={styles.recordPanel}>
-          <RecorderDock hasActiveSource={!!view.source} recorder={recorder} />
-        </div>
-      ) : null}
-
       {activeTab === 'practice' ? (
         <div className={styles.practiceLayout}>
           <div className={styles.playerColumn}>
             <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
+
+            {recorderOpen ? (
+              <div className={styles.recorderOverlay}>
+                <RecorderDock hasActiveSource={!!view.source} recorder={recorder} inline onClose={() => setRecorderOpen(false)} />
+              </div>
+            ) : null}
 
             {view.showMediaDisplay ? (
               <VideoPracticeCanvas
@@ -186,7 +198,7 @@ export function PracticePage() {
                 onMarkerHover={setHoveredMarker}
                 onMarkerLeave={() => setHoveredMarker(null)}
                 onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
-                onSwitchToRecord={() => handleTabChange('record')}
+                onSwitchToRecord={() => setRecorderOpen((o) => !o)}
                 setVideoElement={actions.setVideoElement}
               />
             ) : null}
