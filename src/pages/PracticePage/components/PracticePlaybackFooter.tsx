@@ -2,6 +2,7 @@ import type { PracticeMarker } from '../../../features/practice-player/types/pra
 import type { TimelineWaveformDatum } from '../../../features/practice-player/types/practicePlayer';
 import { Timeline } from '../../../features/practice-player/components/Timeline/Timeline';
 import { TransportControls } from '../../../features/practice-player/components/TransportControls/TransportControls';
+import { formatMediaTimestamp } from '../../../features/practice-player/utils/time';
 import styles from './PracticePlaybackFooter.module.css';
 
 interface PracticePlaybackFooterProps {
@@ -47,6 +48,9 @@ export function PracticePlaybackFooter({
   onClearLoop,
   hideMeta,
 }: PracticePlaybackFooterProps) {
+  const currentTimeLabel = formatMediaTimestamp(currentTime, duration);
+  const durationLabel = formatMediaTimestamp(duration, duration);
+
   return (
     <div className={styles.root}>
       <div className={styles.timelineShell}>
@@ -64,6 +68,13 @@ export function PracticePlaybackFooter({
           onMarkerLeave={onMarkerLeave}
           onMarkerClick={onMarkerClick}
         />
+        {hideMeta ? (
+          <div className={styles.timecode}>
+            <span>{currentTimeLabel}</span>
+            <span>/</span>
+            <span>{durationLabel}</span>
+          </div>
+        ) : null}
       </div>
       <TransportControls
         isPlaying={isPlaying}

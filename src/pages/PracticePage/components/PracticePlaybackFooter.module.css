@@ -7,6 +7,28 @@
 }
 
 .timelineShell {
+  display: grid;
+  gap: 0.45rem;
   padding: 0.75rem 1.75rem 0.5rem;
   background: rgba(0, 0, 0, 0.3);
+}
+
+.timecode {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .timelineShell {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .timecode {
+    font-size: 0.72rem;
+  }
 }

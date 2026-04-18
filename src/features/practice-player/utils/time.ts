@@ -13,3 +13,22 @@ export function formatTime(totalSeconds: number) {
 
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
+
+export function formatMediaTimestamp(totalSeconds: number, durationSeconds: number) {
+  const clamped = Math.max(0, Math.floor(totalSeconds));
+  const useHours = Math.max(0, Math.floor(durationSeconds)) >= 3600;
+  const hours = Math.floor(clamped / 3600);
+  const minutes = Math.floor((clamped % 3600) / 60);
+  const seconds = clamped % 60;
+
+  if (!useHours) {
+    const totalMinutes = Math.floor(clamped / 60);
+    return `${String(totalMinutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  return [
+    String(hours).padStart(2, '0'),
+    String(minutes).padStart(2, '0'),
+    String(seconds).padStart(2, '0'),
+  ].join(':');
+}
