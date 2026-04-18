@@ -79,9 +79,10 @@ export function PracticePage() {
       if (event.key === 'ArrowRight') { event.preventDefault(); actions.jumpBy(5); return; }
       if (event.key.toLowerCase() === 'm') { event.preventDefault(); actions.addMarker(); return; }
       if (event.key.toLowerCase() === 'l') { event.preventDefault(); actions.clearLoop(); return; }
+      if (event.key.toLowerCase() === 'p') { event.preventDefault(); recorder.actions.toggleRecordingPlayback(); return; }
       if (event.key.toLowerCase() === 'r') {
         event.preventDefault();
-        recorder.actions.setOpen(true);
+        setRecorderOpen(true);
         if (recorder.view.isRecording) { recorder.actions.stopRecording(); return; }
         if (!view.source) return;
         void recorder.actions.startRecording(recorderMessages);
@@ -199,6 +200,7 @@ export function PracticePage() {
                 onMarkerLeave={() => setHoveredMarker(null)}
                 onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
                 onSwitchToRecord={() => setRecorderOpen((o) => !o)}
+                recorderMode={recorder.view.mode}
                 setVideoElement={actions.setVideoElement}
               />
             ) : null}
@@ -226,6 +228,8 @@ export function PracticePage() {
                 onMarkerHover={setHoveredMarker}
                 onMarkerLeave={() => setHoveredMarker(null)}
                 onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
+                onSwitchToRecord={() => setRecorderOpen((o) => !o)}
+                recorderMode={recorder.view.mode}
               />
             ) : null}
 
@@ -271,6 +275,7 @@ export function PracticePage() {
             <span className={styles.shortcutItem}><kbd>M</kbd>{t('practice.shortcuts.addMarker')}</span>
             <span className={styles.shortcutItem}><kbd>L</kbd>{t('practice.shortcuts.loopToggle')}</span>
             <span className={styles.shortcutItem}><kbd>R</kbd>{t('practice.shortcuts.record')}</span>
+            <span className={styles.shortcutItem}><kbd>P</kbd>{t('practice.shortcuts.playRecording')}</span>
           </div>
         </section>
       </div>

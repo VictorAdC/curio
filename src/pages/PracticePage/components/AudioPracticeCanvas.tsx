@@ -1,7 +1,9 @@
+import type { RecordingMode } from '../../../features/practice-recorder/hooks/usePracticeRecorder';
 import type { PracticeMarker, TimelineWaveformDatum } from '../../../features/practice-player/types/practicePlayer';
 import { Timeline } from '../../../features/practice-player/components/Timeline/Timeline';
 import { MarkerSpotlight } from './MarkerSpotlight';
 import { PracticePlaybackFooter } from './PracticePlaybackFooter';
+import { RecPill } from './RecPill';
 import styles from './AudioPracticeCanvas.module.css';
 
 interface AudioPracticeCanvasProps {
@@ -26,6 +28,8 @@ interface AudioPracticeCanvasProps {
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
   onMarkerClick?: (marker: PracticeMarker) => void;
+  onSwitchToRecord?: () => void;
+  recorderMode?: RecordingMode;
 }
 
 export function AudioPracticeCanvas({
@@ -48,10 +52,13 @@ export function AudioPracticeCanvas({
   onMarkerHover,
   onMarkerLeave,
   onMarkerClick,
+  onSwitchToRecord,
+  recorderMode,
 }: AudioPracticeCanvasProps) {
   return (
     <div className={styles.root}>
       <div className={styles.canvasArea}>
+        <RecPill onClick={onSwitchToRecord} mode={recorderMode} />
         <div className={styles.waveStage}>
           <Timeline
             currentTime={currentTime}

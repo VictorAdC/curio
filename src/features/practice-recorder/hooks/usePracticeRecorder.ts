@@ -69,6 +69,7 @@ export function usePracticeRecorder() {
   const timerRef = useRef<number | null>(null);
   const livePreviewStreamRef = useRef<MediaStream | null>(null);
   const recordingUrlRef = useRef<string | null>(null);
+  const recordingPlaybackRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -296,7 +297,12 @@ export function usePracticeRecorder() {
     clearError() {
       setError(null);
     },
+    toggleRecordingPlayback() {
+      const el = recordingPlaybackRef.current;
+      if (!el) return;
+      if (el.paused) { void el.play(); } else { el.pause(); }
+    },
   };
 
-  return { view, actions };
+  return { view, actions, recordingPlaybackRef };
 }
