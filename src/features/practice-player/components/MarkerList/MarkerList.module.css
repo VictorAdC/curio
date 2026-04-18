@@ -12,6 +12,15 @@
   overflow: hidden;
 }
 
+@media (max-width: 959px) {
+  .root {
+    position: static;
+    inset: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
+
 .header {
   display: grid;
   gap: 0.3rem;
