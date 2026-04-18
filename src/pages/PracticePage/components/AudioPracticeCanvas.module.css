@@ -6,13 +6,13 @@
 }
 
 .canvasArea {
-  display: grid;
-  gap: 1rem;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
   padding: 1rem;
   background: #0a0a0a;
 }
 
 .waveStage {
   width: 100%;
-  min-height: 160px;
 }
