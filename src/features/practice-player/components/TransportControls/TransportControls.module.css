@@ -84,34 +84,23 @@
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
-  background: var(--surface-2);
+  background: transparent;
   color: var(--text-muted);
   font: inherit;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: color 0.12s;
   flex-shrink: 0;
 }
 
 .jump:hover {
-  background: var(--surface-3);
   color: var(--text);
 }
 
-.jumpIcon {
-  font-size: 1rem;
-  line-height: 1.1;
-}
-
-.jumpLabel {
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
+.jump .material-symbols-outlined {
+  font-size: 2rem;
 }
 
 .play {
@@ -122,14 +111,16 @@
   background: var(--accent);
   color: white;
   font: inherit;
-  font-size: 1.25rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.12s;
   flex-shrink: 0;
+}
+
+.play .material-symbols-outlined {
+  font-size: 2rem;
 }
 
 .play:hover {
@@ -155,7 +146,7 @@
 .loopValue {
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: var(--accent);
   white-space: nowrap;
 }
 

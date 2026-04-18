@@ -31,22 +31,21 @@ export function TransportControls({
 }: TransportControlsProps) {
   const { t } = useI18n();
   const withLoopControls = onAddMarker !== undefined;
-  const hasLoop = loopStart != null || loopEnd != null;
 
   if (!withLoopControls) {
     return (
       <div className={styles.stackedRoot}>
         <div className={styles.primaryRow}>
           <button className={styles.jump} type="button" onClick={onJumpBackward} aria-label={t('practice.transport.backward')}>
-            <span className={styles.jumpIcon}>↺</span>
-            <span className={styles.jumpLabel}>5</span>
+            <span className="material-symbols-outlined">replay_5</span>
           </button>
-          <button className={styles.play} type="button" onClick={onTogglePlayback}>
-            {isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}
+          <button className={styles.play} type="button" onClick={onTogglePlayback} aria-label={isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {isPlaying ? 'pause' : 'play_arrow'}
+            </span>
           </button>
           <button className={styles.jump} type="button" onClick={onJumpForward} aria-label={t('practice.transport.forward')}>
-            <span className={styles.jumpIcon}>↻</span>
-            <span className={styles.jumpLabel}>5</span>
+            <span className="material-symbols-outlined">forward_5</span>
           </button>
         </div>
         <div className={styles.speedRow}>
@@ -82,29 +81,27 @@ export function TransportControls({
 
       <div className={styles.transportGroup}>
         <button className={styles.jump} type="button" onClick={onJumpBackward} aria-label={t('practice.transport.backward')}>
-          <span className={styles.jumpIcon}>↺</span>
-          <span className={styles.jumpLabel}>5</span>
+          <span className="material-symbols-outlined">replay_5</span>
         </button>
-        <button className={styles.play} type="button" onClick={onTogglePlayback}>
-          {isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}
+        <button className={styles.play} type="button" onClick={onTogglePlayback} aria-label={isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+            {isPlaying ? 'pause' : 'play_arrow'}
+          </span>
         </button>
         <button className={styles.jump} type="button" onClick={onJumpForward} aria-label={t('practice.transport.forward')}>
-          <span className={styles.jumpIcon}>↻</span>
-          <span className={styles.jumpLabel}>5</span>
+          <span className="material-symbols-outlined">forward_5</span>
         </button>
       </div>
 
       <div className={styles.loopGroup}>
-        {hasLoop && (
-          <div className={styles.loopRange}>
-            <span className={styles.loopLabel}>{t('practice.controls.loopRange')}</span>
-            <strong className={styles.loopValue}>
-              {loopStart != null ? formatTime(loopStart) : '--:--'}
-              {' – '}
-              {loopEnd != null ? formatTime(loopEnd) : '--:--'}
-            </strong>
-          </div>
-        )}
+        <div className={styles.loopRange}>
+          <span className={styles.loopLabel}>{t('practice.controls.loopRange')}</span>
+          <strong className={styles.loopValue}>
+            {loopStart != null ? formatTime(loopStart) : '--:--'}
+            {' – '}
+            {loopEnd != null ? formatTime(loopEnd) : '--:--'}
+          </strong>
+        </div>
         <button className={styles.addMarkerBtn} type="button" onClick={onAddMarker}>
           + {t('practice.controls.addMarker')}
         </button>
@@ -115,7 +112,7 @@ export function TransportControls({
           aria-label={t('practice.controls.clearLoop')}
           title={t('practice.controls.clearLoop')}
         >
-          ↺
+          <span className="material-symbols-outlined">loop</span>
         </button>
       </div>
     </div>
