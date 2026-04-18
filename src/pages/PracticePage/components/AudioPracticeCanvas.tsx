@@ -1,7 +1,6 @@
 import type { PracticeMarker, TimelineWaveformDatum } from '../../../features/practice-player/types/practicePlayer';
 import { Timeline } from '../../../features/practice-player/components/Timeline/Timeline';
 import { MarkerSpotlight } from './MarkerSpotlight';
-import { PracticeControlCards } from './PracticeControlCards';
 import { PracticePlaybackFooter } from './PracticePlaybackFooter';
 import styles from './AudioPracticeCanvas.module.css';
 
@@ -42,8 +41,6 @@ export function AudioPracticeCanvas({
   hoveredMarker,
   onAddMarker,
   onClearLoop,
-  onLoopStartClick,
-  onLoopEndClick,
   onTogglePlayback,
   onJumpBy,
   onSetPlaybackRate,
@@ -55,15 +52,6 @@ export function AudioPracticeCanvas({
   return (
     <div className={styles.root}>
       <div className={styles.canvasArea}>
-        <PracticeControlCards
-          layout="inline"
-          loopStart={loopStart}
-          loopEnd={loopEnd}
-          onAddMarker={onAddMarker}
-          onClearLoop={onClearLoop}
-          onLoopStartClick={onLoopStartClick}
-          onLoopEndClick={onLoopEndClick}
-        />
         <div className={styles.waveStage}>
           <Timeline
             currentTime={currentTime}
@@ -97,6 +85,8 @@ export function AudioPracticeCanvas({
         onMarkerHover={onMarkerHover}
         onMarkerLeave={onMarkerLeave}
         onMarkerClick={onMarkerClick}
+        onAddMarker={onAddMarker}
+        onClearLoop={onClearLoop}
       />
     </div>
   );

@@ -118,6 +118,7 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.controls.clearLoop': 'Clear loop',
     'practice.controls.loopStart': 'Loop start',
     'practice.controls.loopEnd': 'Loop end',
+    'practice.controls.loopRange': 'Loop range',
 
     'practice.markerSpotlight.label': 'Marker',
     'practice.markerSpotlight.emptyNote':
@@ -349,6 +350,7 @@ export const messages: Record<SupportedLocale, TranslationDictionary> = {
     'practice.controls.clearLoop': 'Limpar loop',
     'practice.controls.loopStart': 'Início do loop',
     'practice.controls.loopEnd': 'Fim do loop',
+    'practice.controls.loopRange': 'Loop',
 
     'practice.markerSpotlight.label': 'Marcador',
     'practice.markerSpotlight.emptyNote':

@@ -1,4 +1,5 @@
-.root {
+/* ── Stacked layout (standalone, no media) ─────────────────────── */
+.stackedRoot {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -12,40 +13,56 @@
   display: flex;
   gap: 1rem;
   align-items: center;
-  justify-content: center;
 }
 
-.rateGroup {
-  display: flex;
-  gap: 0.35rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.rateLabel {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-right: 0.25rem;
-}
-
-.rateOptions {
+.speedRow {
   display: flex;
   gap: 0.3rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
+/* ── Row layout (with loop controls) ───────────────────────────── */
+.rowRoot {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: var(--surface);
+  border-radius: 0 0 16px 16px;
+}
+
+.speedGroup {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.transportGroup {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.loopGroup {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ── Shared button styles ───────────────────────────────────────── */
 .rateOption {
   border: 0;
   border-radius: 999px;
-  padding: 0.35rem 0.65rem;
+  padding: 0.3rem 0.6rem;
   background: var(--surface-2);
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
@@ -61,39 +78,107 @@
   color: var(--accent);
 }
 
-.primary,
-.secondary {
+.jump {
   border: 0;
-  border-radius: 12px;
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
 
-.primary {
-  width: 3.5rem;
-  height: 3.5rem;
+.jump:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.play {
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 0;
   border-radius: 50%;
   background: var(--accent);
   color: white;
-  font-size: 1.1rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s;
+  flex-shrink: 0;
 }
 
-.primary:hover {
+.play:hover {
   background: var(--accent-hover);
 }
 
-.secondary {
-  padding: 0.75rem 1rem;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font-size: 0.85rem;
+/* ── Loop range display ─────────────────────────────────────────── */
+.loopRange {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  text-align: right;
 }
 
-.secondary:hover {
+.loopLabel {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.loopValue {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ── Action buttons ─────────────────────────────────────────────── */
+.addMarkerBtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.addMarkerBtn:hover {
+  background: rgba(249, 115, 22, 0.18);
+  color: var(--accent);
+}
+
+.clearLoopBtn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.clearLoopBtn:hover {
   background: var(--surface-3);
   color: var(--text);
 }

@@ -19,6 +19,8 @@ interface PracticePlaybackFooterProps {
   onMarkerHover: (marker: PracticeMarker) => void;
   onMarkerLeave: () => void;
   onMarkerClick?: (marker: PracticeMarker) => void;
+  onAddMarker?: () => void;
+  onClearLoop?: () => void;
 }
 
 export function PracticePlaybackFooter({
@@ -37,6 +39,8 @@ export function PracticePlaybackFooter({
   onMarkerHover,
   onMarkerLeave,
   onMarkerClick,
+  onAddMarker,
+  onClearLoop,
 }: PracticePlaybackFooterProps) {
   return (
     <div className={styles.root}>
@@ -63,6 +67,10 @@ export function PracticePlaybackFooter({
         onJumpBackward={() => onJumpBy(-5)}
         onJumpForward={() => onJumpBy(5)}
         onSetPlaybackRate={onSetPlaybackRate}
+        loopStart={loopStart}
+        loopEnd={loopEnd}
+        onAddMarker={onAddMarker}
+        onClearLoop={onClearLoop}
       />
     </div>
   );
