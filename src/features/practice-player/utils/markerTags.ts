@@ -54,6 +54,10 @@ export function toggleSystemTag(markers: PracticeMarker[], markerId: string, tag
     return markers.map((marker) => (marker.id === markerId ? stripSystemTag(marker, tag) : marker));
   }
 
+  if (!canAssignSystemTag(markers, target, tag)) {
+    return markers;
+  }
+
   return markers.map((marker) => {
     if (marker.id === markerId) {
       const withoutOppositeTag = stripSystemTag(marker, OPPOSITE_SYSTEM_TAG[tag]);
@@ -62,6 +66,41 @@ export function toggleSystemTag(markers: PracticeMarker[], markerId: string, tag
 
     return hasSystemTag(marker, tag) ? stripSystemTag(marker, tag) : marker;
   });
+}
+
+function canAssignSystemTag(markers: PracticeMarker[], target: PracticeMarker, tag: PracticeSystemTag) {
+  const ends = getBoundaryTimes(markers, ['loop-end', 'media-end'], target.id, tag);
+  const starts = getBoundaryTimes(markers, ['loop-start', 'media-start'], target.id, tag);
+
+  if (tag === 'loop-start' || tag === 'media-start') {
+    const effectiveEnd = ends.length > 0 ? Math.min(...ends) : null;
+    return effectiveEnd === null || target.timestampSeconds < effectiveEnd;
+  }
+
+  const effectiveStart = starts.length > 0 ? Math.max(...starts) : null;
+  return effectiveStart === null || target.timestampSeconds > effectiveStart;
+}
+
+function getBoundaryTimes(
+  markers: PracticeMarker[],
+  tags: PracticeSystemTag[],
+  targetMarkerId: string,
+  pendingTag: PracticeSystemTag,
+) {
+  return markers
+    .filter((marker) => {
+      if (marker.id === targetMarkerId) {
+        return false;
+      }
+
+      return tags.some((tag) => hasSystemTag(marker, tag));
+    })
+    .map((marker) => marker.timestampSeconds)
+    .concat(
+      tags.includes(pendingTag)
+        ? []
+        : [],
+    );
 }
 
 export function convertSystemTagToUserTag(
@@ -85,6 +124,16 @@ export function convertSystemTagToUserTag(
 }
 
 export function getValidLoopRange(markers: PracticeMarker[]) {
+  const rawRange = getRawLoopRange(markers);
+
+  if (rawRange.start !== null && rawRange.end !== null && rawRange.start >= rawRange.end) {
+    return { start: null, end: null };
+  }
+
+  return rawRange;
+}
+
+function getRawLoopRange(markers: PracticeMarker[]) {
   const loopStart = getTaggedMarker(markers, 'loop-start');
   const loopEnd = getTaggedMarker(markers, 'loop-end');
   const mediaStart = getTaggedMarker(markers, 'media-start');
@@ -106,9 +155,18 @@ export function getValidLoopRange(markers: PracticeMarker[]) {
   const effectiveStart = starts.length > 0 ? Math.max(...starts) : null;
   const effectiveEnd = ends.length > 0 ? Math.min(...ends) : null;
 
-  if (effectiveStart !== null && effectiveEnd !== null && effectiveStart >= effectiveEnd) {
+  return { start: effectiveStart, end: effectiveEnd };
+}
+
+export function getEffectiveLoopRange(markers: PracticeMarker[], durationSeconds: number) {
+  const loopRange = getValidLoopRange(markers);
+
+  if (loopRange.start === null && loopRange.end === null) {
     return { start: null, end: null };
   }
 
-  return { start: effectiveStart, end: effectiveEnd };
+  return {
+    start: loopRange.start ?? 0,
+    end: loopRange.end ?? Math.max(durationSeconds, 0),
+  };
 }

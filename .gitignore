@@ -7,3 +7,5 @@ steps.md
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+src/utils/githubPages.js
+src/utils/githubPages.d.ts

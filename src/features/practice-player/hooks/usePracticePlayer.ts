@@ -180,6 +180,7 @@ export function usePracticePlayer() {
   useLoopPlayback(
     controllerRef.current,
     store.markers,
+    store.duration,
   );
 
   useEffect(() => {
