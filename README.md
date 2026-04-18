@@ -110,4 +110,4 @@ scripts/   Project utility scripts
 
 ## License
 
-No license is currently declared in this repository.
+MIT — see [LICENSE](LICENSE).
