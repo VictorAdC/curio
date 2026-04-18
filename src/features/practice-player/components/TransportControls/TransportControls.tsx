@@ -37,14 +37,16 @@ export function TransportControls({
     return (
       <div className={styles.stackedRoot}>
         <div className={styles.primaryRow}>
-          <button className={styles.jump} type="button" onClick={onJumpBackward}>
-            {t('practice.transport.backward')}
+          <button className={styles.jump} type="button" onClick={onJumpBackward} aria-label={t('practice.transport.backward')}>
+            <span className={styles.jumpIcon}>↺</span>
+            <span className={styles.jumpLabel}>5</span>
           </button>
           <button className={styles.play} type="button" onClick={onTogglePlayback}>
             {isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}
           </button>
-          <button className={styles.jump} type="button" onClick={onJumpForward}>
-            {t('practice.transport.forward')}
+          <button className={styles.jump} type="button" onClick={onJumpForward} aria-label={t('practice.transport.forward')}>
+            <span className={styles.jumpIcon}>↻</span>
+            <span className={styles.jumpLabel}>5</span>
           </button>
         </div>
         <div className={styles.speedRow}>
@@ -80,13 +82,15 @@ export function TransportControls({
 
       <div className={styles.transportGroup}>
         <button className={styles.jump} type="button" onClick={onJumpBackward} aria-label={t('practice.transport.backward')}>
-          {t('practice.transport.backward')}
+          <span className={styles.jumpIcon}>↺</span>
+          <span className={styles.jumpLabel}>5</span>
         </button>
         <button className={styles.play} type="button" onClick={onTogglePlayback}>
           {isPlaying ? t('practice.transport.pause') : t('practice.transport.play')}
         </button>
         <button className={styles.jump} type="button" onClick={onJumpForward} aria-label={t('practice.transport.forward')}>
-          {t('practice.transport.forward')}
+          <span className={styles.jumpIcon}>↻</span>
+          <span className={styles.jumpLabel}>5</span>
         </button>
       </div>
 

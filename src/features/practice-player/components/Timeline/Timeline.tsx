@@ -14,6 +14,7 @@ interface TimelineProps {
   waveform: TimelineWaveformDatum[];
   onSeek: (seconds: number) => void;
   variant?: 'default' | 'compact';
+  hideMeta?: boolean;
   onMarkerHover?: (marker: PracticeMarker) => void;
   onMarkerLeave?: () => void;
   onMarkerClick?: (marker: PracticeMarker) => void;
@@ -28,6 +29,7 @@ export function Timeline({
   waveform,
   onSeek,
   variant = 'default',
+  hideMeta = false,
   onMarkerHover,
   onMarkerLeave,
   onMarkerClick,
@@ -118,7 +120,7 @@ export function Timeline({
         />
       </div>
 
-      {isCompact ? (
+      {isCompact && !hideMeta ? (
         <div className={styles.compactMeta}>
           <span>{t('practice.timeline.markersCount', { count: markers.length })}</span>
           <span>

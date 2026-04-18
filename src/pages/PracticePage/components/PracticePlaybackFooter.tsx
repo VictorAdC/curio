@@ -21,6 +21,7 @@ interface PracticePlaybackFooterProps {
   onMarkerClick?: (marker: PracticeMarker) => void;
   onAddMarker?: () => void;
   onClearLoop?: () => void;
+  hideMeta?: boolean;
 }
 
 export function PracticePlaybackFooter({
@@ -41,6 +42,7 @@ export function PracticePlaybackFooter({
   onMarkerClick,
   onAddMarker,
   onClearLoop,
+  hideMeta,
 }: PracticePlaybackFooterProps) {
   return (
     <div className={styles.root}>
@@ -54,6 +56,7 @@ export function PracticePlaybackFooter({
           waveform={[]}
           onSeek={onSeek}
           variant="compact"
+          hideMeta={hideMeta}
           onMarkerHover={onMarkerHover}
           onMarkerLeave={onMarkerLeave}
           onMarkerClick={onMarkerClick}

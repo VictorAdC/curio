@@ -68,6 +68,7 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
       playerVars: {
         rel: 0,
         modestbranding: 1,
+        controls: 0,
       },
       events: {
         onReady: (event: YouTubePlayerEvent) => {

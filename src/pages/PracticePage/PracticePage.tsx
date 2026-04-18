@@ -186,6 +186,7 @@ export function PracticePage() {
                 onMarkerHover={setHoveredMarker}
                 onMarkerLeave={() => setHoveredMarker(null)}
                 onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
+                onSwitchToRecord={() => handleTabChange('record')}
                 setVideoElement={actions.setVideoElement}
               />
             ) : null}
