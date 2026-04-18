@@ -93,9 +93,9 @@ Rules:
 
 - only one marker may hold `loop-start` at a time;
 - only one marker may hold `loop-end` at a time;
-- both may exist independently, but loop playback only becomes active when both exist in a valid forward order;
-- if a new `loop-start` is assigned after the existing `loop-end`, the current `loop-end` must be removed automatically;
-- if a new `loop-end` is assigned before the existing `loop-start`, the current `loop-start` must be removed automatically.
+- both may exist independently; the timeline and boundary cards display any single boundary that is set;
+- loop playback only becomes active when both exist and the start timestamp is strictly before the end timestamp;
+- when the resulting start/end pair is invalid (start ≥ end), the effective loop range becomes inactive — the tags are not removed.
 
 ### Media Pair
 
@@ -105,8 +105,7 @@ Rules:
 
 - only one marker may hold `media-start` at a time;
 - only one marker may hold `media-end` at a time;
-- if a new `media-start` is assigned after the existing `media-end`, the current `media-end` must be removed automatically;
-- if a new `media-end` is assigned before the existing `media-start`, the current `media-start` must be removed automatically.
+- when the resulting start/end pair is invalid (start ≥ end), the effective range becomes inactive — the tags are not removed.
 
 ## Conversion Rules
 
@@ -186,8 +185,10 @@ Expected behavior:
 
 - system-tagged markers remain visible on the compact timeline;
 - loop-active markers should remain visually identifiable;
+- when only one loop or media boundary is set, that single boundary is displayed on the timeline and boundary cards even without the paired tag;
 - media-start and media-end markers may later influence transport shortcuts or default playback ranges;
-- regular markers continue to act as note anchors and seek points.
+- regular markers continue to act as note anchors and seek points;
+- clicking a marker dot on the timeline or a loop boundary display card opens the marker workspace with that marker expanded in edit mode.
 
 ## Persistence Model
 

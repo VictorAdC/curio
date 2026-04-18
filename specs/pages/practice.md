@@ -131,6 +131,8 @@ The workspace should allow:
 - filtering markers later by type or tag;
 - removing a marker.
 
+Clicking a marker dot on the interactive timeline or a loop boundary display card (showing the set boundary time) opens the marker workspace with that marker expanded in edit mode.
+
 ### 7. Session Notes Area
 
 The page must include a general session note area separate from marker notes.
@@ -169,10 +171,9 @@ Behavior rules:
 
 - `loop-start` and `loop-end` are a related pair;
 - `media-start` and `media-end` are a related pair;
-- assigning a new `loop-start` after the current `loop-end` must remove the current `loop-end`;
-- assigning a new `loop-end` before the current `loop-start` must remove the current `loop-start`;
-- assigning a new `media-start` after the current `media-end` must remove the current `media-end`;
-- assigning a new `media-end` before the current `media-start` must remove the current `media-start`;
+- only one marker may hold each system tag at a time; assigning a tag to a new marker removes it from any marker that previously held it;
+- when the resulting start/end pair is invalid (start ≥ end), the effective range becomes inactive — the tags are not automatically removed;
+- single boundary tags are displayed on the timeline and boundary cards even without the paired tag;
 - removing a system tag must keep the marker itself as a normal marker;
 - system tags do not require a note;
 - loop playback becomes active only when both `loop-start` and `loop-end` exist in a valid forward range.
@@ -236,7 +237,7 @@ The page must handle the following cases clearly:
 - timeline seeking is disabled or deferred until metadata is ready;
 - if only one loop tag exists, the markers are visible but loop playback remains inactive;
 - if loop start is at or after loop end, loop playback remains inactive;
-- assigning a conflicting loop or media special tag must automatically clear the invalid paired tag;
+- when loop or media boundary tags produce a conflicting range (start ≥ end), loop playback becomes inactive; no tags are automatically removed;
 - transport controls must clamp seeks and jumps to valid time boundaries;
 - switching to a new media source must create a fresh session and must not leave an invalid active loop;
 - importing a local-file session without embedded media must show a recoverable missing-media state;
@@ -259,6 +260,8 @@ The page must handle the following cases clearly:
 - a user writes a separate session note not tied to a marker;
 - loop playback only activates when both selected loop markers are valid;
 - a user can remove a special tag and keep the marker as a normal marker;
+- a user clicks a marker dot on the timeline and the marker workspace opens with that marker expanded in edit mode;
+- a user clicks a loop boundary display card and the marker workspace opens focused on the responsible boundary marker;
 - a user reloads the app and returns to the most recent session;
 - a user opens the session drawer and switches to an older saved session;
 - a user exports a light backup and later reimports it;
