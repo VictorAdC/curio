@@ -30,7 +30,9 @@ export function WaveformTimeline({
     }
 
     const rect = element.getBoundingClientRect();
-    const ratio = (clientX - rect.left) / rect.width;
+    const padPx = parseFloat(getComputedStyle(element).paddingLeft);
+    const barsWidth = rect.width - padPx * 2;
+    const ratio = (clientX - rect.left - padPx) / barsWidth;
     onSeek(Math.max(0, Math.min(1, ratio)) * duration);
   };
 
@@ -79,8 +81,8 @@ export function WaveformTimeline({
         <div
           className={styles.loopRange}
           style={{
-            left: `${((loopStart ?? 0) / duration) * 100}%`,
-            width: `${(((loopEnd ?? duration) - (loopStart ?? 0)) / duration) * 100}%`,
+            left: `calc(0.75rem + ${(loopStart ?? 0) / duration} * (100% - 1.5rem))`,
+            width: `calc(${((loopEnd ?? duration) - (loopStart ?? 0)) / duration} * (100% - 1.5rem))`,
           }}
         />
       ) : null}
@@ -98,7 +100,7 @@ export function WaveformTimeline({
         ))}
       </div>
 
-      <div className={styles.playhead} style={{ left: `${progress}%` }} />
+      <div className={styles.playhead} style={{ left: `calc(0.75rem + ${progress / 100} * (100% - 1.5rem))` }} />
     </div>
   );
 }
