@@ -103,7 +103,8 @@ export function TransportControls({
           </strong>
         </div>
         <button className={styles.addMarkerBtn} type="button" onClick={onAddMarker}>
-          + {t('practice.controls.addMarker')}
+          <span className="material-symbols-outlined">add_circle</span>
+          {t('practice.controls.addMarker')}
         </button>
         <button
           className={styles.clearLoopBtn}

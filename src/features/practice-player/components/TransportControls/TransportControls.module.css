@@ -54,6 +54,10 @@
   justify-content: flex-end;
 }
 
+.loopGroup .loopRange {
+  margin-right: 0.5rem;
+}
+
 /* ── Shared button styles ───────────────────────────────────────── */
 .rateOption {
   border: 0;
@@ -163,6 +167,13 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.addMarkerBtn .material-symbols-outlined {
+  font-size: 1rem;
 }
 
 .addMarkerBtn:hover {

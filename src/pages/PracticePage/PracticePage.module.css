@@ -27,9 +27,11 @@
 }
 
 .markersColumn {
+  position: relative;
   min-width: 0;
-  display: grid;
-  align-items: stretch;
+  min-height: 0;
+  align-self: stretch;
+  overflow: hidden;
 }
 
 .historyPanel,
