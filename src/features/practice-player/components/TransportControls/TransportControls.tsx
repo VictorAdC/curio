@@ -31,6 +31,10 @@ export function TransportControls({
 }: TransportControlsProps) {
   const { t } = useI18n();
   const withLoopControls = onAddMarker !== undefined;
+  const loopStartLabel = loopStart != null ? formatTime(loopStart) : '--:--';
+  const loopEndLabel = loopEnd != null ? formatTime(loopEnd) : '--:--';
+  const activeRateIndex = Math.max(0, playbackRatePresets.findIndex((rate) => rate === playbackRate));
+  const nextPlaybackRate = playbackRatePresets[(activeRateIndex + 1) % playbackRatePresets.length] ?? playbackRatePresets[0];
 
   if (!withLoopControls) {
     return (
@@ -97,9 +101,9 @@ export function TransportControls({
         <div className={styles.loopRange}>
           <span className={styles.loopLabel}>{t('practice.controls.loopRange')}</span>
           <strong className={styles.loopValue}>
-            {loopStart != null ? formatTime(loopStart) : '--:--'}
+            {loopStartLabel}
             {' – '}
-            {loopEnd != null ? formatTime(loopEnd) : '--:--'}
+            {loopEndLabel}
           </strong>
         </div>
         <button className={styles.addMarkerBtn} type="button" onClick={onAddMarker}>
@@ -114,6 +118,37 @@ export function TransportControls({
           title={t('practice.controls.clearLoop')}
         >
           <span className="material-symbols-outlined">loop</span>
+        </button>
+      </div>
+
+      <div className={styles.mobileLoopGrid}>
+        <div className={styles.mobileLoopCard}>
+          <span className={styles.mobileCardLabel}>{t('practice.controls.loopStart')}</span>
+          <strong className={styles.mobileCardValue}>{loopStartLabel}</strong>
+        </div>
+        <div className={styles.mobileLoopCard}>
+          <span className={styles.mobileCardLabel}>{t('practice.controls.loopEnd')}</span>
+          <strong className={styles.mobileCardValue}>{loopEndLabel}</strong>
+        </div>
+      </div>
+
+      <div className={styles.mobileActionRow}>
+        <button className={styles.mobileActionBtn} type="button" onClick={onAddMarker}>
+          <span className="material-symbols-outlined">add_circle</span>
+          <span>{t('practice.controls.addMarker')}</span>
+        </button>
+        <button className={styles.mobileActionBtn} type="button" onClick={onClearLoop}>
+          <span className="material-symbols-outlined">close</span>
+          <span>{t('practice.controls.clearLoop')}</span>
+        </button>
+        <button
+          className={`${styles.mobileActionBtn} ${styles.mobileActionBtnAccent}`}
+          type="button"
+          onClick={() => onSetPlaybackRate(nextPlaybackRate)}
+          aria-label={t('practice.transport.speed')}
+        >
+          <span className="material-symbols-outlined">slow_motion_video</span>
+          <span>{t('practice.transport.speedValue', { value: playbackRate })} {t('practice.transport.speed')}</span>
         </button>
       </div>
     </div>

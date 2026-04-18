@@ -1,4 +1,5 @@
 import type { PracticeMarker } from '../../../features/practice-player/types/practicePlayer';
+import type { TimelineWaveformDatum } from '../../../features/practice-player/types/practicePlayer';
 import { Timeline } from '../../../features/practice-player/components/Timeline/Timeline';
 import { TransportControls } from '../../../features/practice-player/components/TransportControls/TransportControls';
 import styles from './PracticePlaybackFooter.module.css';
@@ -6,6 +7,7 @@ import styles from './PracticePlaybackFooter.module.css';
 interface PracticePlaybackFooterProps {
   currentTime: number;
   duration: number;
+  waveform?: TimelineWaveformDatum[];
   markers: PracticeMarker[];
   loopStart: number | null;
   loopEnd: number | null;
@@ -27,6 +29,7 @@ interface PracticePlaybackFooterProps {
 export function PracticePlaybackFooter({
   currentTime,
   duration,
+  waveform = [],
   markers,
   loopStart,
   loopEnd,
@@ -53,7 +56,7 @@ export function PracticePlaybackFooter({
           markers={markers}
           loopStart={loopStart}
           loopEnd={loopEnd}
-          waveform={[]}
+          waveform={waveform}
           onSeek={onSeek}
           variant="compact"
           hideMeta={hideMeta}

@@ -139,7 +139,7 @@ export function usePracticePlayer() {
       throw error;
     }
 
-    if (options?.fileForWaveform && source.kind === 'local-audio') {
+    if (options?.fileForWaveform && (source.kind === 'local-audio' || source.kind === 'local-video')) {
       try {
         const waveform = await buildWaveformFromFile(options.fileForWaveform);
         store.setWaveform(waveform);
@@ -613,7 +613,7 @@ export function usePracticePlayer() {
       sessionNote: store.sessionNote,
       error: store.error,
       isReady: store.isReady,
-      waveform: sourceKind === 'local-audio' ? store.waveform : [],
+      waveform: sourceKind === 'local-audio' || sourceKind === 'local-video' ? store.waveform : [],
       sessionHistory,
       storageHealth,
       activeSessionId: activeSession?.id ?? null,

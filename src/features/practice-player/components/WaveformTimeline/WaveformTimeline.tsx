@@ -10,6 +10,7 @@ interface WaveformTimelineProps {
   loopStart: number | null;
   loopEnd: number | null;
   onSeek: (seconds: number) => void;
+  variant?: 'default' | 'compact';
 }
 
 export function WaveformTimeline({
@@ -19,10 +20,12 @@ export function WaveformTimeline({
   loopStart,
   loopEnd,
   onSeek,
+  variant = 'default',
 }: WaveformTimelineProps) {
   const isDraggingRef = useRef(false);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const { t } = useI18n();
+  const isCompact = variant === 'compact';
 
   const seekFromPointer = (clientX: number, element: HTMLDivElement) => {
     if (duration <= 0) {
@@ -38,7 +41,7 @@ export function WaveformTimeline({
 
   return (
     <div
-      className={styles.root}
+      className={`${styles.root} ${isCompact ? styles.compactRoot : ''}`}
       onPointerDown={(event) => {
         isDraggingRef.current = true;
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -79,7 +82,7 @@ export function WaveformTimeline({
     >
       {(loopStart !== null || loopEnd !== null) && duration > 0 ? (
         <div
-          className={styles.loopRange}
+          className={`${styles.loopRange} ${isCompact ? styles.compactLoopRange : ''}`}
           style={{
             left: `calc(0.75rem + ${(loopStart ?? 0) / duration} * (100% - 1.5rem))`,
             width: `calc(${((loopEnd ?? duration) - (loopStart ?? 0)) / duration} * (100% - 1.5rem))`,
@@ -87,20 +90,23 @@ export function WaveformTimeline({
         />
       ) : null}
 
-      <div className={styles.bars}>
+      <div className={`${styles.bars} ${isCompact ? styles.compactBars : ''}`}>
         {waveform.map((sample, index) => (
           <span
             key={`${sample.timestampSeconds}-${index}`}
             className={styles.bar}
             style={{
-              height: `${Math.max(sample.amplitude * 100, 12)}%`,
+              height: `${Math.max(sample.amplitude * 100, isCompact ? 22 : 12)}%`,
               opacity: sample.timestampSeconds <= currentTime ? 1 : 0.34,
             }}
           />
         ))}
       </div>
 
-      <div className={styles.playhead} style={{ left: `calc(0.75rem + ${progress / 100} * (100% - 1.5rem))` }} />
+      <div
+        className={`${styles.playhead} ${isCompact ? styles.compactPlayhead : ''}`}
+        style={{ left: `calc(0.75rem + ${progress / 100} * (100% - 1.5rem))` }}
+      />
     </div>
   );
 }

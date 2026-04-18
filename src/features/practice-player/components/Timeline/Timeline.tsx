@@ -57,6 +57,7 @@ export function Timeline({
           loopStart={loopStart}
           loopEnd={loopEnd}
           onSeek={onSeek}
+          variant={variant}
         />
       </div>
     );

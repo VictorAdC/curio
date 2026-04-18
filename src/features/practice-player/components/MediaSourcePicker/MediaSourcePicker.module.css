@@ -106,3 +106,29 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+@media (max-width: 720px) {
+  .inputShell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0;
+    padding: 0.35rem;
+    align-items: center;
+  }
+
+  .inputShell svg {
+    margin-left: 0.75rem;
+  }
+
+  .textInput {
+    min-width: 0;
+    padding: 0.85rem 0.75rem;
+  }
+
+  .inlineLoadButton {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin: 0.25rem 0 0;
+    padding: 0.85rem 1rem;
+  }
+}

@@ -181,6 +181,7 @@ export function PracticePage() {
                 sourceKind={view.sourceKind}
                 currentTime={view.currentTime}
                 duration={view.duration}
+                waveform={view.waveform}
                 markers={view.markers}
                 loopStart={view.loopRange.start}
                 loopEnd={view.loopRange.end}
