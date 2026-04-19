@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { usePageKeyboardShortcuts } from './hooks/usePageKeyboardShortcuts';
+import { PlaybackProvider } from './context/PlaybackContext';
 import { RecorderDock } from '../../features/practice-recorder/components/RecorderDock/RecorderDock';
 import { MediaSourcePicker } from '../../features/practice-player/components/MediaSourcePicker/MediaSourcePicker';
 import { MarkerList } from '../../features/practice-player/components/MarkerList/MarkerList';
@@ -45,59 +47,53 @@ export function PracticePage() {
 
   const relinkInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const isTypingTarget = (target: EventTarget | null) => {
-      if (!(target instanceof HTMLElement)) return false;
-      const tagName = target.tagName.toLowerCase();
-      return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select' || tagName === 'option';
-    };
-
-    const recorderMessages = {
+  usePageKeyboardShortcuts({
+    actions,
+    recorderActions: recorder.actions,
+    isRecording: recorder.view.isRecording,
+    hasSource: !!view.source,
+    recorderMessages: {
       unsupported: t('practice.recorder.error.unsupported'),
       permissionDenied: t('practice.recorder.error.permission'),
       generic: t('practice.recorder.error.generic'),
       audioInputLabel: t('practice.recorder.audioInput'),
       videoInputLabel: t('practice.recorder.videoInput'),
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-      // Space triggers playback unless the user is actively typing text
-      if (event.key === ' ') {
-        const el = event.target instanceof HTMLElement ? event.target : null;
-        const tag = el?.tagName.toLowerCase() ?? '';
-        const isTextEntry = el?.isContentEditable ||
-          (tag === 'input' && !['button', 'checkbox', 'radio', 'submit', 'reset', 'file', 'image'].includes((el as HTMLInputElement).type)) ||
-          tag === 'textarea';
-        if (!isTextEntry) { event.preventDefault(); actions.togglePlayback(); }
-        return;
-      }
-
-      if (isTypingTarget(event.target)) return;
-      if (event.key === 'ArrowLeft') { event.preventDefault(); actions.jumpBy(-5); return; }
-      if (event.key === 'ArrowRight') { event.preventDefault(); actions.jumpBy(5); return; }
-      if (event.key.toLowerCase() === 'm') { event.preventDefault(); actions.addMarker(); return; }
-      if (event.key.toLowerCase() === 'l') { event.preventDefault(); actions.clearLoop(); return; }
-      if (event.key.toLowerCase() === 'p') { event.preventDefault(); recorder.actions.toggleRecordingPlayback(); return; }
-      if (event.key.toLowerCase() === 'r') {
-        event.preventDefault();
-        setRecorderOpen(true);
-        if (recorder.view.isRecording) { recorder.actions.stopRecording(); return; }
-        if (!view.source) return;
-        void recorder.actions.startRecording(recorderMessages);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [actions, recorder.actions, recorder.view.isRecording, t, view.source]);
+    },
+    onOpenRecorder: () => setRecorderOpen(true),
+  });
 
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
     if (tab === 'record') {
       recorder.actions.setOpen(true);
     }
+  };
+
+  const playbackContextValue = {
+    currentTime: view.currentTime,
+    duration: view.duration,
+    isPlaying: view.isPlaying,
+    playbackRate: view.playbackRate,
+    playbackRatePresets: view.playbackRatePresets,
+    markers: view.markers,
+    loopStart: view.loopRange.start,
+    loopEnd: view.loopRange.end,
+    waveform: view.waveform,
+    sourceKind: view.sourceKind,
+    hoveredMarker,
+    recorderMode: recorder.view.mode,
+    onTogglePlayback: actions.togglePlayback,
+    onJumpBy: actions.jumpBy,
+    onSetPlaybackRate: actions.setPlaybackRate,
+    onSeek: actions.seek,
+    onAddMarker: actions.addMarker,
+    onClearLoop: actions.clearLoop,
+    onMarkerHover: setHoveredMarker,
+    onMarkerLeave: () => setHoveredMarker(null),
+    onMarkerClick: (marker: PracticeMarker) => setFocusMarkerId(marker.id),
+    onSwitchToRecord: () => setRecorderOpen((o) => !o),
+    onLoopStartClick: handleLoopStartClick,
+    onLoopEndClick: handleLoopEndClick,
   };
 
   return (
@@ -165,103 +161,56 @@ export function PracticePage() {
         </div>
       ) : null}
 
-      {activeTab === 'practice' ? (
-        <div className={styles.practiceLayout}>
-          <div className={styles.playerColumn}>
-            <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
+      <PlaybackProvider value={playbackContextValue}>
+        {activeTab === 'practice' ? (
+          <div className={styles.practiceLayout}>
+            <div className={styles.playerColumn}>
+              <audio ref={actions.setAudioElement} className={styles.hiddenMedia} />
 
-            {recorderOpen ? (
-              <div className={styles.recorderOverlay}>
-                <RecorderDock hasActiveSource={!!view.source} recorder={recorder} inline onClose={() => setRecorderOpen(false)} />
-              </div>
-            ) : null}
+              {recorderOpen ? (
+                <div className={styles.recorderOverlay}>
+                  <RecorderDock hasActiveSource={!!view.source} recorder={recorder} inline onClose={() => setRecorderOpen(false)} />
+                </div>
+              ) : null}
 
-            {view.showMediaDisplay ? (
-              <VideoPracticeCanvas
-                sourceKind={view.sourceKind}
-                currentTime={view.currentTime}
-                duration={view.duration}
+              {view.showMediaDisplay ? (
+                <VideoPracticeCanvas setVideoElement={actions.setVideoElement} />
+              ) : null}
+
+              {view.showAudioCanvas ? (
+                <AudioPracticeCanvas />
+              ) : null}
+
+              {!view.showMediaDisplay && !view.showAudioCanvas ? (
+                <TransportControls
+                  isPlaying={view.isPlaying}
+                  playbackRate={view.playbackRate}
+                  playbackRatePresets={view.playbackRatePresets}
+                  onTogglePlayback={actions.togglePlayback}
+                  onJumpBackward={() => actions.jumpBy(-5)}
+                  onJumpForward={() => actions.jumpBy(5)}
+                  onSetPlaybackRate={actions.setPlaybackRate}
+                />
+              ) : null}
+            </div>
+
+            <aside className={styles.markersColumn}>
+              <MarkerList
                 markers={view.markers}
-                loopStart={view.loopRange.start}
-                loopEnd={view.loopRange.end}
-                isPlaying={view.isPlaying}
-                playbackRate={view.playbackRate}
-                playbackRatePresets={view.playbackRatePresets}
-                hoveredMarker={hoveredMarker}
+                focusMarkerId={focusMarkerId}
+                onSeekToMarker={actions.seek}
+                onToggleSystemTag={actions.toggleSystemTag}
+                onDeleteMarker={actions.removeMarker}
+                onUpdateMarker={actions.updateMarker}
                 onAddMarker={actions.addMarker}
                 onClearLoop={actions.clearLoop}
-                onLoopStartClick={handleLoopStartClick}
-                onLoopEndClick={handleLoopEndClick}
-                onTogglePlayback={actions.togglePlayback}
-                onJumpBy={actions.jumpBy}
-                onSetPlaybackRate={actions.setPlaybackRate}
-                onSeek={actions.seek}
-                onMarkerHover={setHoveredMarker}
-                onMarkerLeave={() => setHoveredMarker(null)}
-                onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
-                onSwitchToRecord={() => setRecorderOpen((o) => !o)}
-                recorderMode={recorder.view.mode}
-                setVideoElement={actions.setVideoElement}
+                onExportLight={(sessionIds) => { void actions.exportLightSessions(sessionIds); }}
+                onExport={(sessionIds) => { void actions.exportSessions(sessionIds); }}
               />
-            ) : null}
-
-            {view.showAudioCanvas ? (
-              <AudioPracticeCanvas
-                currentTime={view.currentTime}
-                duration={view.duration}
-                markers={view.markers}
-                loopStart={view.loopRange.start}
-                loopEnd={view.loopRange.end}
-                waveform={view.waveform}
-                isPlaying={view.isPlaying}
-                playbackRate={view.playbackRate}
-                playbackRatePresets={view.playbackRatePresets}
-                hoveredMarker={hoveredMarker}
-                onAddMarker={actions.addMarker}
-                onClearLoop={actions.clearLoop}
-                onLoopStartClick={handleLoopStartClick}
-                onLoopEndClick={handleLoopEndClick}
-                onTogglePlayback={actions.togglePlayback}
-                onJumpBy={actions.jumpBy}
-                onSetPlaybackRate={actions.setPlaybackRate}
-                onSeek={actions.seek}
-                onMarkerHover={setHoveredMarker}
-                onMarkerLeave={() => setHoveredMarker(null)}
-                onMarkerClick={(marker) => { setFocusMarkerId(marker.id); }}
-                onSwitchToRecord={() => setRecorderOpen((o) => !o)}
-                recorderMode={recorder.view.mode}
-              />
-            ) : null}
-
-            {!view.showMediaDisplay && !view.showAudioCanvas ? (
-              <TransportControls
-                isPlaying={view.isPlaying}
-                playbackRate={view.playbackRate}
-                playbackRatePresets={view.playbackRatePresets}
-                onTogglePlayback={actions.togglePlayback}
-                onJumpBackward={() => actions.jumpBy(-5)}
-                onJumpForward={() => actions.jumpBy(5)}
-                onSetPlaybackRate={actions.setPlaybackRate}
-              />
-            ) : null}
+            </aside>
           </div>
-
-          <aside className={styles.markersColumn}>
-            <MarkerList
-              markers={view.markers}
-              focusMarkerId={focusMarkerId}
-              onSeekToMarker={actions.seek}
-              onToggleSystemTag={actions.toggleSystemTag}
-              onDeleteMarker={actions.removeMarker}
-              onUpdateMarker={actions.updateMarker}
-              onAddMarker={actions.addMarker}
-              onClearLoop={actions.clearLoop}
-              onExportLight={(sessionIds) => { void actions.exportLightSessions(sessionIds); }}
-              onExport={(sessionIds) => { void actions.exportSessions(sessionIds); }}
-            />
-          </aside>
-        </div>
-      ) : null}
+        ) : null}
+      </PlaybackProvider>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import type React from 'react';
 import { useI18n } from '../../../../i18n/I18nProvider';
 import { formatTime } from '../../../practice-player/utils/time';
 import type { usePracticeRecorder } from '../../hooks/usePracticeRecorder';
@@ -199,9 +198,9 @@ export function RecorderDock({ hasActiveSource, recorder, inline, onClose }: Rec
               </div>
 
               {view.recordedMode === 'audio' ? (
-                <audio className={styles.audioPreview} controls src={view.recordingUrl} ref={recorder.recordingPlaybackRef as React.RefObject<HTMLAudioElement>} />
+                <audio className={styles.audioPreview} controls src={view.recordingUrl} ref={recorder.audioPlaybackRef} />
               ) : (
-                <video className={styles.preview} controls src={view.recordingUrl} ref={recorder.recordingPlaybackRef as React.RefObject<HTMLVideoElement>} />
+                <video className={styles.preview} controls src={view.recordingUrl} ref={recorder.videoPlaybackRef} />
               )}
 
               <div className={styles.actions}>

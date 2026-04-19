@@ -43,6 +43,7 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
   private loopStart: number | null = null;
   private loopEnd: number | null = null;
   private frameHandle: number | null = null;
+  private lastReportedTime: number = -1;
 
   constructor(private options: YouTubeAdapterOptions) {}
 
@@ -153,7 +154,8 @@ export class YouTubePlayerAdapter implements PlaybackAdapter {
 
       if (isPlaying && this.loopEnd !== null && currentTime >= this.loopEnd) {
         this.seek(this.loopStart ?? 0);
-      } else {
+      } else if (Math.abs(currentTime - this.lastReportedTime) >= 0.05) {
+        this.lastReportedTime = currentTime;
         this.options.onTimeUpdate(currentTime);
         this.options.onDurationChange(this.getDuration());
       }

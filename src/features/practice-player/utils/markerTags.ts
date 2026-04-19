@@ -69,8 +69,8 @@ export function toggleSystemTag(markers: PracticeMarker[], markerId: string, tag
 }
 
 function canAssignSystemTag(markers: PracticeMarker[], target: PracticeMarker, tag: PracticeSystemTag) {
-  const ends = getBoundaryTimes(markers, ['loop-end', 'media-end'], target.id, tag);
-  const starts = getBoundaryTimes(markers, ['loop-start', 'media-start'], target.id, tag);
+  const ends = getBoundaryTimes(markers, ['loop-end', 'media-end'], target.id);
+  const starts = getBoundaryTimes(markers, ['loop-start', 'media-start'], target.id);
 
   if (tag === 'loop-start' || tag === 'media-start') {
     const effectiveEnd = ends.length > 0 ? Math.min(...ends) : null;
@@ -85,7 +85,6 @@ function getBoundaryTimes(
   markers: PracticeMarker[],
   tags: PracticeSystemTag[],
   targetMarkerId: string,
-  pendingTag: PracticeSystemTag,
 ) {
   return markers
     .filter((marker) => {
@@ -95,12 +94,7 @@ function getBoundaryTimes(
 
       return tags.some((tag) => hasSystemTag(marker, tag));
     })
-    .map((marker) => marker.timestampSeconds)
-    .concat(
-      tags.includes(pendingTag)
-        ? []
-        : [],
-    );
+    .map((marker) => marker.timestampSeconds);
 }
 
 export function convertSystemTagToUserTag(

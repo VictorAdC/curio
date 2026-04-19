@@ -55,7 +55,6 @@ export function usePracticeRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const [recordingMimeType, setRecordingMimeType] = useState<string | null>(null);
   const [recordedMode, setRecordedMode] = useState<RecordingMode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [livePreviewStream, setLivePreviewStream] = useState<MediaStream | null>(null);
@@ -69,7 +68,8 @@ export function usePracticeRecorder() {
   const timerRef = useRef<number | null>(null);
   const livePreviewStreamRef = useRef<MediaStream | null>(null);
   const recordingUrlRef = useRef<string | null>(null);
-  const recordingPlaybackRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+  const audioPlaybackRef = useRef<HTMLAudioElement | null>(null);
+  const videoPlaybackRef = useRef<HTMLVideoElement | null>(null);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -161,7 +161,6 @@ export function usePracticeRecorder() {
 
     try {
       resetRecordingUrl();
-      setRecordingMimeType(null);
       setError(null);
       chunksRef.current = [];
 
@@ -189,7 +188,6 @@ export function usePracticeRecorder() {
         const blob = new Blob(chunksRef.current, { type: finalMimeType });
         const nextUrl = URL.createObjectURL(blob);
 
-        setRecordingMimeType(finalMimeType);
         setRecordedMode(activeMode);
         recordingUrlRef.current = nextUrl;
         setRecordingUrl(nextUrl);
@@ -235,7 +233,7 @@ export function usePracticeRecorder() {
       return;
     }
 
-    const extension = recordingMimeType?.includes('audio/') ? 'webm' : 'webm';
+    const extension = 'webm';
     const anchor = document.createElement('a');
     anchor.href = recordingUrl;
     anchor.download = `${baseName}.${extension}`;
@@ -298,11 +296,11 @@ export function usePracticeRecorder() {
       setError(null);
     },
     toggleRecordingPlayback() {
-      const el = recordingPlaybackRef.current;
+      const el = audioPlaybackRef.current ?? videoPlaybackRef.current;
       if (!el) return;
       if (el.paused) { void el.play(); } else { el.pause(); }
     },
   };
 
-  return { view, actions, recordingPlaybackRef };
+  return { view, actions, audioPlaybackRef, videoPlaybackRef };
 }

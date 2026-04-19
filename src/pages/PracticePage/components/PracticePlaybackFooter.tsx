@@ -1,53 +1,35 @@
-import type { PracticeMarker } from '../../../features/practice-player/types/practicePlayer';
-import type { TimelineWaveformDatum } from '../../../features/practice-player/types/practicePlayer';
 import { Timeline } from '../../../features/practice-player/components/Timeline/Timeline';
 import { TransportControls } from '../../../features/practice-player/components/TransportControls/TransportControls';
 import { formatMediaTimestamp } from '../../../features/practice-player/utils/time';
+import { usePlaybackContext } from '../context/PlaybackContext';
 import styles from './PracticePlaybackFooter.module.css';
 
 interface PracticePlaybackFooterProps {
-  currentTime: number;
-  duration: number;
-  waveform?: TimelineWaveformDatum[];
-  markers: PracticeMarker[];
-  loopStart: number | null;
-  loopEnd: number | null;
-  isPlaying: boolean;
-  playbackRate: number;
-  playbackRatePresets: readonly number[];
-  onTogglePlayback: () => void;
-  onJumpBy: (deltaSeconds: number) => void;
-  onSetPlaybackRate: (rate: number) => void;
-  onSeek: (seconds: number) => void;
-  onMarkerHover: (marker: PracticeMarker) => void;
-  onMarkerLeave: () => void;
-  onMarkerClick?: (marker: PracticeMarker) => void;
-  onAddMarker?: () => void;
-  onClearLoop?: () => void;
   hideMeta?: boolean;
 }
 
-export function PracticePlaybackFooter({
-  currentTime,
-  duration,
-  waveform = [],
-  markers,
-  loopStart,
-  loopEnd,
-  isPlaying,
-  playbackRate,
-  playbackRatePresets,
-  onTogglePlayback,
-  onJumpBy,
-  onSetPlaybackRate,
-  onSeek,
-  onMarkerHover,
-  onMarkerLeave,
-  onMarkerClick,
-  onAddMarker,
-  onClearLoop,
-  hideMeta,
-}: PracticePlaybackFooterProps) {
+export function PracticePlaybackFooter({ hideMeta }: PracticePlaybackFooterProps) {
+  const {
+    currentTime,
+    duration,
+    waveform,
+    markers,
+    loopStart,
+    loopEnd,
+    isPlaying,
+    playbackRate,
+    playbackRatePresets,
+    onTogglePlayback,
+    onJumpBy,
+    onSetPlaybackRate,
+    onSeek,
+    onMarkerHover,
+    onMarkerLeave,
+    onMarkerClick,
+    onAddMarker,
+    onClearLoop,
+  } = usePlaybackContext();
+
   const currentTimeLabel = formatMediaTimestamp(currentTime, duration);
   const durationLabel = formatMediaTimestamp(duration, duration);
 

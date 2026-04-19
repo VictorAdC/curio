@@ -32,10 +32,6 @@
   font-weight: 800;
 }
 
-.header p {
-  display: none;
-}
-
 .eyebrow {
   font-size: 0.65rem;
   font-weight: 700;
@@ -56,10 +52,6 @@
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.06em;
-}
-
-.summaryRow {
-  display: none;
 }
 
 .headerActions {
